@@ -19,8 +19,8 @@ return new class extends Migration
             $table->integer('enrollment_year')->nullable();
             $table->integer('expected_graduation_year')->nullable();
             $table->enum('status', ['pending', 'active', 'suspended'])->default('pending');
-            $table->timestamp('created_at')->nullable();
-            
+            $table->timestamps();
+
             $table->index('status');
         });
     }
