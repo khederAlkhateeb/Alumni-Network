@@ -25,8 +25,8 @@ return new class extends Migration
             $table->string('country')->nullable();
             $table->enum('status', ['pending', 'active', 'suspended'])->default('pending');
             $table->boolean('is_open_to_mentor')->default(false);
-            $table->timestamp('created_at')->nullable();
-            
+            $table->timestamps();
+
             $table->index('status');
             $table->index('graduation_year');
             $table->index('is_open_to_mentor');
