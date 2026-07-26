@@ -19,11 +19,11 @@ return new class extends Migration
             $table->enum('type', ['campus', 'online', 'hybrid'])->default('campus');
             $table->string('location')->nullable();
             $table->string('meeting_link')->nullable();
-            $table->timestamp('start_date');
-            $table->timestamp('end_date');
+            $table->dateTime('start_date');
+            $table->dateTime('end_date');
             $table->integer('capacity')->nullable();
             $table->enum('status', ['upcoming', 'ongoing', 'completed', 'cancelled'])->default('upcoming');
-            
+
             $table->index(['university_id', 'status']);
             $table->index('start_date');
         });
