@@ -27,8 +27,8 @@ class FacultyController extends Controller
 
     public function __construct()
     {
-        // $this->middleware('permission:view-faculties')->only(['index', 'show']);
-        // $this->middleware('permission:manage-faculties')->only(['store', 'update', 'destroy']);
+        $this->middleware('permission:view-faculties')->only(['index', 'show']);
+        $this->middleware('permission:manage-faculties')->only(['store', 'update', 'destroy']);
     }
     /**
      * Display a paginated list of faculties.

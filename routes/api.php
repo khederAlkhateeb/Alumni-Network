@@ -54,6 +54,6 @@ Route::middleware('auth:api')->prefix('v1/auth')->group(function () {
     Route::get('/me', [SessionController::class, 'me'])->name('api.auth.me');
 });
 
-Route::prefix('v1')->group(function () {
+Route::middleware('auth:api')->prefix('v1')->group(function () {
     Route::resource('faculties', FacultyController::class);
 });
