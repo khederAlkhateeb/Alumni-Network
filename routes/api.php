@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\SessionController;
+use App\Http\Controllers\UniversityController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -51,4 +52,19 @@ Route::middleware('auth:api')->prefix('v1/auth')->group(function () {
      * @see SessionController::me()
      */
     Route::get('/me', [SessionController::class, 'me'])->name('api.auth.me');
+});
+
+
+
+/*
+|--------------------------------------------------------------------------
+| University routes
+|--------------------------------------------------------------------------
+*/
+Route::middleware('auth:api')->prefix('v1')->group(function () {
+    Route::get('/universities', [UniversityController::class, 'index'])->name('api.universities.index');
+    Route::post('/universities', [UniversityController::class, 'store'])->name('api.universities.store');
+    Route::get('/universities/{university}', [UniversityController::class, 'show'])->name('api.universities.show');
+    Route::put('/universities/{university}', [UniversityController::class, 'update'])->name('api.universities.update');
+    Route::delete('/universities/{university}', [UniversityController::class, 'destroy'])->name('api.universities.destroy');
 });
