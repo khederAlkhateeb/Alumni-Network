@@ -1,8 +1,8 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\FacultyController;
 use App\Http\Controllers\SessionController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Route;
 | and cannot log in until approved by an admin.
 |
 */
+
 Route::prefix('v1/auth')->group(function () {
     /**
      * Register a new user (alumni or student).
@@ -51,4 +52,8 @@ Route::middleware('auth:api')->prefix('v1/auth')->group(function () {
      * @see SessionController::me()
      */
     Route::get('/me', [SessionController::class, 'me'])->name('api.auth.me');
+});
+
+Route::middleware('auth:api')->prefix('v1')->group(function () {
+    Route::resource('faculties', FacultyController::class);
 });
