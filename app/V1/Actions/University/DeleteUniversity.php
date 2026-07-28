@@ -6,8 +6,14 @@ use App\Models\University;
 
 class DeleteUniversity
 {
-    public function handle(University $university): void
+    /**
+     * Delete (soft-delete) the given university.
+     *
+     * @param  University $university
+     * @return bool|null
+     */
+    public function handle(University $university): ?bool
     {
-        $university->delete();
+        return $university->delete();
     }
 }

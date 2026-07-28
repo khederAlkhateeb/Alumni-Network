@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\University;
 
+use App\Models\University;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -9,14 +10,15 @@ class UpdateUniversityRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()->can('edit-university');
+        return true;
     }
 
     public function rules(): array
     {
-        $universityId = $this->route('university');
+        $university = $this->route('university');
+        $universityId = $university instanceof University ? $university->getKey() : $university;
 
-        return [
+        return [    
             'name'    => ['sometimes', 'string', 'max:255', 'unique:universities,name,' . $universityId],
             'country' => ['sometimes', 'string', 'max:255'],
             'website' => ['sometimes', 'nullable', 'url', 'max:255', 'unique:universities,website,' . $universityId],

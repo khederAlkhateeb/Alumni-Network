@@ -3,11 +3,14 @@
 namespace App\Models;
 
 use App\Models\Scopes\UniversityScope;
+use App\Policies\UniversityPolicy;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Attributes\ScopedBy;
+use Illuminate\Database\Eloquent\Attributes\UsePolicy;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Fillable([
@@ -18,17 +21,16 @@ use Illuminate\Database\Eloquent\SoftDeletes;
     'created_by',
     'updated_by',
 ])]
-
+#[UsePolicy(UniversityPolicy::class)]
+#[ScopedBy(UniversityScope::class)]
 class University extends Model
 {
-    use SoftDeletes;
+    use HasFactory, SoftDeletes;
 
     protected function casts(): array
     {
         return [
             'created_at' => 'datetime',
-            'updated_at' => 'datetime',
-            'deleted_at' => 'datetime',
         ];
     }
 
@@ -47,8 +49,4 @@ class University extends Model
         return $this->belongsTo(User::class, 'updated_by');
     }
 
-    protected static function booted(): void
-    {
-        static::addGlobalScope(new UniversityScope);
-    }
 }

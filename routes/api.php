@@ -60,11 +60,22 @@ Route::middleware('auth:api')->prefix('v1/auth')->group(function () {
 |--------------------------------------------------------------------------
 | University routes
 |--------------------------------------------------------------------------
+|
+| Index is public; all other endpoints
+|
 */
-Route::middleware('auth:api')->prefix('v1')->group(function () {
+Route::prefix('v1')->group(function () {
+
+    // get all Universities Public
     Route::get('/universities', [UniversityController::class, 'index'])->name('api.universities.index');
-    Route::post('/universities', [UniversityController::class, 'store'])->name('api.universities.store');
-    Route::get('/universities/{university}', [UniversityController::class, 'show'])->name('api.universities.show');
-    Route::put('/universities/{university}', [UniversityController::class, 'update'])->name('api.universities.update');
-    Route::delete('/universities/{university}', [UniversityController::class, 'destroy'])->name('api.universities.destroy');
+
+    //  create , get , edit  require authentication.
+    Route::middleware('auth:sanctum')->group(
+        function () {
+            Route::post('/universities', [UniversityController::class, 'store'])->name('api.universities.store');
+            Route::get('/universities/{university}', [UniversityController::class, 'show'])->name('api.universities.show');
+            Route::put('/universities/{university}', [UniversityController::class, 'update'])->name('api.universities.update');
+            Route::delete('/universities/{university}', [UniversityController::class, 'destroy'])->name('api.universities.destroy');
+        }
+    );
 });

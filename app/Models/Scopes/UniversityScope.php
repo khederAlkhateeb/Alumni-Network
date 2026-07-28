@@ -2,6 +2,7 @@
 
 namespace App\Models\Scopes;
 
+use App\Contracts\UniversityContext;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Scope;
@@ -10,33 +11,23 @@ class UniversityScope implements Scope
 {
     public function apply(Builder $builder, Model $model): void
     {
-        if (auth()->guest()) {
+        $context = app(UniversityContext::class);
+
+        if ($context->isGuest()) {
             return;
         }
 
-        $user = auth()->user();
-
-        if ($user->hasRole('super_admin')) {
+        if ($context->isSuperAdmin()) {
             return;
         }
 
-        $universityId = $this->resolveUniversityId($user);
+        $universityId = $context->getUniversityId();
 
-        if ($universityId) {
-            $builder->where('id', $universityId);
+        if ($universityId !== null) {
+            $builder->where($model->getTable() . '.id', $universityId);
+        } else {
+            // Users without a university ID should not see any university data
+            $builder->whereNull($model->getTable() . '.id');
         }
-    }
-
-    private function resolveUniversityId($user): ?int
-    {
-        $profile = $user->alumniProfile ?? $user->studentProfile;
-
-        if (!$profile) {
-            return null;
-        }
-
-        $profile->loadMissing('major.faculty');
-
-        return $profile->major?->faculty?->university_id;
     }
 }
