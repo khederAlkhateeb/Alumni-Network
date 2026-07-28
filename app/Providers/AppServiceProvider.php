@@ -6,7 +6,6 @@ use App\Models\University;
 use App\Policies\UniversityPolicy;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\Gate;
 use App\Models\User;
 use App\Policies\RegistrationPolicy;
 

@@ -11,11 +11,9 @@ use App\V1\Actions\University\ListUniversities;
 use App\V1\Actions\University\UpdateUniversity;
 use App\V1\Actions\University\DeleteUniversity;
 use App\V1\Resources\UniversityResource;
-use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class UniversityController extends Controller
 {
@@ -75,21 +73,14 @@ class UniversityController extends Controller
      */
     public function store(StoreUniversityRequest $request): JsonResponse
     {
-        try {
-            Gate::authorize('create', University::class);
-            $university = $this->createUniversity->handle($request->validated());
+        Gate::authorize('create', University::class);
+        $university = $this->createUniversity->handle($request->validated());
 
-            return $this->successResponse(
-                data: new UniversityResource($university),
-                message: 'University created successfully.',
-                code: 201,
-            );
-
-        } catch (AuthorizationException $e) {
-            return $this->errorResponse('Access Denied , Forbidden User', [], 403);
-        } catch (\Throwable $th) {
-            return $this->errorResponse('server error', [], 500);
-        }
+        return $this->successResponse(
+            data: new UniversityResource($university),
+            message: 'University created successfully.',
+            code: 201,
+        );
     }
 
     /**
@@ -104,18 +95,12 @@ class UniversityController extends Controller
      */
     public function show(University $university): JsonResponse
     {
-        try {
-            Gate::authorize('view', $university);
-            $university = $this->getUniversity->handle($university);
+        Gate::authorize('view', $university);
+        $university = $this->getUniversity->handle($university);
 
-            return $this->successResponse(
-                data: new UniversityResource($university),
-            );
-        } catch (AuthorizationException $e) {
-            return $this->errorResponse('Access Denied , Forbidden User', [], 403);
-        } catch (\Throwable $th) {
-            return $this->errorResponse('server error', [], 500);
-        }
+        return $this->successResponse(
+            data: new UniversityResource($university),
+        );
     }
 
     /**
@@ -133,21 +118,13 @@ class UniversityController extends Controller
      */
     public function update(UpdateUniversityRequest $request, University $university): JsonResponse
     {
-        try {
-            Gate::authorize('update', $university);
-            $university = $this->updateUniversity->handle($university, $request->validated());
+        Gate::authorize('update', $university);
+        $university = $this->updateUniversity->handle($university, $request->validated());
 
-            return $this->successResponse(
-                data: new UniversityResource($university),
-                message: 'University updated successfully.',
-            );
-        } catch (NotFoundHttpException $e) {
-            return $this->errorResponse('Record Not Found', [], 404);
-        } catch (AuthorizationException $e) {
-            return $this->errorResponse('Access Denied , Forbidden User', [], 403);
-        } catch (\Throwable $th) {
-            return $this->errorResponse('server error', [], 500);
-        }
+        return $this->successResponse(
+            data: new UniversityResource($university),
+            message: 'University updated successfully.',
+        );
     }
 
     /**
@@ -162,17 +139,11 @@ class UniversityController extends Controller
      */
     public function destroy(University $university): JsonResponse
     {
-        try {
-            Gate::authorize('delete', $university);
-            $this->deleteUniversity->handle($university);
+        Gate::authorize('delete', $university);
+        $this->deleteUniversity->handle($university);
 
-            return $this->successResponse(
-                message: 'University deleted successfully.',
-            );
-        } catch (AuthorizationException $e) {
-            return $this->errorResponse('Access Denied , Forbidden User', [], 403);
-        } catch (\Throwable $th) {
-            return $this->errorResponse('server error', [], 500);
-        }
+        return $this->successResponse(
+            message: 'University deleted successfully.',
+        );
     }
 }

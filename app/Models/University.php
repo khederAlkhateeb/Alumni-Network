@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Builders\UniversityQueryBuilder;
 use App\Models\Scopes\UniversityScope;
 use App\Policies\UniversityPolicy;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -26,6 +27,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class University extends Model
 {
     use HasFactory, SoftDeletes;
+
+    public function newEloquentBuilder($query): UniversityQueryBuilder
+    {
+        return new UniversityQueryBuilder($query);
+    }
 
     protected function casts(): array
     {

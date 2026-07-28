@@ -2,7 +2,6 @@
 
 namespace App\V1\Actions\University;
 
-use App\Models\Scopes\UniversityScope;
 use App\Models\University;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Log;
@@ -25,13 +24,10 @@ class ListUniversities
     public function handle(int $per_page = 15, array $filters = []): LengthAwarePaginator
     {
         try {
-            return University::withoutGlobalScope(UniversityScope::class)
-                ->when(!empty($filters['name']), function ($query) use ($filters) {
-                    $query->where('name', 'like', '%' . trim($filters['name']) . '%');
-                })
-                ->when(!empty($filters['country']), function ($query) use ($filters) {
-                    $query->where('country', 'like', '%' . trim($filters['country']) . '%');
-                })
+            return University::query()
+                ->withoutTenantScope()
+                ->filterByName($filters['name'] ?? null)
+                ->filterByCountry($filters['country'] ?? null)
                 ->paginate($per_page ?? config('app.pagination.per_page'));
         } catch (Throwable $exception) {
             Log::error('ListUniversities failed', [

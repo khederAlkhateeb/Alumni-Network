@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('universities', function (Blueprint $table) {
-            $table->timestamp('updated_at')->nullable()->after('created_at');
+            // $table->timestamp('updated_at')->nullable()->after('created_at');
             $table->softDeletes()->after('updated_at');
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete()->after('logo');
             $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete()->after('created_by');
