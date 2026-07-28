@@ -40,12 +40,15 @@ class UniversityController extends Controller
      *
      * Returns a paginated list of all universities. This endpoint is
      * publicly accessible and does not require authentication.
+     * Supports optional query filters: ?name=...&country=...
      *
+     * @param  Request $request
      * @return JsonResponse HTTP 200 with paginated university collection.
      */
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        $universities = $this->listUniversities->handle(config('app.pagination.per_page'));
+        $filters = $request->only(['name', 'country']);
+        $universities = $this->listUniversities->handle(config('app.pagination.per_page'), $filters);
 
         return $this->successResponse(
             data: UniversityResource::collection($universities),

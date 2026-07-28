@@ -6,13 +6,28 @@ use App\Models\University;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * Class UpdateUniversityRequest
+ * 
+ * Validates request data when updating an existing university resource.
+ */
 class UpdateUniversityRequest extends FormRequest
 {
+    /**
+     * Determine if the user is authorized to make this request.
+     * 
+     * @return bool
+     */
     public function authorize(): bool
     {
         return true;
     }
 
+    /**
+     * Get the validation rules that apply to the request.
+     * 
+     * @return array<string, array<int, string>>
+     */
     public function rules(): array
     {
         $university = $this->route('university');
@@ -26,6 +41,11 @@ class UpdateUniversityRequest extends FormRequest
         ];
     }
 
+    /**
+     * Get the custom validation error messages.
+     * 
+     * @return array<string, string>
+     */
     public function messages(): array
     {
         return [
