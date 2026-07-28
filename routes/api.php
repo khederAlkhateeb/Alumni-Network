@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Route;
 | and cannot log in until approved by an admin.
 |
 */
+
 Route::prefix('v1/auth')->group(function () {
     /**
      * Register a new user (alumni or student).
@@ -27,6 +28,18 @@ Route::prefix('v1/auth')->group(function () {
      * @see AuthController::login()
      */
     Route::post('/login', [AuthController::class, 'login'])->name('api.auth.login');
+
+    /**
+     * Send a password reset link to the user's email.
+     * @see AuthController::forgotPassword()
+     */
+    Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->name('api.auth.forgot-password');
+
+    /**
+     * Reset user password using a token.
+     * @see AuthController::resetPassword()
+     */
+    Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('api.auth.reset-password');
 });
 
 /*
@@ -51,4 +64,10 @@ Route::middleware('auth:api')->prefix('v1/auth')->group(function () {
      * @see SessionController::me()
      */
     Route::get('/me', [SessionController::class, 'me'])->name('api.auth.me');
+
+    /**
+     * Change the authenticated user's password.
+     * @see AuthController::changePassword()
+     */
+    Route::put('/change-password', [AuthController::class, 'changePassword'])->name('api.auth.password.change');
 });
