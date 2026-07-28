@@ -27,7 +27,7 @@ class StoreWorkExperienceAction
     {
         return DB::transaction(function () use ($profile, $data) {
 
-            // 1. Create and persist the work experience record
+
             $experience = $profile->workExperiences()->create([
                 'job_title'    => $data['job_title'],
                 'company' => $data['company'],
@@ -35,7 +35,6 @@ class StoreWorkExperienceAction
                 'end_date'     =>  ($data['end_date'] ?? null),
                          ]);
 
-            // 2. Synchronize profile primary headline only if explicitly requested by user
             if (!empty($data['set_as_primary_headline']) && $data['set_as_primary_headline'] === true) {
                 $profile->update([
                     'current_job_title' => $experience->job_title,

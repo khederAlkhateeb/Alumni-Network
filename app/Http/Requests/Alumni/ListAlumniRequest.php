@@ -2,15 +2,40 @@
 
 namespace App\Http\Requests\Alumni;
 
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * Class ListAlumniRequest
+ *
+ * Handles query parameter validation rules and custom failure messages for
+ * filtering and listing alumni profiles.
+ *
+ * @property-read int|null $university_id
+ * @property-read int|null $major_id
+ * @property-read int|null $graduation_year
+ * @property-read int|null $skill_id
+ * @property-read bool|null $is_open_to_mentor
+ *
+ * @package App\Http\Requests\Alumni
+ */
 class ListAlumniRequest extends FormRequest
 {
+    /**
+     * Determine if the user is authorized to make this request.
+     *
+     * @return bool
+     */
     public function authorize(): bool
     {
         return true;
     }
 
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array<string, ValidationRule|array<mixed>|string>
+     */
     public function rules(): array
     {
         return [

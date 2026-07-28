@@ -2,15 +2,45 @@
 
 namespace App\Http\Requests\Alumni;
 
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * Class UpdateAlumniProfile
+ *
+ * Handles validation, input sanitization, and error messaging
+ * for updating an alumni's profile information.
+ *
+ * @property-read string|null $bio
+ * @property-read int|null $graduation_year
+ * @property-read string|null $current_job_title
+ * @property-read string|null $current_company
+ * @property-read string|null $country
+ * @property-read string|null $city
+ * @property-read string|null $linkedin_url
+ * @property-read bool|null $is_open_to_mentor
+ *
+ * @package App\Http\Requests\Alumni
+ */
 class UpdateAlumniProfile extends FormRequest
 {
+    /**
+     * Determine if the user is authorized to make this request.
+     *
+     * @return bool
+     */
     public function authorize(): bool
     {
         return true;
     }
 
+    /**
+     * Prepare inputs for validation.
+     *
+     * Sanitizes and normalizes the LinkedIn URL by prepending the HTTPS scheme if missing.
+     *
+     * @return void
+     */
     protected function prepareForValidation(): void
     {
         $linkedin = $this->input('linkedin_url');
@@ -27,6 +57,11 @@ class UpdateAlumniProfile extends FormRequest
         }
     }
 
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array<string, ValidationRule|array<mixed>|string>
+     */
     public function rules(): array
     {
         return [
@@ -43,6 +78,8 @@ class UpdateAlumniProfile extends FormRequest
 
     /**
      * Custom error messages for form validation.
+     *
+     * @return array<string, string>
      */
     public function messages(): array
     {

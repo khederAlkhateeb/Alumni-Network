@@ -4,11 +4,24 @@ namespace App\Http\Requests\Alumni;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\UploadedFile;
 
+/**
+ * Class UploadAlumniPhotoRequest
+ *
+ * Handles validation rules and custom failure messages for
+ * uploading an alumni profile photo.
+ *
+ * @property-read UploadedFile $photo
+ *
+ * @package App\Http\Requests\Alumni
+ */
 class UploadAlumniPhotoRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
+     *
+     * @return bool
      */
     public function authorize(): bool
     {
@@ -48,5 +61,4 @@ class UploadAlumniPhotoRequest extends FormRequest
             'photo.max'      => 'The image size cannot exceed 2MB.',
         ];
     }
-    
 }

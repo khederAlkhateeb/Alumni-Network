@@ -2,6 +2,9 @@
 
 namespace Database\Seeders;
 
+use App\Models\Faculty;
+use App\Models\Major;
+use App\Models\University;
 use App\Models\User;
 use DB;
 use Hash;
@@ -19,8 +22,33 @@ class DatabaseSeeder extends Seeder
 
 
     {
+// data for testing
+// for delete!!
+$university = University::firstOrCreate(
+            ['id' => 1],
+            [
+                'name'    => 'Damascus University',
+                'country' => 'Syria',
+            ]
+        );
 
 
+        $faculty = Faculty::firstOrCreate(
+            ['id' => 1],
+            [
+                'university_id' => $university->id,
+                'name'          => 'Faculty of Information Technology',
+            ]
+        );
+
+
+        $major = Major::firstOrCreate(
+            ['id' => 1],
+            [
+                'faculty_id' => $faculty->id,
+                'name'       => 'Software Engineering',
+            ]
+        );
         $this->call([
             RoleAndPermissionSeeder::class,
             FacultySeeder::class,

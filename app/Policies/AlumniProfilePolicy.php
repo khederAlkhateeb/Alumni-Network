@@ -24,7 +24,8 @@ class AlumniProfilePolicy
       */
     public function viewAny(User $user): bool
     {
-        return $user->is_active;
+        // active from middleware
+        return true;
     }
 
     /**
@@ -33,7 +34,7 @@ class AlumniProfilePolicy
     public function view(User $user, AlumniProfile $profile): bool
     {
 return true;
-// يجب تعديلاها لتلائم الشروط لا يرى  اي شي من غير جامعته
+
     }
 
     /**
@@ -44,12 +45,6 @@ return true;
         return $profile->user_id === $user->id;
     }
 
-    /**
-     * POST/PUT/DELETE على work-experiences و skills
-     * نفس شرط update: بس صاحب البروفايل (بدون استثناءات، حتى uni_admin ما يعدل)
-     */
-
-    //سيتم وضعها في الموديل المخصص
 
     /**
      * POST /alumni/me/toggle-mentor
@@ -57,8 +52,7 @@ return true;
      */
     public function toggleMentor(User $user, AlumniProfile $profile): bool
     {
-        return $profile->user_id === $user->id
-            && $profile->status === 'active';
+        return $profile->user_id === $user->id;
     }
 
 /**

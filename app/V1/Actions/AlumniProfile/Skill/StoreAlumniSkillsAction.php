@@ -27,20 +27,18 @@ class StoreAlumniSkillsAction
         $skillIds = collect($data['skills'])->map(function (array $skillData) {
 
             $skill = Skill::firstOrCreate(
-                // Search condition (Strictly by unique name to avoid integrity violations)
+
                 ['name' => trim($skillData['name'])],
 
-                // Attributes applied ONLY when creating a new record
                 ['category' => $skillData['category'] ?? null]
             );
 
             return $skill->id;
         });
 
-        // Attach the collected skill IDs to the alumni profile without removing existing ones.
         $profile->skills()->syncWithoutDetaching($skillIds);
 
-        //  Reload relation to reflect immediate changes in the response.
+  
         return $profile->load('skills');
     }
 }

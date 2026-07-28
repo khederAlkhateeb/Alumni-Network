@@ -49,9 +49,5 @@ class AlumniProfileBuilder extends Builder
             $query->where('university_id', $universityId);
         });
     }
-public function newEloquentBuilder($query): AlumniProfileBuilder
-{
-    return new AlumniProfileBuilder($query);
-}
 
 }

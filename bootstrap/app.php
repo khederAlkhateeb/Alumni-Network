@@ -23,7 +23,22 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        $exceptions->shouldRenderJsonWhen(
-            fn(Request $request) => $request->is('api/*'),
-        );
+        $exceptions->render(function (Throwable $e, Request $request) {
+            if ($request->is('api/*') || $request->wantsJson()) {
+
+                if ($e instanceof NotFoundHttpException) {
+                    return response()->json([
+                        'status'  => 'error',
+                        'message' => 'The requested resource was not found.'
+                    ], 404);
+                }
+
+                if ($e instanceof AccessDeniedHttpException || $e instanceof AuthorizationException) {
+                    return response()->json([
+                        'status'  => 'error',
+                        'message' => 'This action is unauthorized.'
+                    ], 403);
+                }
+            }
+        });
     })->create();

@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
+use App\Builders\AlumniProfileBuilder;
 use App\Enums\ProfileStatus;
 use Illuminate\Database\Eloquent\Attributes\Appends;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -13,10 +13,46 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
-// #[UseEloquentBuilder(AlumniProfileBuilder::class)]
 
+/**
+ * Class AlumniProfile
+ *
+ * Represents an alumni's professional profile, including academic info,
+ * career history, skills, and profile completeness metrics.
+ *
+ * @property int $id
+ * @property int $user_id
+ * @property int|null $major_id
+ * @property string|null $student_number
+ * @property int|null $graduation_year
+ * @property string|null $current_job_title
+ * @property string|null $current_company
+ * @property string|null $linkedin_url
+ * @property string|null $bio
+ * @property string|null $city
+ * @property string|null $country
+ * @property ProfileStatus $status
+ * @property bool $is_open_to_mentor
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ *
+ * @property-read float $total_experience_years
+ * @property-read bool $is_currently_employed
+ * @property-read WorkExperience|null $current_work_experience
+ * @property-read int $completeness_score
+ * @property-read array $missing_fields
+ *
+ * @property-read User $user
+ * @property-read Major|null $major
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, WorkExperience> $workExperiences
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Skill> $skills
+ * @property-read Attachment|null $photo
+ *
+ * @method static AlumniProfileBuilder query()
+ *
+ * @package App\Models
+ */
 #[Fillable([
-
     'user_id',
     'major_id',
     'student_number',
@@ -28,65 +64,98 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
     'city',
     'country',
     'status',
-    'is_open_to_mentor'
+    'is_open_to_mentor',
 ])]
 #[Appends([
     'total_experience_years',
     'is_currently_employed',
     'completeness_score',
     'missing_fields',
-
 ])]
 class AlumniProfile extends Model
-{   //
+{
     use HasFactory;
 
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
     protected function casts(): array
     {
         return [
             'status' => ProfileStatus::class,
             'is_open_to_mentor' => 'boolean',
-            'graduation_year' => "integer"
+            'graduation_year' => 'integer',
         ];
     }
 
+    /************************ Relationships ************************** */
 
-    /************************RelationShips ************************** */
+    /**
+     * Get the user that owns the alumni profile.
+     *
+     * @return BelongsTo<User, AlumniProfile>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * Get the academic major associated with the alumni.
+     *
+     * @return BelongsTo<Major, AlumniProfile>
+     */
     public function major(): BelongsTo
     {
         return $this->belongsTo(Major::class);
     }
 
+    /**
+     * Get all work experiences for the alumni profile sorted by most recent.
+     *
+     * @return HasMany<WorkExperience>
+     */
     public function workExperiences(): HasMany
     {
-
         return $this->hasMany(WorkExperience::class)->orderByDesc('start_date');
     }
 
+    /**
+     * The skills that belong to the alumni profile.
+     *
+     * @return BelongsToMany<Skill>
+     */
     public function skills(): BelongsToMany
     {
         return $this->belongsToMany(Skill::class, 'alumni_profile_skill');
     }
+
+    /**
+     * Get the alumni profile's latest uploaded photo attachment.
+     *
+     * @return MorphOne<Attachment>
+     */
     public function photo(): MorphOne
     {
         return $this->morphOne(Attachment::class, 'attachable')
             ->latestOfMany();
     }
 
+    /************************ Accessors & Mutators ************************** */
 
-    /********************************* Accessors & Mutators************************************ */
-
-
+    /**
+     * Accessor for total experience in years rounded to one decimal place.
+     *
+     * @return Attribute<float, void>
+     */
     protected function totalExperienceYears(): Attribute
     {
         return Attribute::get(function () {
             $totalMonths = $this->workExperiences->sum(function (WorkExperience $exp) {
                 $end = $exp->end_date ?? now();
+
                 return $exp->start_date->diffInMonths($end);
             });
 
@@ -94,43 +163,35 @@ class AlumniProfile extends Model
         });
     }
 
-
-
+    /**
+     * Accessor to determine if the alumni is currently employed.
+     *
+     * @return Attribute<bool, void>
+     */
     protected function isCurrentlyEmployed(): Attribute
     {
         return Attribute::get(
-            fn() => $this->workExperiences->contains(fn(WorkExperience $exp) => is_null($exp->end_date))
+            fn () => $this->workExperiences->contains(fn (WorkExperience $exp) => is_null($exp->end_date))
         );
     }
 
-
+    /**
+     * Accessor to retrieve the ongoing work experience record.
+     *
+     * @return Attribute<WorkExperience|null, void>
+     */
     protected function currentWorkExperience(): Attribute
     {
         return Attribute::get(
-            fn() => $this->workExperiences->firstWhere('end_date', null)
+            fn () => $this->workExperiences->firstWhere('end_date', null)
         );
     }
 
-
-    // protected function completenessScore(): Attribute
-    // {
-    //     return Attribute::get(function () {
-    //         $weights = config('profile_scoring.weights');
-    //         $score = 0;
-
-    //         $score += $this->bio ? $weights['bio'] : 0;
-    //         $score += $this->linkedin_url ? $weights['linkedin_url'] : 0;
-    //         $score += $this->city ? $weights['city'] : 0;
-    //         $score += $this->country ? $weights['country'] : 0;
-    //         $score += $this->current_job_title ? $weights['current_job_title'] : 0;
-    //         $score += $this->current_company ? $weights['current_company'] : 0;
-    //         $score += $this->skills->isNotEmpty() ? $weights['has_at_least_one_skill'] : 0;
-    //         $score += $this->workExperiences->isNotEmpty() ? $weights['has_at_least_one_work_experience'] : 0;
-
-    //         return min($score, 100);
-    //     });
-    // }
-
+    /**
+     * Accessor for profile completeness percentage score based on configured weights.
+     *
+     * @return Attribute<int, void>
+     */
     protected function completenessScore(): Attribute
     {
         return Attribute::get(function () {
@@ -138,12 +199,14 @@ class AlumniProfile extends Model
 
             return collect($this->completionMap())
                 ->filter()
-                ->sum(fn($_, $field) => $weights[$field] ?? 0);
+                ->sum(fn ($_, $field) => $weights[$field] ?? 0);
         });
     }
 
     /**
-     * Accessor for missing fields list.
+     * Accessor for missing fields along with their potential weight points.
+     *
+     * @return Attribute<array<int, array{field: string, points: int}>, void>
      */
     protected function missingFields(): Attribute
     {
@@ -152,7 +215,7 @@ class AlumniProfile extends Model
 
             return collect($this->completionMap())
                 ->reject()
-                ->map(fn($_, $field) => [
+                ->map(fn ($_, $field) => [
                     'field' => $field,
                     'points' => $weights[$field] ?? 0,
                 ])
@@ -161,23 +224,36 @@ class AlumniProfile extends Model
         });
     }
 
-
+    /**
+     * Map profile completion state for fields and relations.
+     *
+     * Handles N+1 prevention by checking if relations are preloaded before querying.
+     *
+     * @return array<string, bool>
+     */
     private function completionMap(): array
     {
         return [
-            'bio' => !empty($this->bio),
-            'linkedin_url' => !empty($this->linkedin_url),
-            'city' => !empty($this->city),
-            'country' => !empty($this->country),
-            'current_job_title' => !empty($this->current_job_title),
-            'current_company' => !empty($this->current_company),
-            'has_at_least_one_skill' => $this->skills->isNotEmpty(),
-            'has_at_least_one_work_experience' => $this->workExperiences->isNotEmpty(),
+            'bio' => ! empty($this->bio),
+            'linkedin_url' => ! empty($this->linkedin_url),
+            'city' => ! empty($this->city),
+            'country' => ! empty($this->country),
+            'current_job_title' => ! empty($this->current_job_title),
+            'current_company' => ! empty($this->current_company),
+            'has_at_least_one_skill' => $this->relationLoaded('skills')
+                ? $this->skills->isNotEmpty()
+                : $this->skills()->exists(),
         ];
     }
 
-    public function newEloquentBuilder($query): \App\Builders\AlumniProfileBuilder
+    /**
+     * Create a new Eloquent query builder for the model.
+     *
+     * @param \Illuminate\Database\Query\Builder $query
+     * @return AlumniProfileBuilder
+     */
+    public function newEloquentBuilder($query): AlumniProfileBuilder
     {
-        return new \App\Builders\AlumniProfileBuilder($query);
+        return new AlumniProfileBuilder($query);
     }
 }
