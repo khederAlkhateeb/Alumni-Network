@@ -16,7 +16,7 @@ return new class extends Migration
             $table->morphs('reactable');
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->enum('type', ['like', 'insightful', 'celebrate'])->default('like');
-            $table->timestamp('created_at')->nullable();
+            $table->timestamps();
             
             $table->unique(['reactable_id', 'reactable_type', 'user_id']);
         });

@@ -19,6 +19,7 @@ return new class extends Migration
             $table->date('end_date');
             $table->integer('mentor_per_mentees_max')->default(5);
             $table->enum('status', ['draft', 'active', 'closed'])->default('draft');
+            $table->timestamps();
             
             $table->index(['university_id', 'status']);
             $table->index('start_date');

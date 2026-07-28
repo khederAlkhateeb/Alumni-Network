@@ -18,7 +18,7 @@ return new class extends Migration
             $table->text('cover_letter')->nullable();
             $table->string('resume')->nullable();
             $table->enum('status', ['submitted', 'reviewed', 'shortlisted', 'rejected'])->default('submitted');
-            $table->timestamp('created_at')->nullable();
+            $table->timestamps();
             
             $table->unique(['job_listing_id', 'applicant_id']);
             $table->index('status');

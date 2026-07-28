@@ -23,6 +23,7 @@ return new class extends Migration
             $table->dateTime('end_date');
             $table->integer('capacity')->nullable();
             $table->enum('status', ['upcoming', 'ongoing', 'completed', 'cancelled'])->default('upcoming');
+            $table->timestamps();
 
             $table->index(['university_id', 'status']);
             $table->index('start_date');

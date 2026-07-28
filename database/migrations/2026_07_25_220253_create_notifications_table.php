@@ -18,7 +18,7 @@ return new class extends Migration
             $table->morphs('related');
             $table->text('message')->nullable();
             $table->timestamp('read_at')->nullable();
-            $table->timestamp('created_at')->nullable();
+            $table->timestamps();
             
             $table->index(['user_id', 'read_at']);
             $table->index('type');
