@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreignId('mentee_id')->constrained('users')->onDelete('cascade');
             $table->text('intro_message')->nullable();
             $table->enum('status', ['pending', 'accepted', 'rejected', 'complete'])->default('pending');
-            $table->timestamp('created_at')->nullable();
+            $table->timestamps();
             
             $table->unique(['program_id', 'mentor_id', 'mentee_id']);
             $table->index('status');

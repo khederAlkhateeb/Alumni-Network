@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->text('content');
             $table->enum('visibility', ['public', 'connections', 'university'])->default('public');
-            $table->timestamp('created_at')->nullable();
+            $table->timestamps();
             
             $table->index(['user_id', 'created_at']);
             $table->index('visibility');

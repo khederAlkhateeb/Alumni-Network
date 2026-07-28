@@ -24,7 +24,7 @@ return new class extends Migration
             $table->string('salary_range')->nullable();
             $table->timestamp('expires_at')->nullable();
             $table->enum('status', ['active', 'closed', 'expired'])->default('active');
-            $table->timestamp('created_at')->nullable();
+            $table->timestamps();
             
             $table->index(['university_id', 'status']);
             $table->index('type');

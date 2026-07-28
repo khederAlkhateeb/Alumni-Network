@@ -6,6 +6,9 @@ use App\Models\University;
 use App\Policies\UniversityPolicy;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Gate;
+use App\Models\User;
+use App\Policies\RegistrationPolicy;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -25,6 +28,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        Gate::policy(User::class, RegistrationPolicy::class);
     }
 }

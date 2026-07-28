@@ -18,6 +18,7 @@ return new class extends Migration
             $table->timestamp('registered_at')->nullable();
             $table->timestamp('attended_at')->nullable();
             $table->enum('status', ['registered', 'cancelled'])->default('registered');
+            $table->timestamps();
             
             $table->unique(['event_id', 'user_id']);
             $table->index('status');
