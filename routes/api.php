@@ -1,8 +1,8 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\FacultyController;
 use App\Http\Controllers\SessionController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\RegistrationManagementController;
 
@@ -16,6 +16,7 @@ use App\Http\Controllers\RegistrationManagementController;
 | and cannot log in until approved by an admin.
 |
 */
+
 Route::prefix('v1/auth')->group(function () {
     /**
      * Register a new user (alumni or student).
@@ -54,6 +55,7 @@ Route::middleware('auth:api')->prefix('v1/auth')->group(function () {
     Route::get('/me', [SessionController::class, 'me'])->name('api.auth.me');
 });
 
+
 /*
 |--------------------------------------------------------------------------
 | University Admin registration management routes
@@ -71,4 +73,9 @@ Route::middleware(['auth:api', 'role:uni_admin'])->prefix('v1/uni_admin')->group
      * @see RegistrationManagementController::rejectUser()
      */
     Route::post('universities/{university}/registrations/{user}/reject', [RegistrationManagementController::class, 'rejectUser'])->name('api.registrations.reject');
+});
+
+Route::middleware('auth:api')->prefix('v1')->group(function () {
+    Route::resource('faculties', FacultyController::class);
+
 });
