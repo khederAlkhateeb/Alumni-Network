@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\FacultyController;
 use App\Http\Controllers\SessionController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\File;
 use App\Http\Controllers\RegistrationManagementController;
 
 /*
@@ -53,6 +54,18 @@ Route::middleware('auth:api')->prefix('v1/auth')->group(function () {
      * @see SessionController::me()
      */
     Route::get('/me', [SessionController::class, 'me'])->name('api.auth.me');
+
+
+
+
+
+});
+Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
+
+    foreach (File::allFiles(__DIR__ . '/Api/V1') as $file) {
+        require $file->getPathname();
+    }
+
 });
 
 
