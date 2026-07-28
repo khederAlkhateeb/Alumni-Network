@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->morphs('attachable');
             $table->string('file_path');
-            $table->timestamp('created_at')->nullable();
+            $table->timestamps();
         });
     }
 

@@ -18,6 +18,7 @@ return new class extends Migration
             $table->json('snapshot_data')->nullable();
             $table->foreignId('generated_by')->constrained('users')->onDelete('cascade');
             $table->timestamp('generated_at')->nullable();
+            $table->timestamps();
             
             $table->index(['university_id', 'report_type']);
             $table->index('generated_at');

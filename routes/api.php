@@ -1,9 +1,10 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\FacultyController;
 use App\Http\Controllers\SessionController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\RegistrationManagementController;
 
 /*
 |--------------------------------------------------------------------------
@@ -70,4 +71,29 @@ Route::middleware('auth:api')->prefix('v1/auth')->group(function () {
      * @see AuthController::changePassword()
      */
     Route::put('/change-password', [AuthController::class, 'changePassword'])->name('api.auth.password.change');
+});
+
+
+/*
+|--------------------------------------------------------------------------
+| University Admin registration management routes
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth:api', 'role:uni_admin'])->prefix('v1/uni_admin')->group(function () {
+    /**
+     * Approve a user's registration for a specific university.
+     * @see RegistrationManagementController::approveUser()
+     */
+    Route::post('universities/{university}/registrations/{user}/approve', [RegistrationManagementController::class, 'approveUser'])->name('api.registrations.approve');
+
+    /**
+     * Reject a user's registration for a specific university.
+     * @see RegistrationManagementController::rejectUser()
+     */
+    Route::post('universities/{university}/registrations/{user}/reject', [RegistrationManagementController::class, 'rejectUser'])->name('api.registrations.reject');
+});
+
+Route::middleware('auth:api')->prefix('v1')->group(function () {
+    Route::resource('faculties', FacultyController::class);
+
 });
