@@ -18,7 +18,8 @@ return new class extends Migration
             $table->string('website')->nullable()->unique();
             $table->string('logo')->nullable();
             $table->timestamp('created_at')->nullable();
-            
+            $table->timestamp('updated_at')->nullable();
+
             $table->index('country');
         });
     }
