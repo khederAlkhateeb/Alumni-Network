@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\FacultyController;
 use App\Http\Controllers\SessionController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\File;
 use App\Http\Controllers\RegistrationManagementController;
 
 /*
@@ -73,6 +74,11 @@ Route::middleware('auth:api')->prefix('v1/auth')->group(function () {
     Route::put('/change-password', [AuthController::class, 'changePassword'])->name('api.auth.password.change');
 });
 
+Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
+    foreach (File::allFiles(__DIR__ . '/Api/V1') as $file) {
+        require $file->getPathname();
+    }
+});
 
 /*
 |--------------------------------------------------------------------------
@@ -95,5 +101,4 @@ Route::middleware(['auth:api', 'role:uni_admin'])->prefix('v1/uni_admin')->group
 
 Route::middleware('auth:api')->prefix('v1')->group(function () {
     Route::resource('faculties', FacultyController::class);
-
 });
