@@ -3,6 +3,8 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\FacultyController;
 use App\Http\Controllers\SessionController;
+use App\Http\Controllers\UniversityController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\File;
 use App\Http\Controllers\RegistrationManagementController;
@@ -78,6 +80,30 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
     foreach (File::allFiles(__DIR__ . '/Api/V1') as $file) {
         require $file->getPathname();
     }
+});
+
+/*
+|--------------------------------------------------------------------------
+| University routes
+|--------------------------------------------------------------------------
+|
+| Index is public; all other endpoints require authentication.
+|
+*/
+Route::prefix('v1')->group(function () {
+
+    // get all Universities Public
+    Route::get('/universities', [UniversityController::class, 'index'])->name('api.universities.index');
+
+    //  create , get , edit  require authentication.
+    Route::middleware('auth:sanctum')->group(
+        function () {
+            Route::post('/universities', [UniversityController::class, 'store'])->name('api.universities.store');
+            Route::get('/universities/{university}', [UniversityController::class, 'show'])->name('api.universities.show');
+            Route::put('/universities/{university}', [UniversityController::class, 'update'])->name('api.universities.update');
+            Route::delete('/universities/{university}', [UniversityController::class, 'destroy'])->name('api.universities.destroy');
+        }
+    );
 });
 
 /*

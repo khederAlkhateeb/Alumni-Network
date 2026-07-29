@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
 
 
     {
+
 // data for testing
 // for delete!!
 $university = University::firstOrCreate(
@@ -49,6 +50,7 @@ $university = University::firstOrCreate(
                 'name'       => 'Software Engineering',
             ]
         );
+
         $this->call([
             RoleAndPermissionSeeder::class,
             FacultySeeder::class,
@@ -56,5 +58,13 @@ $university = University::firstOrCreate(
             AlumniSkillSeeder::class,
             AlumniWorkExperienceSeeder::class,
         ]);
+
+        // User
+        User::factory()->create([
+            'email' => 'super@admin.com'
+        ])->assignRole('super_admin')->save();
+
+        // Universities
+        University::factory(50)->create(['created_by' =>  1]);
     }
 }

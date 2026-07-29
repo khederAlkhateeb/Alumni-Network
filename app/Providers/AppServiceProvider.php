@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\University;
+use App\Policies\UniversityPolicy;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Support\Facades\Gate;
@@ -15,7 +17,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->singleton(
+            \App\Contracts\UniversityContext::class,
+            \App\Services\LaravelUniversityContext::class
+        );
     }
 
     /**
