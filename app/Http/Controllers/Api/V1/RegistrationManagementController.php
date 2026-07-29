@@ -1,6 +1,7 @@
 <?php
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api\V1;
 
+use App\Http\Controllers\Controller;
 use App\V1\Actions\Authentication\ApproveRegistrationAction;
 use App\V1\Actions\Authentication\RejectRegistrationAction;
 use App\Models\University;
