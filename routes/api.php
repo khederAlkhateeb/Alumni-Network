@@ -1,130 +1,19 @@
 <?php
 
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\FacultyController;
-use App\Http\Controllers\SessionController;
-use App\Http\Controllers\UniversityController;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\File;
-use App\Http\Controllers\RegistrationManagementController;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
-| Public authentication routes
+| API V1 Routes
 |--------------------------------------------------------------------------
 |
-| These endpoints do not require authentication and are accessible
-| to any visitor. New accounts are created with a "pending" status
-| and cannot log in until approved by an admin.
+| Automatically loads all route files located in routes/Api/V1 directory.
 |
 */
 
-Route::prefix('v1/auth')->group(function () {
-    /**
-     * Register a new user (alumni or student).
-     * @see AuthController::register()
-     */
-    Route::post('/register', [AuthController::class, 'register'])->name('api.auth.register');
-
-    /**
-     * Authenticate an existing, approved user and issue an access token.
-     * @see AuthController::login()
-     */
-    Route::post('/login', [AuthController::class, 'login'])->name('api.auth.login');
-
-    /**
-     * Send a password reset link to the user's email.
-     * @see AuthController::forgotPassword()
-     */
-    Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->name('api.auth.forgot-password');
-
-    /**
-     * Reset user password using a token.
-     * @see AuthController::resetPassword()
-     */
-    Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('api.auth.reset-password');
-});
-
-/*
-|--------------------------------------------------------------------------
-| Protected authentication routes
-|--------------------------------------------------------------------------
-|
-| These endpoints require a valid Sanctum access token (guard "api",
-| driver "sanctum" — see config/auth.php). The token is passed via
-| the "Authorization: Bearer {token}" header.
-|
-*/
-Route::middleware('auth:api')->prefix('v1/auth')->group(function () {
-    /**
-     * Revoke the access token used for the current request.
-     * @see AuthController::logout()
-     */
-    Route::post('/logout', [AuthController::class, 'logout'])->name('api.auth.logout');
-
-    /**
-     * Return the currently authenticated user's data.
-     * @see SessionController::me()
-     */
-    Route::get('/me', [SessionController::class, 'me'])->name('api.auth.me');
-
-    /**
-     * Change the authenticated user's password.
-     * @see AuthController::changePassword()
-     */
-    Route::put('/change-password', [AuthController::class, 'changePassword'])->name('api.auth.password.change');
-});
-
-Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
+Route::prefix('v1')->group(function () {
     foreach (File::allFiles(__DIR__ . '/Api/V1') as $file) {
         require $file->getPathname();
     }
-});
-
-/*
-|--------------------------------------------------------------------------
-| University routes
-|--------------------------------------------------------------------------
-|
-| Index is public; all other endpoints require authentication.
-|
-*/
-Route::prefix('v1')->group(function () {
-
-    // get all Universities Public
-    Route::get('/universities', [UniversityController::class, 'index'])->name('api.universities.index');
-
-    //  create , get , edit  require authentication.
-    Route::middleware('auth:sanctum')->group(
-        function () {
-            Route::post('/universities', [UniversityController::class, 'store'])->name('api.universities.store');
-            Route::get('/universities/{university}', [UniversityController::class, 'show'])->name('api.universities.show');
-            Route::put('/universities/{university}', [UniversityController::class, 'update'])->name('api.universities.update');
-            Route::delete('/universities/{university}', [UniversityController::class, 'destroy'])->name('api.universities.destroy');
-        }
-    );
-});
-
-/*
-|--------------------------------------------------------------------------
-| University Admin registration management routes
-|--------------------------------------------------------------------------
-*/
-Route::middleware(['auth:api', 'role:uni_admin'])->prefix('v1/uni_admin')->group(function () {
-    /**
-     * Approve a user's registration for a specific university.
-     * @see RegistrationManagementController::approveUser()
-     */
-    Route::post('universities/{university}/registrations/{user}/approve', [RegistrationManagementController::class, 'approveUser'])->name('api.registrations.approve');
-
-    /**
-     * Reject a user's registration for a specific university.
-     * @see RegistrationManagementController::rejectUser()
-     */
-    Route::post('universities/{university}/registrations/{user}/reject', [RegistrationManagementController::class, 'rejectUser'])->name('api.registrations.reject');
-});
-
-Route::middleware('auth:api')->prefix('v1')->group(function () {
-    Route::resource('faculties', FacultyController::class);
 });
