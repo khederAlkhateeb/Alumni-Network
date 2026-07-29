@@ -6,6 +6,7 @@ use App\Http\Controllers\SessionController;
 use App\Http\Controllers\UniversityController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\File;
 use App\Http\Controllers\RegistrationManagementController;
 
 /*
@@ -31,6 +32,18 @@ Route::prefix('v1/auth')->group(function () {
      * @see AuthController::login()
      */
     Route::post('/login', [AuthController::class, 'login'])->name('api.auth.login');
+
+    /**
+     * Send a password reset link to the user's email.
+     * @see AuthController::forgotPassword()
+     */
+    Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->name('api.auth.forgot-password');
+
+    /**
+     * Reset user password using a token.
+     * @see AuthController::resetPassword()
+     */
+    Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('api.auth.reset-password');
 });
 
 /*
@@ -55,8 +68,19 @@ Route::middleware('auth:api')->prefix('v1/auth')->group(function () {
      * @see SessionController::me()
      */
     Route::get('/me', [SessionController::class, 'me'])->name('api.auth.me');
+
+    /**
+     * Change the authenticated user's password.
+     * @see AuthController::changePassword()
+     */
+    Route::put('/change-password', [AuthController::class, 'changePassword'])->name('api.auth.password.change');
 });
 
+Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
+    foreach (File::allFiles(__DIR__ . '/Api/V1') as $file) {
+        require $file->getPathname();
+    }
+});
 
 /*
 |--------------------------------------------------------------------------

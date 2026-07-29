@@ -7,6 +7,7 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -49,4 +50,10 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+    public function alumniProfile(): HasOne
+{
+
+    return $this->hasOne(AlumniProfile::class, 'user_id');
+}
+
 }
