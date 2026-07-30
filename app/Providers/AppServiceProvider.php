@@ -2,8 +2,12 @@
 
 namespace App\Providers;
 
+use App\Contracts\AttachmentSecurity\FileValidatorInterface;
+use App\Contracts\AttachmentSecurity\SecureFileStorageInterface;
 use App\Models\University;
 use App\Policies\UniversityPolicy;
+use App\Services\FileValidatorService;
+use App\Services\SecureFileStorageService;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Support\Facades\Gate;
@@ -20,6 +24,18 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(
             \App\Contracts\UniversityContext::class,
             \App\Services\LaravelUniversityContext::class
+        );
+        $this->app->bind(
+            FileValidatorInterface::class,
+            FileValidatorService::class
+        );
+        $this->app->bind(
+            SecureFileStorageInterface::class,
+            function ($app) {
+                return new SecureFileStorageService(
+                    baseDir: config('filesystems.secure_upload_path', '/var/secure/uploads')
+                );
+            }
         );
     }
 
