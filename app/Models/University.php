@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Models\Builders\UniversityQueryBuilder;
+use App\Builders\UniversityQueryBuilder;
 use App\Models\Scopes\UniversityScope;
 use App\Policies\UniversityPolicy;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
