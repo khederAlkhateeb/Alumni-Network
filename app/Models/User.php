@@ -10,7 +10,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\Permission\Traits\HasRoles;
 use Laravel\Sanctum\HasApiTokens;
@@ -28,9 +27,12 @@ class User extends Authenticatable
      *
      * @return array<string, string>
      */
-    public function alumniProfile(): HasOne
+    protected function casts(): array
     {
-        return $this->hasOne(AlumniProfile::class);
+        return [
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed',
+        ];
     }
 
     public function studentProfile(): HasOne
@@ -43,17 +45,9 @@ class User extends Authenticatable
         return $this->hasOne(UniversityAdmin::class);
     }
 
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
-    }
     public function alumniProfile(): HasOne
-{
-
-    return $this->hasOne(AlumniProfile::class, 'user_id');
-}
+    {
+        return $this->hasOne(AlumniProfile::class, 'user_id');
+    }
 
 }
