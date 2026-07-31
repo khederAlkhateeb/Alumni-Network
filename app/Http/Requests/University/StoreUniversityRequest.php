@@ -7,14 +7,14 @@ use Illuminate\Foundation\Http\FormRequest;
 
 /**
  * Class StoreUniversityRequest
- * 
+ *
  * Validates request data when creating a new university resource.
  */
 class StoreUniversityRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
-     * 
+     *
      * @return bool
      */
     public function authorize(): bool
@@ -24,7 +24,7 @@ class StoreUniversityRequest extends FormRequest
 
     /**
      * Get the validation rules that apply to the request.
-     * 
+     *
      * @return array<string, array<int, string>>
      */
     public function rules(): array
@@ -33,13 +33,13 @@ class StoreUniversityRequest extends FormRequest
             'name' => ['required', 'string', 'max:255', 'unique:universities,name'],
             'country' => ['required', 'string', 'max:255'],
             'website' => ['nullable', 'url', 'max:255', 'unique:universities,website'],
-            'logo' => ['nullable', 'string', 'max:2048'],
+            'logo'    => ['nullable','file','image', 'mimes:jpg,jpeg,png,webp' ,'nullable', 'max:5242880'],
         ];
     }
 
     /**
      * Get the custom validation error messages.
-     * 
+     *
      * @return array<string, string>
      */
     public function messages(): array

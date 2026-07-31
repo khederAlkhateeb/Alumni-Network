@@ -33,7 +33,7 @@ class AppServiceProvider extends ServiceProvider
             SecureFileStorageInterface::class,
             function ($app) {
                 return new SecureFileStorageService(
-                    baseDir: config('filesystems.secure_upload_path', '/var/secure/uploads')
+                    storage_path('app/secure-uploads')
                 );
             }
         );
