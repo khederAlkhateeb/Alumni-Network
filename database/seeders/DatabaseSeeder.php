@@ -10,6 +10,7 @@ use DB;
 use Hash;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Spatie\Permission\Models\Role;
 
 class DatabaseSeeder extends Seeder
 {
@@ -60,9 +61,12 @@ $university = University::firstOrCreate(
         ]);
 
         // User
-        User::factory()->create([
+        $superAdmin = User::factory()->create([
             'email' => 'super@admin.com'
-        ])->assignRole('super_admin')->save();
+        ]);
+
+        $role = Role::findByName('super_admin', 'api');
+        $superAdmin->assignRole($role);
 
         // Universities
         University::factory(50)->create(['created_by' =>  1]);
