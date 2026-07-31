@@ -49,6 +49,25 @@ class RegistrationPolicy
      */
     public function reject(User $admin, User $targetUser, University $university): bool
     {
-        return $this->approve($admin, $targetUser, $university);   
+        return $this->approve($admin, $targetUser, $university);
+    }
+    /**
+     * Determine if the admin can view pending registrations for a university.
+     *
+     * @param User $admin The university admin attempting to view registrations.
+     * @param University $university The university whose pending registrations are requested.
+     * @return bool True if the admin can view pending registrations, false otherwise.
+     */public function viewPendingRegistrations(User $admin, University $university): bool
+    {
+        if (!$admin->hasRole('uni_admin')) {
+            return false;
+        }
+
+        $adminUniversityId = $admin->universityAdmin?->university_id;
+        if (!$adminUniversityId || (int)$adminUniversityId !== (int)$university->id) {
+            return false;
+        }
+
+        return true;
     }
 }
