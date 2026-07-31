@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Fillable([
@@ -26,7 +27,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 #[ScopedBy(UniversityScope::class)]
 class University extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
 
     public function newEloquentBuilder($query): UniversityQueryBuilder
     {
@@ -53,6 +54,11 @@ class University extends Model
     public function updatedByUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    public function attachments(): morphMany
+    {
+        return $this->morphMany(Attachment::class, 'attachable');
     }
 
 }

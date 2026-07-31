@@ -51,6 +51,7 @@ class UniversityController extends Controller
 
         return $this->successResponse(
             data: UniversityResource::collection($universities),
+            message: __('Universities retrieved successfully'),
             meta: [
                 'current_page' => $universities->currentPage(),
                 'last_page' => $universities->lastPage(),
@@ -101,6 +102,7 @@ class UniversityController extends Controller
 
         return $this->successResponse(
             data: new UniversityResource($university),
+            message: 'university fetched successfuly',
         );
     }
 
