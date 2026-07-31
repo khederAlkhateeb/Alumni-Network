@@ -38,7 +38,8 @@ class StoreWorkExperienceAction
             if (!empty($data['set_as_primary_headline']) && $data['set_as_primary_headline'] === true) {
                 $profile->update([
                     'current_job_title' => $experience->job_title,
-                    'current_company'   => $experience->company_name,
+                    'current_company'   => $experience->company,
+
                 ]);
             }
 
