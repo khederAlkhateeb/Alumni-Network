@@ -2,7 +2,11 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\AlumniProfileResource;
+use App\Http\Resources\StudentProfileResource;
+use App\Policies\RegistrationPolicy;
 use App\V1\Actions\Authentication\ApproveRegistrationAction;
+use App\V1\Actions\Authentication\GetPendingRegistrationsAction;
 use App\V1\Actions\Authentication\RejectRegistrationAction;
 use App\Models\University;
 use App\Models\User;
@@ -57,6 +61,31 @@ class RegistrationManagementController extends Controller
             data: $rejectedUser,
             message: 'User registration rejected successfully.',
             code: 200
+        );
+    }
+
+
+
+
+    /**
+     * List pending alumni and student registrations for a university.
+     *
+     * @param  University  $university
+     * @param  GetPendingRegistrationsAction  $action
+     * @return JsonResponse
+     */
+    public function pending(University $university, GetPendingRegistrationsAction $action): JsonResponse
+    {
+        $user = auth()->user();
+        $this->authorize('viewPendingRegistrations', $university);
+
+        $result = $action->handle($university);
+
+        return $this->successResponse(
+            data: [
+                'alumni' => AlumniProfileResource::collection($result['alumni']),
+                'students' => StudentProfileResource::collection($result['students']),
+            ],
         );
     }
 }
