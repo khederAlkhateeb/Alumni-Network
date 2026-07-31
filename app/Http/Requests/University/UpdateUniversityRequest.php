@@ -8,14 +8,14 @@ use Illuminate\Foundation\Http\FormRequest;
 
 /**
  * Class UpdateUniversityRequest
- * 
+ *
  * Validates request data when updating an existing university resource.
  */
 class UpdateUniversityRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
-     * 
+     *
      * @return bool
      */
     public function authorize(): bool
@@ -25,7 +25,7 @@ class UpdateUniversityRequest extends FormRequest
 
     /**
      * Get the validation rules that apply to the request.
-     * 
+     *
      * @return array<string, array<int, string>>
      */
     public function rules(): array
@@ -33,17 +33,17 @@ class UpdateUniversityRequest extends FormRequest
         $university = $this->route('university');
         $universityId = $university instanceof University ? $university->getKey() : $university;
 
-        return [    
+        return [
             'name'    => ['sometimes', 'string', 'max:255', 'unique:universities,name,' . $universityId],
             'country' => ['sometimes', 'string', 'max:255'],
             'website' => ['sometimes', 'nullable', 'url', 'max:255', 'unique:universities,website,' . $universityId],
-            'logo'    => ['sometimes', 'nullable', 'string', 'max:2048'],
+            'logo'    => ['sometimes','file','image', 'mimes:jpg,jpeg,png,webp' ,'nullable', 'max:5242880'],
         ];
     }
 
     /**
      * Get the custom validation error messages.
-     * 
+     *
      * @return array<string, string>
      */
     public function messages(): array

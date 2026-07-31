@@ -163,15 +163,12 @@ class FileValidatorService implements FileValidatorInterface
         $content = file_get_contents($filePath);
 
         // Null bytes are a common indicator of a tampered/malicious file.
-        if (str_contains($content, "\0")) {
-            return false;
-        }
+        if ($mimeType === 'text/plain') {
+            if (str_contains($content, "\0")) {
+                return false;
+            }
 
-        // Reject embedded script/PHP tags in files that are not expected
-        // to contain them (i.e. anything that isn't text/* or application/*,
-        // which get their own dedicated checks below).
-        if (!str_starts_with($mimeType, 'text/') && !str_starts_with($mimeType, 'application/')) {
-            if (preg_match('/<\?php|<script|<%/i', $content)) {
+            if (preg_match('/<\?php|<script|<%|javascript:/i', $content)) {
                 return false;
             }
         }

@@ -28,9 +28,9 @@ class SecureFileStorageService implements SecureFileStorageInterface
      * @param string $baseDir Absolute path to the root storage directory.
      *                        Should live outside the public webroot.
      */
-    public function __construct(string $baseDir = '/var/secure/uploads')
+    public function __construct(?string $baseDir = null)
     {
-        $this->baseDir = rtrim($baseDir, '/') . '/';
+        $this->baseDir = rtrim($baseDir ?? storage_path('app/secure-uploads'), '/\\') . DIRECTORY_SEPARATOR;
 
         if (!is_dir($this->baseDir)) {
             mkdir($this->baseDir, 0755, true);
