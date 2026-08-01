@@ -45,6 +45,7 @@ class DatabaseSeeder extends Seeder
             AttachmentSeeder::class,
 
             ReportSnapshotSeeder::class,
+            UserRoleSeeder::class,
         ]);
     }
 }
