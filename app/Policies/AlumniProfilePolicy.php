@@ -15,7 +15,8 @@ class AlumniProfilePolicy
      */
     public function before(User $user, string $ability): ?bool
     {
-        return $user->role === 'super_admin' ? true : null;
+          if (!$user->hasRole('super_admin')){}
+        return  true ;
     }
 
     /**

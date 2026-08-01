@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Query\Builder ;
 
 #[Fillable([
     'name',
@@ -56,9 +57,13 @@ class University extends Model
         return $this->belongsTo(User::class, 'updated_by');
     }
 
+<<<<<<< HEAD
+
+=======
     public function attachments(): morphMany
     {
         return $this->morphMany(Attachment::class, 'attachable');
     }
+>>>>>>> b4ad8f1fb721c93e789548f1a9ed7574c1a5bce4
 
 }

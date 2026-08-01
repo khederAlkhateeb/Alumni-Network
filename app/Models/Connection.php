@@ -2,21 +2,29 @@
 
 namespace App\Models;
 
+
 use App\Builders\ConnectionQueryBuilder;
 use App\Enums\enConnectionStatus;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable([
+
+class Connection extends Model
+{
+  use HasFactory;
+  
+  #[Fillable([
     'requester_id',
     'receiver_id',
     'status',
     'accepted_at',
     'rejected_at',
 ])]
-class Connection extends Model
-{
+  
     /**
      * Cast the status to accept the enum directly like : enConnectionType::rejected without  ->value to get the value
      *
@@ -44,4 +52,3 @@ class Connection extends Model
     {
         return $this->belongsTo(User::class, 'receiver_id');
     }
-}

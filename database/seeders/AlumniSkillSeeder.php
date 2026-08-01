@@ -4,24 +4,24 @@ namespace Database\Seeders;
 
 use App\Models\AlumniProfile;
 use App\Models\Skill;
+use App\Models\AlumniSkill;
 use Illuminate\Database\Seeder;
 
 class AlumniSkillSeeder extends Seeder
 {
     public function run(): void
     {
+        $skillIds = Skill::pluck('id');
 
-        $skills = Skill::factory()->count(15)->create();
+     AlumniProfile::all()->each(function (AlumniProfile $alumniProfile) use ($skillIds) {
+            $randomSkillIds = $skillIds->random(min(rand(2, 5), $skillIds->count()));
 
-        $profile = AlumniProfile::first();
-
-        if (! $profile) {
-            $this->command->warn('No alumni profile found. Run AlumniProfileSeeder first.');
-            return;
-        }
-
-        $profile->skills()->syncWithoutDetaching(
-            $skills->random(min(4, $skills->count()))->pluck('id')
-        );
+            foreach ((array) $randomSkillIds as $skillId) {
+                Skill::factory()->create([
+                    'alumni_profile_id' => $alumniProfile->id,
+                    'skill_id' => $skillId,
+                ]);
+            }
+        });
     }
 }
