@@ -46,19 +46,5 @@ class DatabaseSeeder extends Seeder
 
             ReportSnapshotSeeder::class,
         ]);
-<<<<<<< HEAD
-=======
-
-        // User
-        $superAdmin = User::factory()->create([
-            'email' => 'super@admin.com'
-        ]);
-
-        $role = Role::findByName('super_admin', 'api');
-        $superAdmin->assignRole($role);
-
-        // Universities
-        University::factory(50)->create(['created_by' =>  1]);
->>>>>>> b4ad8f1fb721c93e789548f1a9ed7574c1a5bce4
     }
 }
