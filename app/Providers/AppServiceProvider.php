@@ -36,7 +36,7 @@ class AppServiceProvider extends ServiceProvider
             SecureFileStorageInterface::class,
             function ($app) {
                 return new SecureFileStorageService(
-                    baseDir: config('filesystems.secure_upload_path', '/var/secure/uploads')
+                    storage_path('app/secure-uploads')
                 );
             }
         );
@@ -50,7 +50,7 @@ class AppServiceProvider extends ServiceProvider
         ResetPassword::createUrlUsing(function ($notifiable, $token) {
             return 'http://localhost:3000/reset-password?token=' . $token . '&email=' . $notifiable->getEmailForPasswordReset();
         });
-
+        Gate::policy(University::class, RegistrationPolicy::class);
         Gate::policy(User::class, RegistrationPolicy::class);
         Gate::policy(Event::class, EventPolicy::class);
     }

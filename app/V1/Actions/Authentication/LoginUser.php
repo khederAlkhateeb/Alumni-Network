@@ -59,9 +59,9 @@ class LoginUser
                 'email' => ['Your account is still pending approval.'],
             ]);
         }
-        if ($profile && $profile->status === 'rejected') {
+        if ($profile && $profile->status === 'suspended') {
             throw ValidationException::withMessages([
-                'email' => ['Your registration was rejected.'],
+                'email' => ['Your registration was suspended.'],
             ]);
         }
         $token = $user->createToken('auth_token')->plainTextToken;

@@ -11,7 +11,7 @@ use App\V1\Actions\University\GetUniversity;
 use App\V1\Actions\University\ListUniversities;
 use App\V1\Actions\University\UpdateUniversity;
 use App\V1\Actions\University\DeleteUniversity;
-use App\V1\Resources\UniversityResource;
+use App\Http\Resources\UniversityResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -51,6 +51,7 @@ class UniversityController extends Controller
 
         return $this->successResponse(
             data: UniversityResource::collection($universities),
+            message: __('Universities retrieved successfully'),
             meta: [
                 'current_page' => $universities->currentPage(),
                 'last_page' => $universities->lastPage(),
@@ -101,6 +102,7 @@ class UniversityController extends Controller
 
         return $this->successResponse(
             data: new UniversityResource($university),
+            message: 'university fetched successfuly',
         );
     }
 

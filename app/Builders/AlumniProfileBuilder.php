@@ -49,5 +49,8 @@ class AlumniProfileBuilder extends Builder
             $query->where('university_id', $universityId);
         });
     }
-
+   public function pending(): static
+    {
+        return $this->where('status', ProfileStatus::PENDING);
+    }
 }
