@@ -19,7 +19,6 @@ use Laravel\Sanctum\HasApiTokens;
 #[Hidden(['password', 'remember_token', 'updated_at'])]
 class User extends Authenticatable
 {
-    protected $guard_name = 'api';
     
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
