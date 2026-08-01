@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\ReactionType;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -15,9 +16,9 @@ return new class extends Migration
             $table->id();
             $table->morphs('reactable');
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->enum('type', ['like', 'insightful', 'celebrate'])->default('like');
+            $table->string('type')->default(ReactionType::lIKE->value);
             $table->timestamps();
-            
+
             $table->unique(['reactable_id', 'reactable_type', 'user_id']);
         });
     }

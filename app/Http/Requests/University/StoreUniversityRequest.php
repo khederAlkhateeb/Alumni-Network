@@ -33,7 +33,7 @@ class StoreUniversityRequest extends FormRequest
             'name' => ['required', 'string', 'max:255', 'unique:universities,name'],
             'country' => ['required', 'string', 'max:255'],
             'website' => ['nullable', 'url', 'max:255', 'unique:universities,website'],
-            'logo'    => ['nullable','file','image', 'mimes:jpg,jpeg,png,webp' ,'nullable', 'max:5242880'],
+            'logo'    => ['nullable','file','image', 'mimes:jpg,jpeg,png,webp' , 'max:5242880'],
         ];
     }
 
