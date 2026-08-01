@@ -10,6 +10,7 @@ use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Illuminate\Auth\Access\AuthorizationException;
+use Spatie\Permission\Exceptions\UnauthorizedException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -29,19 +30,21 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->render(function (Throwable $e, Request $request) {
             if ($request->is('api/*') || $request->wantsJson()) {
 
-                /*if ($e instanceof NotFoundHttpException) {
+                if ($e instanceof NotFoundHttpException) {
                     return response()->json([
                         'status'  => 'error',
                         'message' => 'The requested resource was not found.'
                     ], 404);
                 }
 
-                if ($e instanceof AccessDeniedHttpException || $e instanceof AuthorizationException) {
+                if (
+                    $e instanceof AccessDeniedHttpException || $e instanceof AuthorizationException || $e instanceof UnauthorizedException
+                ) {
                     return response()->json([
                         'status'  => 'error',
                         'message' => 'This action is unauthorized.'
                     ], 403);
-                }*/
+                }
             }
         });
     })->create();

@@ -67,8 +67,7 @@ class EventPolicy
      */
     public function manage(User $user, Event $event): bool
     {
-        return $user->hasRole('uni_admin')
-            && $user->universityAdmin?->university_id === $event->university_id;
+        return $user->hasRole('uni_admin') && $user->universityAdmin?->university_id === $event->university_id;
     }
 
     /**
@@ -83,6 +82,6 @@ class EventPolicy
      */
     public function create(User $user, University $university): bool
     {
-        return $user->hasRole('uni_admin') && $user->university_id === $university->id;
+        return $user->hasRole('uni_admin') && $user->universityAdmin?->university_id === $university->id;
     }
 }

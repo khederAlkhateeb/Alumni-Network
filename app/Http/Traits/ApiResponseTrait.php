@@ -37,8 +37,6 @@ trait ApiResponseTrait
 
     /**
      * Return a successful JSON response for a paginated resource.
-     * Accepts either a raw LengthAwarePaginator or an
-     * AnonymousResourceCollection (e.g. EventResource::collection($paginator)).
      *
      * @param  LengthAwarePaginator|AnonymousResourceCollection  $resource
      * @param  string  $message
@@ -46,16 +44,21 @@ trait ApiResponseTrait
      */
     protected function paginated(LengthAwarePaginator|AnonymousResourceCollection $resource, string $message = 'Retrieved successfully.'): JsonResponse
     {
-        // Extract the underlying paginator whether we received a resource
-        // collection or a raw paginator directly.
+        // Extract the underlying paginator
         $paginator = $resource instanceof AnonymousResourceCollection
             ? $resource->resource
             : $resource;
 
+        // If it's a resource collection, resolve it to get just the array of items.
+        // If it's a raw paginator, grab the items directly.
+        $items = $resource instanceof AnonymousResourceCollection
+            ? $resource->resolve()
+            : $paginator->items();
+
         return response()->json([
             'status'  => 'success',
             'message' => $message,
-            'data'    => $resource,
+            'data'    => $items,
             'meta'    => [
                 'current_page' => $paginator->currentPage(),
                 'last_page'    => $paginator->lastPage(),
