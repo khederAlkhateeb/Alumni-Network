@@ -2,31 +2,19 @@
 
 namespace Database\Seeders;
 
-use App\Models\Faculty;
 use App\Models\University;
+use App\Models\Faculty;
 use Illuminate\Database\Seeder;
 
 class FacultySeeder extends Seeder
 {
     public function run(): void
     {
-        // Ensure there's at least one university to attach faculties to
-        $university = University::All();
 
-        $faculties = [
-            'Faculty of Engineering',
-            'Faculty of Science',
-            'Faculty of Arts',
-        ];
-        if (!$university->isEmpty()) {
-            foreach ($university as $university) {
-                foreach ($faculties as $name) {
-                    Faculty::firstOrCreate([
-                        'name' => $name,
-                        'university_id' => $university->id,
-                    ]);
-                }
-            }
-        }
+        University::all()->each(function (University $university) {
+            Faculty::factory()
+                ->count(rand(3, 6))
+                ->create(['university_id' => $university->id]);
+        });
     }
 }

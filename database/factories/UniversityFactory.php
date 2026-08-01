@@ -2,28 +2,20 @@
 
 namespace Database\Factories;
 
-use App\Models\University;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends Factory<University>
- */
 class UniversityFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
+        $name = $this->faker->company() . ' University';
+
         return [
-            'name' => fake()->name(),
-            'country' => fake()->country(),
-            'website' => fake()->url(),
-            'logo' => fake()->url(),
-            'created_by' => User::factory()->create()->id,
+            'name' => $name,
+            'country' => $this->faker->country(),
+            'website' => 'https://' . str($name)->slug() . '.edu',
+            'logo' => null,
+            // 'created_at' => $this->faker->dateTimeBetween('-5 years', '-1 year'),
         ];
     }
 }
