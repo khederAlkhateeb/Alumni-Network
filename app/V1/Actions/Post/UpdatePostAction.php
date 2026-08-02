@@ -43,7 +43,7 @@ class UpdatePostAction
         $oldImagePath = null;
 
         if (isset($data['image'])) {
-            $uploadResult = $this->service->upload($data['image'], $user);
+            $uploadResult = $this->service->upload($data['image'], (string) $user->id);
             $imagePath = $uploadResult['safe_filename'];
             $oldImagePath = $post->image;
         }

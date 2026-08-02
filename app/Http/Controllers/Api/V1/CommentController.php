@@ -10,6 +10,7 @@ use App\V1\Actions\Comment\CreateCommentAction;
 use App\V1\Actions\Comment\DeleteCommentAction;
 use App\V1\Actions\Comment\GetCommentsAction;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Arr;
 
 /**
  * Class CommentController
@@ -48,10 +49,12 @@ class CommentController extends Controller
     public function index(Post $post)
     {
         $comments = $this->getCommentsAction->handle($post);
+        $paginatedData = $comments->toArray();
         return $this->successResponse(
-            data: $comments,
+            data: $paginatedData['data'],
             message: 'Comments retrieved successfully',
-            code: 200
+            code: 200,
+            meta: Arr::except($paginatedData, ['data'])
         );
     }
 
@@ -93,7 +96,7 @@ class CommentController extends Controller
      *
      * @return JsonResponse Returns a JSON response confirming the successful deletion.
      */
-    public function delete(Comment $comment)
+    public function delete(Post $post, Comment $comment)
     {
         $this->authorize('delete', $comment);
         $this->deleteCommentAction->handle($comment);

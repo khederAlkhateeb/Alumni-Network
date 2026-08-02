@@ -3,12 +3,27 @@
 namespace App\V1\Actions\Comment;
 
 use App\Models\Comment;
-use App\Models\Post;
 
+/**
+ * Class DeleteCommentAction
+ *
+ * Handles the logic for deleting a specific comment.
+ * If the database migration is set up with 'ON DELETE CASCADE' for parent_comment_id,
+ * all associated replies will be automatically deleted by the database.
+ *
+ * @package App\V1\Actions\Comment
+ */
 class DeleteCommentAction
 {
-    public function handle(Comment $comment)
+    /**
+     * Execute the action to delete the given comment.
+     *
+     * @param Comment $comment The comment model instance to be deleted.
+     *
+     * @return bool|null Returns true if the deletion was successful, or null/false otherwise.
+     */
+    public function handle(Comment $comment): ?bool
     {
-        return $comment->with('replies')->delete();
+        return $comment->delete();
     }
 }

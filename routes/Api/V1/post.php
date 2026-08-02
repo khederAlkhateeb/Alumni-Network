@@ -28,8 +28,7 @@ Route::middleware('auth:api')->group(function () {
      * @name   posts.store
      */
 
-    Route::post('/posts', [PostController::class, 'store'])->name('posts.store')
-        ->middleware('EnsureProfileIsActive');
+    Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
 
     /**
      * Retrieve a specific post by its model binding.

@@ -55,7 +55,7 @@ class PostController extends Controller
         $this->authorize('create', Post::class);
 
         $data = $request->validated();
-        $post = $this->createPostAction->handle($user, $data);
+        $post = $this->createPostAction->handle($request->user(), $data);
 
         return $this->successResponse(
             data: $post,
@@ -101,9 +101,9 @@ class PostController extends Controller
     public function show(Post $post)
     {
         $this->authorize('view', $post);
-
+        $data = $this->getPostAction->handle($post);
         return $this->successResponse(
-            data: $post,
+            data: $data,
             message: 'Post retrieved successfully',
             code: 200
         );

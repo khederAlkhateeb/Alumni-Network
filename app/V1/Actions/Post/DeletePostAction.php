@@ -1,29 +1,41 @@
 <?php
 
-namespace App\V1\Actions\Comment;
+namespace App\V1\Actions\Post;
 
-use App\Models\Comment;
+use App\Models\Post;
+use App\Services\UploadFileService;
 
 /**
- * Class DeleteCommentAction
- *
- * Handles the logic for deleting a specific comment.
- * If the database migration is set up with 'ON DELETE CASCADE' for parent_comment_id,
- * all associated replies will be automatically deleted by the database.
- *
- * @package App\V1\Actions\Comment
+ * Handles deleting a post along with its associated image file (if any).
  */
-class DeleteCommentAction
+class DeletePostAction
 {
     /**
-     * Execute the action to delete the given comment.
-     *
-     * @param Comment $comment The comment model instance to be deleted.
-     *
-     * @return bool|null Returns true if the deletion was successful, or null/false otherwise.
+     * @param UploadFileService $service File upload/storage handler used for post images.
      */
-    public function handle(Comment $comment): ?bool
+    public function __construct(
+        private readonly UploadFileService $service
+    ) {}
+
+    /**
+     * Delete a post and its associated image file.
+     *
+     * The image is removed after the post record is deleted, so that
+     * a failed deletion does not leave the post pointing to a file
+     * that no longer exists.
+     *
+     * @param Post $post The post to delete.
+     *
+     * @return void
+     */
+    public function handle(Post $post): void
     {
-        return $comment->delete();
+        $imagePath = $post->image;
+
+        $post->delete();
+
+        if ($imagePath) {
+            $this->service->deleteFile($imagePath);
+        }
     }
 }

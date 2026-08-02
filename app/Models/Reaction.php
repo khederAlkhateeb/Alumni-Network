@@ -29,7 +29,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @property-read Model $reactable The entity that the user reacted to.
  * @property-read User $user The user who created the reaction.
  */
-#[Fillable(['reactable', 'type', 'user_id'])]
+#[Fillable(['reactable_id', 'reactable_type', 'type', 'user_id'])]
 #[UsePolicy(ReactPolicy::class)]
 class Reaction extends Model
 {
