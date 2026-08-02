@@ -1,0 +1,265 @@
+{
+  "info": {
+    "name": "Alumni Network - Job Listings",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Postman collection for the Job Listings API added to the Alumni Network backend."
+  },
+  "item": [
+    {
+      "name": "Get Job Listings",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/jobs",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "jobs"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create Job Listing",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Career Growth Specialist\",\n  \"company\": \"FutureBridge\",\n  \"location\": \"Amman, Jordan\",\n  \"type\": \"full_time\",\n  \"description\": \"Join our team to support alumni career growth.\",\n  \"requirements\": \"3+ years experience, strong communication skills.\",\n  \"salary_range\": \"1200-2000 JOD\",\n  \"expires_at\": \"2026-09-30\",\n  \"status\": \"active\",\n  \"university_id\": {{universityId}}\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/jobs",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "jobs"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Job Listing",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/jobs/{{jobListingId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "jobs",
+            "{{jobListingId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Update Job Listing",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Senior Career Growth Specialist\",\n  \"location\": \"Remote\",\n  \"salary_range\": \"1400-2200 JOD\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/jobs/{{jobListingId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "jobs",
+            "{{jobListingId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Close Job Listing",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/jobs/{{jobListingId}}/close",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "jobs",
+            "{{jobListingId}}",
+            "close"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Apply for Job",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"cover_letter\": \"I am excited to apply and contribute to your alumni success initiatives.\",\n  \"resume\": \"uploads/resume-{{uuid}}.pdf\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/jobs/{{jobListingId}}/apply",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "jobs",
+            "{{jobListingId}}",
+            "apply"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "List Job Applications",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/jobs/{{jobListingId}}/applications",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "jobs",
+            "{{jobListingId}}",
+            "applications"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Update Application Status",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"reviewed\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/jobs/{{jobListingId}}/applications/{{applicationId}}/status",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "jobs",
+            "{{jobListingId}}",
+            "applications",
+            "{{applicationId}}",
+            "status"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Delete Job Listing",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/jobs/{{jobListingId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "jobs",
+            "{{jobListingId}}"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}

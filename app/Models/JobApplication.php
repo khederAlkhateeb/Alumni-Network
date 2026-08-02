@@ -2,11 +2,43 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+
+
+#[Fillable([
+    'job_listing_id',
+    'applicant_id',
+    'cover_letter',
+    'resume',
+    'status',
+
+])]
 class JobApplication extends Model
-{use HasFactory;
+{
+    use HasFactory;
 
-    //
+    public const STATUS_SUBMITTED = 'submitted';
+    public const STATUS_REVIEWED = 'reviewed';
+    public const STATUS_SHORTLISTED = 'shortlisted';
+    public const STATUS_REJECTED = 'rejected';
+
+    public const STATUSES = [
+        self::STATUS_SUBMITTED,
+        self::STATUS_REVIEWED,
+        self::STATUS_SHORTLISTED,
+        self::STATUS_REJECTED,
+    ];
+    public function jobListing(): BelongsTo
+    {
+        return $this->belongsTo(JobListing::class);
+    }
+
+    public function applicant(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'applicant_id');
+    }
 }

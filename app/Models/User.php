@@ -78,4 +78,13 @@ class User extends Authenticatable
         return $this->hasOne(AlumniProfile::class, 'user_id');
     }
 
+    public function jobListings(): HasMany
+    {
+        return $this->hasMany(JobListing::class, 'posted_by_user_id');
+    }
+
+    public function jobApplications(): HasMany
+    {
+        return $this->hasMany(JobApplication::class, 'applicant_id');
+    }
 }

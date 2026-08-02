@@ -13,17 +13,17 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 
+#[Fillable([
+  'requester_id',
+  'receiver_id',
+  'status',
+  'accepted_at',
+  'rejected_at',
+])]
 class Connection extends Model
 {
   use HasFactory;
   
-  #[Fillable([
-    'requester_id',
-    'receiver_id',
-    'status',
-    'accepted_at',
-    'rejected_at',
-])]
   
     /**
      * Cast the status to accept the enum directly like : enConnectionType::rejected without  ->value to get the value
