@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Policies\CommentPolicy;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UsePolicy;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -33,6 +34,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 #[UsePolicy(CommentPolicy::class)]
 class Comment extends Model
 {
+    use HasFactory;
     /**
      * Get the post that the comment belongs to.
      *

@@ -6,6 +6,7 @@ use App\Enums\ReactionType;
 use App\Policies\ReactPolicy;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UsePolicy;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
@@ -33,6 +34,8 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 #[UsePolicy(ReactPolicy::class)]
 class Reaction extends Model
 {
+    use HasFactory;
+
     /**
      * Get the attributes that should be cast.
      *

@@ -175,17 +175,7 @@ class AlumniProfile extends Model
         );
     }
 
-    /**
-     * Accessor to retrieve the ongoing work experience record.
-     *
-     * @return Attribute<WorkExperience|null, void>
-     */
-    protected function currentWorkExperience(): Attribute
-    {
-        return Attribute::get(
-            fn () => $this->workExperiences->firstWhere('end_date', null)
-        );
-    }
+
 
     /**
      * Accessor for profile completeness percentage score based on configured weights.

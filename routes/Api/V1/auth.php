@@ -82,4 +82,10 @@ Route::middleware(['auth:sanctum', 'role:uni_admin'])->prefix('uni_admin')->grou
      * @see RegistrationManagementController::rejectUser()
      */
     Route::post('universities/{university}/registrations/{user}/reject', [RegistrationManagementController::class, 'rejectUser'])->name('api.v1.registrations.reject');
+  /**
+     * Pending registration   a specific university.
+     * @see RegistrationManagementController::rejectUser()
+     */
+    Route::get('/universities/{university}/pending-registrations', [RegistrationManagementController::class, 'pending']);
+
 });
