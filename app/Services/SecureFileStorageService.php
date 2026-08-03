@@ -69,7 +69,7 @@ class SecureFileStorageService implements SecureFileStorageInterface
 
         $finalPath = $dateDir . $safeFilename;
 
-        if (move_uploaded_file($tempPath, $finalPath)) {
+        if (@rename($tempPath, $finalPath)) {
             // Owner/group read-write, no execute permission for anyone —
             // prevents the stored file from ever being run as a script,
             // even if malicious content somehow slipped past validation.
@@ -121,5 +121,33 @@ class SecureFileStorageService implements SecureFileStorageInterface
         }
 
         return null;
+    }
+
+    /**
+     * Permanently delete a previously stored file.
+     *
+     * Only deletes files that live inside our own base storage directory,
+     * to guard against being passed an unrelated/arbitrary path.
+     *
+     * @param string $filePath Absolute path to the file to delete
+     *                         (as returned by storeFile()).
+     * @return bool True if the file was deleted, false if it didn't exist
+     *              or the deletion failed.
+     */
+    public function deleteFile(string $filePath): bool
+    {
+        $realBase = realpath($this->baseDir);
+        $realFile = realpath($filePath);
+
+        // Refuse to delete anything outside our managed storage directory.
+        if ($realFile === false || $realBase === false || !str_starts_with($realFile, $realBase)) {
+            return false;
+        }
+
+        if (!is_file($realFile)) {
+            return false;
+        }
+
+        return @unlink($realFile);
     }
 }

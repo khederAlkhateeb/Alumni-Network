@@ -9,6 +9,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Major extends Model
 {use HasFactory;
 
+   protected $fillable = [
+        'name',
+        'faculty_id',
+    ];
+    
    public function faculty(): BelongsTo
     {
         return $this->belongsTo(Faculty::class);
