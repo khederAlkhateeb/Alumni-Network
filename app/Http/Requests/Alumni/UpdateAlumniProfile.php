@@ -73,6 +73,8 @@ class UpdateAlumniProfile extends FormRequest
             'city'              => ['nullable', 'string', 'max:100'],
             'linkedin_url'      => ['nullable', 'url', 'max:255'],
             'is_open_to_mentor' => ['sometimes', 'boolean'],
+          "photo" => ['sometimes','file','image', 'mimes:jpg,jpeg,png,webp' ,'nullable', 'max:5242880'],
+          'delete_photo' => ['nullable', 'boolean'],
         ];
     }
 
@@ -108,6 +110,10 @@ class UpdateAlumniProfile extends FormRequest
             'linkedin_url.max'           => 'LinkedIn URL cannot exceed 255 characters.',
 
             'is_open_to_mentor.boolean'  => 'Mentorship availability must be true or false.',
+               'photo.file'     => 'The uploaded item must be a valid file.',
+            'photo.image'    => 'The uploaded file must be an image.',
+            'photo.mimes'    => 'Only JPG, JPEG, PNG, and WEBP image formats are supported.',
+            'photo.max'      => 'The image size cannot exceed 2MB.',
         ];
     }
 }

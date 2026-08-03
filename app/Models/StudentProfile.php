@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 #[Fillable([
     'user_id',
         'major_id',
@@ -53,7 +54,11 @@ class StudentProfile extends Model
         return $this->belongsTo(Major::class);
     }
 
-
+    public function photo(): MorphOne
+    {
+        return $this->morphOne(Attachment::class, 'attachable')
+            ->latestOfMany();
+    }
 
     /*
     |--------------------------------------------------------------------

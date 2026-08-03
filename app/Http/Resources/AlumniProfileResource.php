@@ -17,13 +17,15 @@ class AlumniProfileResource extends JsonResource
 {
     return [
         'id' => $this->id,
+        'name' => $this->user->name,
+
         'bio' => $this->bio,
         'city' => $this->city,
         'completion_percentage' => $this->completeness_score,
-        'photo_url' => $this->whenLoaded('photo', fn () => $this->photo
-    ? Storage::disk('public')->url($this->photo->file_path)
-    : null
-),
+        // 'photo_url' =>$this->photo ? Storage::url($this->photo->file_path) : null,
+         'photo_url' => $this->photo ? ($this->photo->file_path): null,
+
+
         'skills' => SkillResource::collection($this->whenLoaded('skills')),
         'work_experiences' => WorkExperienceResource::collection($this->whenLoaded('workExperiences')),
     ];

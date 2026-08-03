@@ -67,27 +67,7 @@ Route::middleware(['auth:sanctum', 'role:alumni'])->group(function () {
     Route::post('alumni/me/toggle-mentor', [AlumniProfileController::class, 'toggleMentor'])
         ->name('alumni.me.toggle-mentor');
 
-    /**
-     * Upload a profile photo for the authenticated alumni user.
-     *
-     * Endpoint:
-     * - POST /api/v1/alumni/me/photo
-     *
-     * @see AlumniProfileController::uploadPhoto()
-     */
-    Route::post('alumni/me/photo', [AlumniProfileController::class, 'uploadPhoto'])
-        ->name('alumni.me.photo.upload');
-
-    /**
-     * Delete the authenticated alumni user's profile photo.
-     *
-     * Endpoint:
-     * - DELETE /api/v1/alumni/me/photo
-     *
-     * @see AlumniProfileController::destroyPhoto()
-     */
-    Route::delete('alumni/me/photo', [AlumniProfileController::class, 'destroyPhoto'])
-        ->name('alumni.me.photo.destroy');
+    
 
     /**
      * Retrieve a specific alumni profile by ID.

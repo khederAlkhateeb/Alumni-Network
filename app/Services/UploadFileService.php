@@ -72,26 +72,32 @@ class UploadFileService
             throw new Exception('An error occurred while saving the file: ' . $e->getMessage());
         }
     }
-    /**
-     * Deletes a previously stored file from secure storage.
+/**
+     * Deletes a previously stored file using its safe filename and user ID.
      *
-     * @param string $filePath The path of the file to delete (as returned by upload()).
+     * @param string|null $safeFilename The generated secure filename from DB.
+     * @param string      $userId       The owner user ID.
      *
-     * @return bool True if the file was deleted successfully, false otherwise.
+     * @return bool True if deleted, false if file missing or filename is empty.
      *
-     * @throws Exception If the storage service encounters an error while deleting.
+     * @throws Exception If an error occurs during deletion.
      */
-    public function deleteFile(string $filePath): bool
+    public function deleteFile(?string $safeFilename, string $userId): bool
     {
-        if (!$filePath) {
+        if (empty($safeFilename)) {
             return false;
         }
-
         try {
-            return $this->secureFileStorageService->deleteFile($filePath);
+            $realPath = $this->secureFileStorageService->getSecurePath($safeFilename, $userId);
+
+            if (!$realPath) {
+                return false;
+            }
+
+            return $this->secureFileStorageService->deleteFile($realPath);
+
         } catch (RuntimeException $e) {
-            throw new Exception('An error occurred while deleting the file: '
-                . $e->getMessage());
+            throw new Exception('An error occurred while deleting the file: ' . $e->getMessage());
         }
     }
 }

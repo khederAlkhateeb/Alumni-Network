@@ -13,6 +13,7 @@ use App\Policies\UniversityPolicy;
 use App\Services\FileValidatorService;
 use App\Services\SecureFileStorageService;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Support\Facades\Gate;
@@ -74,5 +75,9 @@ class AppServiceProvider extends ServiceProvider
         });
         Gate::policy(University::class, RegistrationPolicy::class);
         Gate::policy(User::class, RegistrationPolicy::class);
+          Model::preventLazyLoading();
     }
+
+
+
 }

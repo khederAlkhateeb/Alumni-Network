@@ -20,7 +20,7 @@ class ShowAlumniProfileAction
         $profile = AlumniProfile::query()
             ->with([
                 'user',
-                // 'major.faculty.university',
+                'major.faculty.university',
                 'workExperiences',
                 'skills',
                 'photo'

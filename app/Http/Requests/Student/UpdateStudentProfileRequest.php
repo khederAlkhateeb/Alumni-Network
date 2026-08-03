@@ -56,6 +56,8 @@ class UpdateStudentProfileRequest extends FormRequest
             'enrollment_number'        => ['sometimes', 'nullable', 'string', 'max:50'],
             'enrollment_year'          => ['sometimes', 'integer', 'min:2000', 'max:' . (date('Y') + 1)],
             'expected_graduation_year' => ['sometimes', 'integer', 'gte:enrollment_year'],
+                   "photo" => ['sometimes','file','image', 'mimes:jpg,jpeg,png,webp' ,'nullable', 'max:5242880'],
+                   'delete_photo' => ['nullable', 'boolean'],
         ];
     }
 
@@ -67,6 +69,9 @@ class UpdateStudentProfileRequest extends FormRequest
     public function messages(): array
     {
         return [
+                 'photo.image'    => 'The uploaded file must be an image.',
+            'photo.mimes'    => 'Only JPG, JPEG, PNG, and WEBP image formats are supported.',
+            'photo.max'      => 'The image size cannot exceed 2MB.',
             'major_id.exists'              => 'The selected major is invalid.',
             'expected_graduation_year.gte' => 'Expected graduation year must be after or equal to the enrollment year.',
         ];

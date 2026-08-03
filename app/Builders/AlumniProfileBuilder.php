@@ -53,4 +53,17 @@ class AlumniProfileBuilder extends Builder
     {
         return $this->where('status', ProfileStatus::PENDING);
     }
+    public function filters(array $filters): static
+{
+    return $this
+        ->active()
+        ->when($filters['university_id'] ?? null, fn($q) => $q->sameUniversityAs($filters['university_id']))
+        ->when($filters['major_id'] ?? null, fn($q) => $q->where('major_id', $filters['major_id']))
+        ->when($filters['graduation_year'] ?? null, fn($q) => $q->graduatedIn($filters['graduation_year']))
+        ->when($filters['skill_id'] ?? null, fn($q) => $q->withSkills((array) $filters['skill_id']))
+        ->when(filter_var($filters['is_open_to_mentor'] ?? false, FILTER_VALIDATE_BOOLEAN),
+            fn($q) => $q->openToMentor()
+        );
+}
+
 }

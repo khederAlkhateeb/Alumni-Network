@@ -192,66 +192,15 @@ class AlumniProfileController extends Controller
         $updatedProfile = $action->execute($profile);
 
         return $this->successResponse(
-            data: new AlumniProfileResource($updatedProfile),
+            data: null,
             message: $updatedProfile->is_open_to_mentor
                 ? 'Mentorship availability enabled successfully.'
                 : 'Mentorship availability disabled successfully.',
         );
     }
 
-    /**
-     * Upload or replace the profile photo for the authenticated user.
-     *
-     * @param UploadAlumniPhotoRequest $request Request containing validated photo file.
-     * @param UpdateAlumniPhotoAction $action Action handling photo storage and model association.
-     * @return JsonResponse JSON containing the generated public photo URL.
-     *
-     * @throws \Illuminate\Auth\Access\AuthorizationException If user cannot update the profile.
-     */
-    public function uploadPhoto(
-        UploadAlumniPhotoRequest $request,
-        UpdateAlumniPhotoAction $action
-    ): JsonResponse {
-        $profile = $this->getAuthenticatedAlumniProfile();
 
-        if (! $profile) {
-            return $this->profileNotFoundResponse();
-        }
 
-        $this->authorize('update', $profile);
-
-        $attachment = $action->execute($profile, $request->file('photo'));
-
-        return $this->successResponse(
-            data: ['photo_url' => Storage::disk('public')->url($attachment->file_path)],
-            message: 'Profile photo updated successfully.',
-        );
-    }
-
-    /**
-     * Delete the authenticated alumni's profile photo and clean up stored files.
-     *
-     * @param DeleteAlumniPhotoAction $action Action deleting attachment record and storage file.
-     * @return JsonResponse Success response message.
-     *
-     * @throws \Illuminate\Auth\Access\AuthorizationException If user cannot update the profile.
-     */
-    public function destroyPhoto(DeleteAlumniPhotoAction $action): JsonResponse
-    {
-        $profile = $this->getAuthenticatedAlumniProfile();
-
-        if (! $profile) {
-            return $this->profileNotFoundResponse();
-        }
-
-        $this->authorize('update', $profile);
-
-        $action->execute($profile);
-
-        return $this->successResponse(
-            message: 'Profile photo deleted successfully.',
-        );
-    }
 
     /**
      * Retrieve the alumni profile associated with the currently authenticated user.
@@ -275,4 +224,5 @@ class AlumniProfileController extends Controller
             code: 404,
         );
     }
+
 }
