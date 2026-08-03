@@ -21,6 +21,15 @@ use Illuminate\Support\Facades\Route; // Note: Usually Facades\Route is used in 
 Route::middleware('auth:api')->group(function () {
 
     /**
+     * Get Feed.
+     *
+     * @method Get /Feed
+     * @uses   \App\Http\Controllers\Api\V1\PostController::index
+     * @name   feed.index
+     */
+    Route::get('/feed', [PostController::class, 'index'])->name('feed.index');
+
+    /**
      * Create a new post.
      *
      * @method POST /posts

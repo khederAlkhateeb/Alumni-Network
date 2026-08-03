@@ -7,6 +7,7 @@ use App\Http\Requests\Post\CreatePostRequest;
 use App\Http\Requests\Post\UpdatePostRequest;
 use App\Models\Post;
 use App\Models\User;
+use App\V1\Actions\Feed\GetFeedAction;
 use App\V1\Actions\Post\CreatePostAction;
 use App\V1\Actions\Post\DeletePostAction;
 use App\V1\Actions\Post\GetPostAction;
@@ -32,13 +33,40 @@ class PostController extends Controller
      * @param UpdatePostAction $updatePostAction Handles updating an existing post.
      * @param GetPostAction    $getPostAction    Handles retrieving post details.
      * @param DeletePostAction $deletePostAction Handles the deletion of a post.
+     * @param GetFeedAction    $getFeedAction    Handles retrieving the user's feed.
      */
     public function __construct(
         private readonly CreatePostAction $createPostAction,
         private readonly UpdatePostAction $updatePostAction,
         private readonly GetPostAction $getPostAction,
-        private readonly DeletePostAction $deletePostAction
+        private readonly DeletePostAction $deletePostAction,
+        private readonly GetFeedAction $getFeedAction,
     ) {}
+
+    /**
+     * Display a listing of the user's feed.
+     *
+     * Retrieves the paginated feed containing posts for the currently authenticated user.
+     *
+     * @return JsonResponse Returns a JSON response containing the feed data.
+     */
+    public function index()
+    {
+        $user = auth()->user();
+        $data = $this->getFeedAction->handle($user);
+        return $this->successResponse(
+            data: $data->items(),
+            code: 200,
+            meta:  [
+            'path'          => $data->path(),
+            'per_page'      => $data->perPage(),
+            'next_cursor'   => $data->nextCursor()?->encode(),
+            'prev_cursor'   => $data->previousCursor()?->encode(),
+            'next_page_url' => $data->nextPageUrl(),
+            'prev_page_url' => $data->previousPageUrl(),
+            ],
+        );
+    }
 
     /**
      * Store a newly created post in storage.

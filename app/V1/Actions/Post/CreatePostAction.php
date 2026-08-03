@@ -2,9 +2,11 @@
 
 namespace App\V1\Actions\Post;
 
+use App\Events\PostCreated;
 use App\Models\Post;
 use App\Models\User;
 use App\Services\UploadFileService;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -51,7 +53,7 @@ class CreatePostAction
                 'image'      => $imagePath,
             ]);
         });
-
+        event(new PostCreated($post));
         return $post->load(['user', 'comments', 'reactions']);
     }
 }

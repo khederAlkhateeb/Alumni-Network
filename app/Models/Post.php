@@ -96,4 +96,23 @@ class Post extends Model
     {
         return $this->morphMany(Reaction::class, 'reactable');
     }
+
+    public function scopeFromConnections($query, array $connectionIds)
+    {
+        return $query->whereIn('user_id', $connectionIds);
+    }
+
+    public function scopeUniversityAnnouncements($query, $universityId)
+    {
+        return $query->where('visibility', PostVisibility::University->value)
+            ->whereHas('user.alumniProfile.major.faculty',
+                fn($q) => $q->where('university_id', $universityId));
+    }
+
+    public function scopeFromSameUniversityAlumni($query, $universityId)
+    {
+        return $query->where('visibility', PostVisibility::Public->value)
+            ->whereHas('user.alumniProfile.major.faculty',
+                fn($q) => $q->where('university_id', $universityId));
+    }
 }

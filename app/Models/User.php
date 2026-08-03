@@ -3,6 +3,7 @@
 namespace App\Models;
 
 //use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Enums\enConnectionStatus;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -116,5 +117,22 @@ class User extends Authenticatable
     public function reactions(): HasMany
     {
         return $this->hasMany(Reaction::class);
+    }
+
+    /**
+     * Get the IDs of users this user is connected to (accepted only),
+     * regardless of who sent the original connection request.
+     */
+    public function connectedUserIds(): array
+{
+    return Connection::query()
+        ->where('status', enConnectionStatus::ACCEPTED->value)
+        ->where(function ($query) {
+            $query->where('requester_id', $this->id)
+                ->orWhere('receiver_id', $this->id);
+        })
+        ->get()
+        ->map(fn ($c) => $c->requester_id === $this->id ? $c->receiver_id : $c->requester_id)
+        ->toArray();
     }
 }

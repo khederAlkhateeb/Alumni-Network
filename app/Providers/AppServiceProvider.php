@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use App\Contracts\AttachmentSecurity\FileValidatorInterface;
 use App\Contracts\AttachmentSecurity\SecureFileStorageInterface;
+use App\Events\PostCreated;
+use App\Listeners\InvalidateFeedCacheForConnections;
 use App\Models\Comment;
 use App\Models\Post;
 use App\Models\University;
@@ -19,6 +21,16 @@ use App\Policies\RegistrationPolicy;
 
 class AppServiceProvider extends ServiceProvider
 {
+    /**
+     * The event to listener mappings for the application.
+     *
+     * @var array<class-string, array<int, class-string>>
+     */
+    protected $listen = [
+        PostCreated::class => [
+            InvalidateFeedCacheForConnections::class,
+        ],
+    ];
     /**
      * Register any application services.
      */

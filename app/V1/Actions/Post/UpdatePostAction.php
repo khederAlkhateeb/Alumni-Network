@@ -5,6 +5,7 @@ namespace App\V1\Actions\Post;
 use App\Models\Post;
 use App\Models\User;
 use App\Services\UploadFileService;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -59,7 +60,7 @@ class UpdatePostAction
         if ($oldImagePath) {
             $this->service->deleteFile($oldImagePath);
         }
-
+        Cache::forget("feed_user_{$user->id}");
         return $post->fresh()->load(['user', 'comments', 'reactions']);
     }
 }
