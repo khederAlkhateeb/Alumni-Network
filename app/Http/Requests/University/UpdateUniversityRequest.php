@@ -37,7 +37,7 @@ class UpdateUniversityRequest extends FormRequest
             'name'    => ['sometimes', 'string', 'max:255', 'unique:universities,name,' . $universityId],
             'country' => ['sometimes', 'string', 'max:255'],
             'website' => ['sometimes', 'nullable', 'url', 'max:255', 'unique:universities,website,' . $universityId],
-            'logo'    => ['sometimes','file','image', 'mimes:jpg,jpeg,png,webp' ,'nullable', 'max:5242880'],
+            'logo'    => ['sometimes','file','image', 'mimes:jpg,jpeg,png,webp' , 'max:5242880'],
         ];
     }
 
