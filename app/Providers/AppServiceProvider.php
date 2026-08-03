@@ -17,7 +17,10 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Support\Facades\Gate;
 use App\Models\User;
+use App\Models\Event;
 use App\Policies\RegistrationPolicy;
+use App\Policies\EventPolicy;
+
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -74,5 +77,6 @@ class AppServiceProvider extends ServiceProvider
         });
         Gate::policy(University::class, RegistrationPolicy::class);
         Gate::policy(User::class, RegistrationPolicy::class);
+        Gate::policy(Event::class, EventPolicy::class);
     }
 }
