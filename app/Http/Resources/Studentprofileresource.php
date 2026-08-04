@@ -30,6 +30,7 @@ class StudentProfileResource extends JsonResource
             'expected_graduation_year'  => $this->expected_graduation_year,
             'years_until_graduation'    => $this->years_until_graduation,
             'status'                    => $this->status,
+                'photo_url' => $this->photo ? ($this->photo->file_path): null,
             'created_at'                => $this->created_at,
         ];
     }
