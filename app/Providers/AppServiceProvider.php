@@ -18,7 +18,10 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Support\Facades\Gate;
 use App\Models\User;
+use App\Models\Event;
 use App\Policies\RegistrationPolicy;
+use App\Policies\EventPolicy;
+
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -73,9 +76,10 @@ class AppServiceProvider extends ServiceProvider
         ResetPassword::createUrlUsing(function ($notifiable, $token) {
             return 'http://localhost:3000/reset-password?token=' . $token . '&email=' . $notifiable->getEmailForPasswordReset();
         });
-        Gate::policy(University::class, RegistrationPolicy::class);
+        Gate::policy(University::class, UniversityPolicy::class);
         Gate::policy(User::class, RegistrationPolicy::class);
           Model::preventLazyLoading();
+        Gate::policy(Event::class, EventPolicy::class);
     }
 
 

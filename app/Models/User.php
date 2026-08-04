@@ -62,12 +62,12 @@ class User extends Authenticatable
     protected function roleLabel(): Attribute
     {
         return Attribute::get(
-            fn(): ?string => match ($this->role) {
+            fn(): ?string => match ($this->getRoleNames()->first()) {
                 'super_admin' => 'super admin',
                 'uni_admin' => 'university admin',
                 'alumni' => 'alumni',
                 'student' => 'student',
-                default => $this->role,
+                default => $this->getRoleNames()->first(),
             }
         );
     }
