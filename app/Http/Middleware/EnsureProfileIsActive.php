@@ -9,13 +9,19 @@ use App\Enums\ProfileStatus;
 
 class EnsureProfileIsActive
 {
+    /**
+     * Handle an incoming request.
+     */
     public function handle(Request $request, Closure $next): Response
     {
         $user = $request->user();
-           if ($user->alumniProfile->status !== ProfileStatus::ACTIVE) {
+
+            $profile = $user->alumniProfile ?? $user->studentProfile;
+
+        if ($profile && $profile->status !== ProfileStatus::ACTIVE) {
             return response()->json([
-                'message' => 'Your alumni profile is not active yet.',
-                'status' => $user->alumniProfile->status,
+                'message' => 'Your profile is not active yet.',
+                'status' => $profile->status,
             ], Response::HTTP_FORBIDDEN); // 403 Forbidden
         }
 

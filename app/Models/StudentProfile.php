@@ -36,6 +36,7 @@ class StudentProfile extends Model
         'enrollment_year'           => 'integer',
         'expected_graduation_year'  => 'integer',
         'created_at'                => 'datetime',
+        'status' => \App\Enums\ProfileStatus::class,
         ];
     }
 

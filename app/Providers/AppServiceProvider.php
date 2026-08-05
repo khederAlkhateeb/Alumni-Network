@@ -4,7 +4,10 @@ namespace App\Providers;
 
 use App\Contracts\AttachmentSecurity\FileValidatorInterface;
 use App\Contracts\AttachmentSecurity\SecureFileStorageInterface;
+use App\Events\MentorshipRequestCreated;
+use App\Events\MentorshipRequestStatusUpdated;
 use App\Events\PostCreated;
+use App\Listeners\ClearAvailableMentorsCache;
 use App\Listeners\InvalidateFeedCacheForConnections;
 use App\Models\Comment;
 use App\Models\Post;
@@ -19,6 +22,9 @@ use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Support\Facades\Gate;
 use App\Models\User;
 use App\Models\Event;
+use Illuminate\Support\Facades\Event as EventFacade;
+
+
 use App\Policies\RegistrationPolicy;
 use App\Policies\EventPolicy;
 
@@ -80,6 +86,14 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(User::class, RegistrationPolicy::class);
           Model::preventLazyLoading();
         Gate::policy(Event::class, EventPolicy::class);
+
+        EventFacade::listen(
+            [
+                MentorshipRequestCreated::class,
+                MentorshipRequestStatusUpdated::class,
+            ],
+               ClearAvailableMentorsCache::class
+        );
     }
 
 

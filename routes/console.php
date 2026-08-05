@@ -11,3 +11,5 @@ Artisan::command('inspire', function () {
 Schedule::command('events:send-reminders')
     ->hourly()
     ->withoutOverlapping();
+
+Schedule::command('mentorship:send-reminders 24')->dailyAt('08:00');
