@@ -3,12 +3,14 @@
 namespace App\Models;
 
 //use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Builders\UserBuilder;
 use App\Enums\enConnectionStatus;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -144,4 +146,36 @@ class User extends Authenticatable
     {
         return $this->hasMany(JobApplication::class, 'applicant_id');
     }
+    public function receivedMentorshipRequests(): HasMany
+{
+    return $this->hasMany(MentorshipRequest::class, 'mentor_id');
+}
+
+public function sentMentorshipRequests(): HasMany
+{
+    return $this->hasMany(MentorshipRequest::class, 'mentee_id');
+}
+public function mentorshipPrograms(): BelongsToMany
+{
+    return $this->belongsToMany(
+        MentorshipProgram::class,
+        'mentorship_requests',
+        'mentor_id',
+        'program_id'
+    )->distinct();
+}
+public function hasReachedLimit(int $programId): bool
+{
+    $program = MentorshipProgram::find($programId);
+    if (!$program) return false;
+// dd( $program);
+     $activeCount = MentorshipRequest::query()
+        ->where('mentor_id', $this->id)
+        ->where('program_id', $programId)
+        ->whereIn('status', ['accepted'])
+        ->count();
+
+    return $activeCount >= $program->mentor_per_mentees_max;
+}
+
 }
