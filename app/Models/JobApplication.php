@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-
+use App\Builders\JobApplicationBuilder;
 
 
 #[Fillable([
@@ -41,4 +41,9 @@ class JobApplication extends Model
     {
         return $this->belongsTo(User::class, 'applicant_id');
     }
+
+    public function newEloquentBuilder($query): JobApplicationBuilder
+{
+    return new JobApplicationBuilder($query);
+}
 }
