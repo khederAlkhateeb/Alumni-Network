@@ -13,8 +13,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Query\Builder;
 
 #[Fillable([
     'name',
@@ -57,7 +55,7 @@ class University extends Model
         return $this->belongsTo(User::class, 'updated_by');
     }
 
-    public function attachments(): morphMany
+    public function attachments(): MorphMany
     {
         return $this->morphMany(Attachment::class, 'attachable');
     }
@@ -69,5 +67,15 @@ class University extends Model
     public function events(): HasMany
     {
         return $this->hasMany(Event::class);
+    }
+
+    /**
+     * Get all mentorship programs belonging to this university.
+     *
+     * @return HasMany
+     */
+    public function mentorshipPrograms(): HasMany
+    {
+        return $this->hasMany(MentorshipProgram::class);
     }
 }
