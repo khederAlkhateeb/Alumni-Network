@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class MentorshipProgram extends Model
 {use HasFactory;
 
+    protected $guarded = [];
+
     //
     public function requests(): HasMany
 {
