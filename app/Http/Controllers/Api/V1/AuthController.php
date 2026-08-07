@@ -62,7 +62,7 @@ class AuthController extends Controller
         $data = $request->validated();
         $result = $this->registerUser->handle($data);
         return $this->successResponse(
-            data: $result,
+            data: $result, 
             message: 'Registration successful. Awaiting approval.',
             code: 201,
         );
