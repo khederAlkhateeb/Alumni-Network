@@ -168,7 +168,6 @@ public function hasReachedLimit(int $programId): bool
 {
     $program = MentorshipProgram::find($programId);
     if (!$program) return false;
-// dd( $program);
      $activeCount = MentorshipRequest::query()
         ->where('mentor_id', $this->id)
         ->where('program_id', $programId)
@@ -177,5 +176,26 @@ public function hasReachedLimit(int $programId): bool
 
     return $activeCount >= $program->mentor_per_mentees_max;
 }
+    /**
+     * All messages sent by this user (across all conversations).
+     */
+    public function sentMessages(): HasMany
+    {
+        return $this->hasMany(Message::class, 'sender_id');
+    }
 
+    /**
+     * All conversations this user is part of, regardless of whether
+     * they're stored as user_one or user_two.
+     *
+     * Not a standard Eloquent relation (hasMany assumes a single FK
+     * column) — this is a plain query method, since a user can appear
+     * in either column depending on who has the smaller ID.
+     */
+    public function conversations()
+    {
+        return Conversation::where('user_one_id', $this->id)
+            ->orWhere('user_two_id', $this->id)
+            ->get();
+    }
 }
