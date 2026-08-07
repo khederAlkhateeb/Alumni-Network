@@ -66,4 +66,59 @@ class AlumniProfileBuilder extends Builder
         );
 }
 
+public function forUniversity(int $university): self
+    {
+        return $this->active()->sameUniversityAs($university);
+    }
+
+
+    public function byMajorSummary(): array
+    {
+        return $this->with('major:id,name')
+            ->get()
+            ->groupBy('major_id')
+            ->map(fn ($profiles, $majorId) => [
+                'major_id' => $majorId ?: null,
+                'major_name' => optional($profiles->first()->major)->name ?? __('Unspecified'),
+                'total' => $profiles->count(),
+            ])
+            ->values()
+            ->all();
+    }
+
+
+    public function byGraduationYearSummary(): array
+    {
+        return $this->selectRaw('graduation_year, count(*) as total')
+            ->groupBy('graduation_year')
+            ->orderByDesc('graduation_year')
+            ->get()
+            ->map(fn ($row) => [
+                'graduation_year' => $row->graduation_year,
+                'total' => (int) $row->total,
+            ])
+            ->all();
+    }
+
+    public function employed(): self
+    {
+        return $this->whereHas('workExperiences', fn ($q) => $q->whereNull('end_date'));
+    }
+
+
+    public function topCompaniesSummary(int $limit = 5): array
+    {
+        return $this->whereNotNull('current_company')
+            ->selectRaw('current_company, count(*) as total')
+            ->groupBy('current_company')
+            ->orderByDesc('total')
+            ->limit($limit)
+            ->get()
+            ->map(fn ($row) => [
+                'company' => $row->current_company,
+                'total' => (int) $row->total,
+            ])
+            ->all();
+    }
+
 }
