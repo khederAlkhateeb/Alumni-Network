@@ -108,6 +108,22 @@ class User extends Authenticatable
     }
 
     /**
+     * All notifications for this user.
+     */
+    public function notifications()
+    {
+        return $this->hasMany(\App\Models\Notification::class, 'user_id');
+    }
+
+    /**
+     * All unread notifications for this user.
+     */
+    public function unreadNotifications()
+    {
+        return $this->notifications()->whereNull('read_at');
+    }
+
+    /**
      * All reactions made by this user, across posts and comments.
      *
      * Reaction is polymorphic on the "reactable" side (post/comment),
@@ -147,35 +163,35 @@ class User extends Authenticatable
         return $this->hasMany(JobApplication::class, 'applicant_id');
     }
     public function receivedMentorshipRequests(): HasMany
-{
-    return $this->hasMany(MentorshipRequest::class, 'mentor_id');
-}
+    {
+        return $this->hasMany(MentorshipRequest::class, 'mentor_id');
+    }
 
-public function sentMentorshipRequests(): HasMany
-{
-    return $this->hasMany(MentorshipRequest::class, 'mentee_id');
-}
-public function mentorshipPrograms(): BelongsToMany
-{
-    return $this->belongsToMany(
-        MentorshipProgram::class,
-        'mentorship_requests',
-        'mentor_id',
-        'program_id'
-    )->distinct();
-}
-public function hasReachedLimit(int $programId): bool
-{
-    $program = MentorshipProgram::find($programId);
-    if (!$program) return false;
-     $activeCount = MentorshipRequest::query()
-        ->where('mentor_id', $this->id)
-        ->where('program_id', $programId)
-        ->whereIn('status', ['accepted'])
-        ->count();
+    public function sentMentorshipRequests(): HasMany
+    {
+        return $this->hasMany(MentorshipRequest::class, 'mentee_id');
+    }
+    public function mentorshipPrograms(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            MentorshipProgram::class,
+            'mentorship_requests',
+            'mentor_id',
+            'program_id'
+        )->distinct();
+    }
+    public function hasReachedLimit(int $programId): bool
+    {
+        $program = MentorshipProgram::find($programId);
+        if (!$program) return false;
+        $activeCount = MentorshipRequest::query()
+            ->where('mentor_id', $this->id)
+            ->where('program_id', $programId)
+            ->whereIn('status', ['accepted'])
+            ->count();
 
-    return $activeCount >= $program->mentor_per_mentees_max;
-}
+        return $activeCount >= $program->mentor_per_mentees_max;
+    }
     /**
      * All messages sent by this user (across all conversations).
      */
