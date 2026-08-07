@@ -101,4 +101,23 @@ class MentorshipRequestBuilder extends Builder
     {
         return $this->where('program_id', $programId);
     }
+
+public function forUniversity(int $university): self
+    {
+        return $this->whereHas('program', fn ($query) => $query->where('university_id', $university));
+    }
+
+
+    public function countByStatuses(): array
+    {
+        $counts = [];
+
+        foreach (MentorshipRequestStatus::cases() as $status) {
+            $counts[$status->value] = (clone $this)
+                ->where('status', $status)
+                ->count();
+        }
+
+        return $counts;
+    }
 }
