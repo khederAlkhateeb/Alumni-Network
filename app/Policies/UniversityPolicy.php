@@ -45,4 +45,25 @@ class UniversityPolicy
     {
         return $user->hasRole('super_admin');
     }
+
+    /**
+     * View reports for a specific university.
+     * @param User $user
+     * @param University $university
+     * @return bool
+     */
+    public function viewReports(User $user, University $university): bool
+    {
+        if ($user->hasRole('super_admin')) {
+            return true;
+        }
+
+        if ($user->hasRole('uni_admin')) {
+            $context = app(UniversityContext::class);
+            $userUniversityId = $context->getUniversityId();
+            return $userUniversityId !== null && $userUniversityId === $university->id;
+        }
+
+        return false;
+    }
 }
