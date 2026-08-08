@@ -19,6 +19,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class MentorshipProgram extends Model
 {
     use HasFactory;
+  
+    protected $guarded = [];
 
     /**
      * Cast attribute values for proper API serialization.
@@ -42,6 +44,8 @@ class MentorshipProgram extends Model
     {
         return $this->belongsTo(University::class);
     }
+
+
 
     /**
      * Get the mentorship requests attached to this program.
