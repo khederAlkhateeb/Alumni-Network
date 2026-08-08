@@ -1,0 +1,190 @@
+{
+  "info": {
+    "name": "Alumni Network - Mentorship Programs",
+    "description": "Postman collection for mentorship program management endpoints in Alumni Network API.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "auth_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "university_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "mentorship_program_id",
+      "value": "1",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Get Mentorship Programs",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{auth_token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/universities/{{university_id}}/mentorship-programs",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "universities",
+            "{{university_id}}",
+            "mentorship-programs"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create Mentorship Program",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{auth_token}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"New Mentorship Program\",\n  \"start_date\": \"2026-09-01\",\n  \"end_date\": \"2026-12-31\",\n  \"mentor_per_mentees_max\": 10,\n  \"status\": \"draft\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/universities/{{university_id}}/mentorship-programs",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "universities",
+            "{{university_id}}",
+            "mentorship-programs"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Update Mentorship Program",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{auth_token}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Updated Program Title\",\n  \"mentor_per_mentees_max\": 12\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/universities/{{university_id}}/mentorship-programs/{{mentorship_program_id}}",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "universities",
+            "{{university_id}}",
+            "mentorship-programs",
+            "{{mentorship_program_id}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Activate Mentorship Program",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{auth_token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/universities/{{university_id}}/mentorship-programs/{{mentorship_program_id}}/activate",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "universities",
+            "{{university_id}}",
+            "mentorship-programs",
+            "{{mentorship_program_id}}",
+            "activate"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Close Mentorship Program",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{auth_token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/universities/{{university_id}}/mentorship-programs/{{mentorship_program_id}}/close",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "universities",
+            "{{university_id}}",
+            "mentorship-programs",
+            "{{mentorship_program_id}}",
+            "close"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
