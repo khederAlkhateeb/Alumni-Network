@@ -2,11 +2,17 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\V1\Actions\Notifications\GetUserNotificationsAction;
+use App\V1\Actions\Notifications\MarkAllNotificationsAsReadAction;
+use App\V1\Actions\Notifications\MarkNotificationAsReadAction;
 use App\Http\Controllers\Controller;
-use App\Http\Traits\ApiResponseTrait;
+use App\Http\Requests\Api\V1\Notifications\IndexNotificationRequest;
+use App\Http\Requests\Api\V1\Notifications\MarkAllNotificationsAsReadRequest;
+use App\Http\Requests\Api\V1\Notifications\MarkNotificationAsReadRequest;
 use App\Http\Resources\Api\V1\NotificationResource;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
+use Throwable;
 
 /*
 | Notification Controller (API v1)
@@ -18,35 +24,46 @@ use Illuminate\Http\Request;
 | $request->user()->notifications(), so a user can never read or
 | modify another user's notifications.
 |
+| The controller stays thin on purpose: validation lives in the
+| Form Requests, business logic lives in the Actions, and this
+| class is only responsible for wiring the two together and
+| translating the outcome into the unified success/error response
+| shape via try/catch.
+|
 */
 
 class NotificationController extends Controller
 {
-    use ApiResponseTrait;
-
     /**
      * GET /notifications
      *
      * List the authenticated user's notifications, newest first.
      * Rule 5.7: Pagination (20 items per page).
      *
-     * @param  Request  $request
+     * @param  IndexNotificationRequest  $request
+     * @param  GetUserNotificationsAction  $action
      * @return JsonResponse
      */
-    public function index(Request $request): JsonResponse
+    public function index(IndexNotificationRequest $request, GetUserNotificationsAction $action): JsonResponse
     {
-        $query = $request->user()->notifications();
+        try {
+            $notifications = $action($request->user());
 
-        if ($request->boolean('unread_only')) {
-            $query->whereNull('read_at');
+            return $this->successResponse(
+                data: NotificationResource::collection($notifications)->resolve($request),
+                message: 'Notifications retrieved successfully.',
+                meta: [
+                    'current_page' => $notifications->currentPage(),
+                    'last_page'    => $notifications->lastPage(),
+                    'per_page'     => $notifications->perPage(),
+                    'total'        => $notifications->total(),
+                ],
+            );
+        } catch (Throwable $e) {
+            report($e);
+
+            return $this->errorResponse('Failed to retrieve notifications.', code: 500);
         }
-
-        $notifications = $query->latest()->paginate(20);
-
-        return $this->paginated(
-            NotificationResource::collection($notifications),
-            'Notifications retrieved successfully.'
-        );
     }
 
     /**
@@ -55,20 +72,27 @@ class NotificationController extends Controller
      * Mark a single notification as read. Scoped to the authenticated
      * user, so attempting to mark another user's notification returns 404.
      *
-     * @param  Request  $request
-     * @param  int  $notification
+     * @param  MarkNotificationAsReadRequest  $request
+     * @param  string  $notification
+     * @param  MarkNotificationAsReadAction  $action
      * @return JsonResponse
      */
-    public function markAsRead(Request $request, int $notification): JsonResponse
+    public function markAsRead(MarkNotificationAsReadRequest $request, string $notification, MarkNotificationAsReadAction $action): JsonResponse
     {
-        $model = $request->user()->notifications()->findOrFail($notification);
+        try {
+            $model = $action($request->user(), $notification);
 
-        $model->markAsRead();
+            return $this->successResponse(
+                data: new NotificationResource($model),
+                message: 'Notification marked as read.',
+            );
+        } catch (ModelNotFoundException $e) {
+            return $this->errorResponse('Notification not found.', code: 404);
+        } catch (Throwable $e) {
+            report($e);
 
-        return $this->success(
-            new NotificationResource($model),
-            'Notification marked as read.'
-        );
+            return $this->errorResponse('Failed to mark notification as read.', code: 500);
+        }
     }
 
     /**
@@ -76,20 +100,23 @@ class NotificationController extends Controller
      *
      * Mark all of the authenticated user's unread notifications as read.
      *
-     * @param  Request  $request
+     * @param  MarkAllNotificationsAsReadRequest  $request
+     * @param  MarkAllNotificationsAsReadAction  $action
      * @return JsonResponse
      */
-    public function markAllAsRead(Request $request): JsonResponse
+    public function markAllAsRead(MarkAllNotificationsAsReadRequest $request, MarkAllNotificationsAsReadAction $action): JsonResponse
     {
-        $unreadQuery = $request->user()->unreadNotifications();
+        try {
+            $count = $action($request->user());
 
-        $count = $unreadQuery->count();
+            return $this->successResponse(
+                data: ['marked_count' => $count],
+                message: 'All notifications marked as read.',
+            );
+        } catch (Throwable $e) {
+            report($e);
 
-        $unreadQuery->update(['read_at' => now()]);
-
-        return $this->success(
-            ['marked_count' => $count],
-            'All notifications marked as read.'
-        );
+            return $this->errorResponse('Failed to mark notifications as read.', code: 500);
+        }
     }
 }

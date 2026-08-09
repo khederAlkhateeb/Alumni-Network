@@ -110,17 +110,17 @@ class User extends Authenticatable
     /**
      * All notifications for this user.
      */
-    public function notifications()
+    public function notifications(): HasMany
     {
-        return $this->hasMany(\App\Models\Notification::class, 'user_id');
+        return $this->hasMany(Notification::class)->latest();
     }
 
     /**
      * All unread notifications for this user.
      */
-    public function unreadNotifications()
+    public function unreadNotifications(): HasMany
     {
-        return $this->notifications()->whereNull('read_at');
+        return $this->hasMany(Notification::class)->whereNull('read_at');
     }
 
     /**

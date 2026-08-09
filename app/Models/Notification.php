@@ -21,9 +21,21 @@ class Notification extends Model
         'read_at' => 'datetime',
     ];
 
+    /**
+     * The user who owns this notification.
+     */
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * The polymorphic subject this notification is about
+     * (e.g. a Connection, JobListing, MentorshipRequest, Event...).
+     */
+    public function related()
+    {
+        return $this->morphTo();
     }
 
     /**
