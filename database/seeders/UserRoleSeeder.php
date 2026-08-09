@@ -32,6 +32,7 @@ class UserRoleSeeder extends Seeder
                 'name'     => 'Super Admin',
                 'email'    => 'superadmin@example.com',
                 'role'     => 'super_admin',
+                'is_active' => true,
             ],
             [
                 'name'     => 'University Admin',
@@ -56,6 +57,7 @@ class UserRoleSeeder extends Seeder
                 [
                     'name'     => $data['name'],
                     'password' => Hash::make('password'),
+                    'is_active' => $data['is_active'] ?? false,
                 ]
             );
 

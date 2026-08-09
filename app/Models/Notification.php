@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 class Notification extends Model
 {
     use HasFactory;
-
     protected $fillable = [
         'user_id',
         'type',
@@ -37,4 +36,6 @@ class Notification extends Model
             $this->forceFill(['read_at' => $this->freshTimestamp()])->save();
         }
     }
+
+    protected $guarded = [];
 }
