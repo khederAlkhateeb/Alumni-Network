@@ -6,17 +6,23 @@ use App\Models\User;
 
 /*
 |--------------------------------------------------------------------------
-| MarkAllNotificationsAsReadAction
+| Mark All Notifications As Read Action
 |--------------------------------------------------------------------------
 |
-| Single responsibility: mark ALL of the user's unread notifications
-| as read in one bulk UPDATE query (not a per-row loop).
+| Marks ALL of the user's unread notifications as read in a single
+| bulk UPDATE query (not a per-row loop).
 |
 */
 
 class MarkAllNotificationsAsReadAction
 {
-    public function __invoke(User $user): int
+    /**
+     * Mark all of the given user's unread notifications as read.
+     *
+     * @param  User  $user
+     * @return int  Number of notifications marked as read.
+     */
+    public function handle(User $user): int
     {
         return $user->unreadNotifications()->update(['read_at' => now()]);
     }
