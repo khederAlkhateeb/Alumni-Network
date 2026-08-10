@@ -60,7 +60,7 @@ class UpdatePostAction
         if ($oldImagePath) {
             $this->service->deleteFile($oldImagePath);
         }
-        Cache::forget("feed_user_{$user->id}");
+        event(new PostUpdated($post));
         return $post->fresh()->load(['user', 'comments', 'reactions']);
     }
 }

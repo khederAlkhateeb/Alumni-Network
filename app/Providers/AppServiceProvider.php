@@ -7,26 +7,26 @@ use App\Contracts\AttachmentSecurity\SecureFileStorageInterface;
 use App\Events\MentorshipRequestCreated;
 use App\Events\MentorshipRequestStatusUpdated;
 use App\Events\PostCreated;
+use App\Events\PostDeleted;
+use App\Events\PostUpdated;
 use App\Listeners\ClearAvailableMentorsCache;
 use App\Listeners\InvalidateFeedCacheForConnections;
 use App\Models\Comment;
+use App\Models\Event;
 use App\Models\Post;
 use App\Models\University;
+use App\Models\User;
+use App\Policies\EventPolicy;
+use App\Policies\RegistrationPolicy;
 use App\Policies\UniversityPolicy;
 use App\Services\FileValidatorService;
 use App\Services\SecureFileStorageService;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\ServiceProvider;
 use Illuminate\Auth\Notifications\ResetPassword;
-use Illuminate\Support\Facades\Gate;
-use App\Models\User;
-use App\Models\Event;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Event as EventFacade;
-
-
-use App\Policies\RegistrationPolicy;
-use App\Policies\EventPolicy;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\ServiceProvider;
 
 
 class AppServiceProvider extends ServiceProvider
@@ -38,6 +38,12 @@ class AppServiceProvider extends ServiceProvider
      */
     protected $listen = [
         PostCreated::class => [
+            InvalidateFeedCacheForConnections::class,
+        ],
+        PostUpdated::class => [
+            InvalidateFeedCacheForConnections::class,
+        ],
+        PostDeleted::class => [
             InvalidateFeedCacheForConnections::class,
         ],
     ];

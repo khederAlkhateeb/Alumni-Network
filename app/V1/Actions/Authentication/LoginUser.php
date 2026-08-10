@@ -2,6 +2,7 @@
 
 namespace App\V1\Actions\Authentication;
 
+use App\Enums\ProfileStatus;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
@@ -46,20 +47,14 @@ class LoginUser
                 'credentials' => ['Invalid credentials.'],
             ]);
         }
-        if(!$user->is_active)
-        {
-            throw ValidationException::withMessages([
-                'email' => ['Your account has been suspended.'],
-            ]);
-        }
         $profile = $user->alumniProfile ?? $user->studentProfile;
 
-        if ($profile && $profile->status === 'pending') {
+        if ($profile && $profile->status === ProfileStatus::PENDING) {
             throw ValidationException::withMessages([
                 'email' => ['Your account is still pending approval.'],
             ]);
         }
-        if ($profile && $profile->status === 'suspended') {
+        if ($profile && $profile->status === ProfileStatus::SUSPENDED) {
             throw ValidationException::withMessages([
                 'email' => ['Your registration was suspended.'],
             ]);

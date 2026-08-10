@@ -4,6 +4,8 @@ namespace App\Listeners;
 
 use App\Enums\ConnectionStatus;
 use App\Events\PostCreated;
+use App\Events\PostDeleted;
+use App\Events\PostUpdated;
 use App\Models\Connection;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Support\Facades\Cache;
@@ -23,7 +25,7 @@ class InvalidateFeedCacheForConnections implements ShouldQueue
     /**
      * Handle the event.
      */
-    public function handle(PostCreated $event): void
+    public function handle(PostCreated|PostUpdated|PostDeleted $event): void
     {
         $post = $event->post;
         $user = $post->user;

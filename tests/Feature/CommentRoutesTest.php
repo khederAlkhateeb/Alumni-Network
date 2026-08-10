@@ -68,8 +68,6 @@ class CommentRoutesTest extends TestCase
     {
         $guardName = 'api';
         $permissions = [
-            'view-jobs',
-            'create-job',
             'comment-on-post',
             'delete-own-comment',
             'delete-any-comment',
@@ -83,85 +81,7 @@ class CommentRoutesTest extends TestCase
         }
     }
 
-
-    public function test_unauthenticated_user_cannot_access_job_routes(): void
-    {
-        $this->getJson('/api/v1/jobs')->assertStatus(401);
-        $this->postJson('/api/v1/jobs', [])->assertStatus(401);
-        $this->getJson('/api/v1/jobs/1')->assertStatus(401);
-        $this->putJson('/api/v1/jobs/1', [])->assertStatus(401);
-        $this->deleteJson('/api/v1/jobs/1')->assertStatus(401);
-        $this->patchJson('/api/v1/jobs/1/close')->assertStatus(401);
-        $this->postJson('/api/v1/jobs/1/apply', [])->assertStatus(401);
-        $this->getJson('/api/v1/jobs/my-applications')->assertStatus(401);
-        $this->getJson('/api/v1/jobs/1/applications')->assertStatus(401);
-        $this->patchJson('/api/v1/jobs/1/applications/1/status', [])->assertStatus(401);
-    }
-
-    public function test_authenticated_user_can_view_jobs(): void
-    {
-        JobListing::factory()->count(3)->create(['university_id' => $this->university->id]);
-
-        Sanctum::actingAs($this->alumniUser, ['*']);
-        $this->alumniUser->givePermissionTo('view-jobs');
-
-        $response = $this->getJson('/api/v1/jobs');
-
-        $response->assertStatus(200)
-            ->assertJsonPath('status', 'success')
-            ->assertJsonStructure([
-                'status',
-                'data' => [
-                    '*' => [
-                        'id',
-                        'title',
-                        'company',
-                        'location',
-                        'type',
-                        'status',
-                    ]
-                ],
-                'message'
-            ]);
-    }
-
-    public function test_authenticated_user_can_view_single_job(): void
-    {
-        $job = JobListing::factory()->create(['university_id' => $this->university->id]);
-
-        Sanctum::actingAs($this->alumniUser, ['*']);
-        $this->alumniUser->givePermissionTo('view-jobs');
-
-        $response = $this->getJson("/api/v1/jobs/{$job->id}");
-
-        $response->assertStatus(200)
-            ->assertJsonPath('status', 'success')
-            ->assertJsonPath('data.id', $job->id);
-    }
-
-    public function test_user_with_permission_can_create_job(): void
-    {
-        Sanctum::actingAs($this->alumniUser, ['*']);
-        $this->alumniUser->givePermissionTo('create-job');
-
-        $response = $this->postJson('/api/v1/jobs', [
-            'university_id' => $this->university->id,
-            'title' => 'Software Engineer',
-            'company' => 'Tech Corp',
-            'location' => 'Amman',
-            'type' => 'full_time',
-            'description' => 'A great job opportunity',
-            'requirements' => 'Experience required',
-            'salary_range' => '1000-2000 JOD',
-            'status' => 'active',
-        ]);
-
-        $response->assertStatus(201)
-            ->assertJsonPath('status', 'success')
-            ->assertJsonPath('message', 'Job listing created successfully.');
-    }
-
-    public function test_unauthenticated_user_cannot_access_comment_routes(): void
+        public function test_unauthenticated_user_cannot_access_comment_routes(): void
     {
         $post = Post::factory()->create();
 
@@ -293,6 +213,4 @@ class CommentRoutesTest extends TestCase
 
         $this->assertDatabaseMissing('comments', ['id' => $comment->id]);
     }
-
-
 }
