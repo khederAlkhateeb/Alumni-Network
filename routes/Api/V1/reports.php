@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware(['auth:sanctum', 'role:uni_admin'])
+Route::middleware('auth:sanctum')
     ->prefix('universities/{university}/reports')
     ->scopeBindings()
     ->group(function () {

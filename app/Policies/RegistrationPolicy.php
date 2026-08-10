@@ -4,6 +4,8 @@ namespace App\Policies;
 
 use App\Models\User;
 use App\Models\University;
+use App\Enums\ProfileStatus;
+
 
 class RegistrationPolicy
 {
@@ -31,7 +33,7 @@ class RegistrationPolicy
             return false;
         }
 
-        if ($targetProfile->status !== 'pending') {
+        if ($targetProfile->status !== ProfileStatus::PENDING) {
             return false;
         }
 

@@ -3,15 +3,16 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\V1\Actions\UniversityAdmin\CreateUniversityAdminAction;
-use App\V1\Actions\UniversityAdmin\ShowUniversityAdminAction;
-use App\Models\UniversityAdmin;
 use App\Http\Requests\UniversityAdmin\StoreUniversityAdminRequest;
-use App\V1\Actions\UniversityAdmin\UpdateUniversityAdminAction;
 use App\Http\Requests\UniversityAdmin\UpdateUniversityAdminRequest;
+use App\Models\UniversityAdmin;
+use App\V1\Actions\UniversityAdmin\CreateUniversityAdminAction;
 use App\V1\Actions\UniversityAdmin\ListUniversityAdminsAction;
-
+use App\V1\Actions\UniversityAdmin\ShowUniversityAdminAction;
+use App\V1\Actions\UniversityAdmin\UpdateUniversityAdminAction;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class UniversityAdminController extends Controller
 {
@@ -26,66 +27,101 @@ class UniversityAdminController extends Controller
         private readonly ShowUniversityAdminAction $showUniversityAdminAction,
         private readonly UpdateUniversityAdminAction $updateUniversityAdminAction,
         private readonly ListUniversityAdminsAction $listUniversityAdminsAction
-        )
-    {}
+    ) {}
+
     /**
      * View University admin list
      *
      * @param Request $request
-     * @return void
+     * @return JsonResponse
      */
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
-        $this->authorize('viewAny', UniversityAdmin::class);
+        try {
+            $this->authorize('viewAny', UniversityAdmin::class);
 
-        $perPage = $request->integer('per_page', 15);
+            $perPage = $request->integer('per_page', 15);
 
-        $admins = $this->listUniversityAdminsAction->handle($perPage);
+            $admins = $this->listUniversityAdminsAction->handle($perPage);
 
-        return $this->successResponse(
-            data: $admins,
-            message: 'University admins retrieved successfully.',
-            code: 200
-        );
+            return $this->successResponse(
+                data: $admins,
+                message: 'University admins retrieved successfully.',
+                code: 200
+            );
+        } catch (AuthorizationException $e) {
+            return $this->errorResponse(
+                message: 'This action is unauthorized.',
+                code: 403
+            );
+        } catch (\Throwable $e) {
+            return $this->errorResponse(
+                message: $e->getMessage() ?: 'An error occurred while fetching university admins.',
+                code: $e->getCode() >= 400 && $e->getCode() < 600 ? $e->getCode() : 500
+            );
+        }
     }
 
-
     /**
-     * create a new university admin user.
+     * Create a new university admin user.
      *
      * @param StoreUniversityAdminRequest $request
-     * @return void
+     * @return JsonResponse
      */
-    public function store(StoreUniversityAdminRequest $request)
+    public function store(StoreUniversityAdminRequest $request): JsonResponse
     {
-        $this->authorize('create', UniversityAdmin::class);
+        try {
+            $this->authorize('create', UniversityAdmin::class);
 
-        $user = $this->createUniversityAdminAction->handle($request->validated());
+            $user = $this->createUniversityAdminAction->handle($request->validated());
 
-        return $this->successResponse(
-            data: $user,
-            message: 'University admin created successfully.',
-            code: 201
-        );
+            return $this->successResponse(
+                data: $user,
+                message: 'University admin created successfully.',
+                code: 201
+            );
+        } catch (AuthorizationException $e) {
+            return $this->errorResponse(
+                message: 'This action is unauthorized.',
+                code: 403
+            );
+        } catch (\Throwable $e) {
+            return $this->errorResponse(
+                message: $e->getMessage() ?: 'An error occurred while creating the university admin.',
+                code: $e->getCode() >= 400 && $e->getCode() < 600 ? $e->getCode() : 500
+            );
+        }
     }
 
     /**
      * Show a university admin info 
      *
      * @param UniversityAdmin $universityAdmin
-     * @return void
+     * @return JsonResponse
      */
-    public function show(UniversityAdmin $universityAdmin)
+    public function show(UniversityAdmin $universityAdmin): JsonResponse
     {
-        $this->authorize('view', $universityAdmin);
+        try {
+            $this->authorize('view', $universityAdmin);
 
-        $adminDetails = $this->showUniversityAdminAction->handle($universityAdmin);
+            $adminDetails = $this->showUniversityAdminAction->handle($universityAdmin);
 
-        return $this->successResponse(
-            data: $adminDetails,
-            message: 'University admin details retrieved successfully.',
-            code: 200
-        );
+            return $this->successResponse(
+                data: $adminDetails,
+                message: 'University admin details retrieved successfully.',
+                code: 200
+            );
+        } catch (AuthorizationException $e) {
+            return $this->errorResponse(
+                message: 'This action is unauthorized.',
+                code: 403
+            );
+        } catch (\Throwable $e) {
+            return $this->errorResponse(
+                message: $e->getMessage() ?: 'An error occurred while fetching university admin details.',
+                code: $e->getCode() >= 400 && $e->getCode() < 600 ? $e->getCode() : 500
+            );
+        }
     }
 
     /**
@@ -93,18 +129,30 @@ class UniversityAdminController extends Controller
      *
      * @param UpdateUniversityAdminRequest $request
      * @param UniversityAdmin $universityAdmin
-     * @return void
+     * @return JsonResponse
      */
-    public function update(UpdateUniversityAdminRequest $request, UniversityAdmin $universityAdmin)
+    public function update(UpdateUniversityAdminRequest $request, UniversityAdmin $universityAdmin): JsonResponse
     {
-        $this->authorize('update', $universityAdmin);
+        try {
+            $this->authorize('update', $universityAdmin);
 
-        $user = $this->updateUniversityAdminAction->handle($universityAdmin, $request->validated());
+            $user = $this->updateUniversityAdminAction->handle($universityAdmin, $request->validated());
 
-        return $this->successResponse(
-            data: $user,
-            message: 'University admin updated successfully.',
-            code: 200
-        );
+            return $this->successResponse(
+                data: $user,
+                message: 'University admin updated successfully.',
+                code: 200
+            );
+        } catch (AuthorizationException $e) {
+            return $this->errorResponse(
+                message: 'This action is unauthorized.',
+                code: 403
+            );
+        } catch (\Throwable $e) {
+            return $this->errorResponse(
+                message: $e->getMessage() ?: 'An error occurred while updating the university admin.',
+                code: $e->getCode() >= 400 && $e->getCode() < 600 ? $e->getCode() : 500
+            );
+        }
     }
 }
