@@ -2,6 +2,7 @@
 
 namespace App\V1\Actions\Post;
 
+use App\Events\PostDeleted;
 use App\Models\Post;
 use App\Services\UploadFileService;
 use Illuminate\Support\Facades\Cache;
@@ -38,6 +39,6 @@ class DeletePostAction
         if ($imagePath) {
             $this->service->deleteFile($imagePath);
         }
-        Cache::forget("feed_user_{$userId}");
+        event(new PostDeleted($post));
     }
 }

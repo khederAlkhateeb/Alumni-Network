@@ -4,7 +4,7 @@ namespace App\Enums;
 
 enum enConnectionStatus: string
 {
-    case PENGING = "pending";
+    case PENDING = "pending";
     case ACCEPTED = "accepted";
     case REJECTED = "rejected";
     case BLOCKED = "blocked";
