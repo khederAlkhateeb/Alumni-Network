@@ -86,7 +86,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(User::class, RegistrationPolicy::class);
           Model::preventLazyLoading();
         Gate::policy(Event::class, EventPolicy::class);
-
+        Gate::define('viewPendingRegistrations', [RegistrationPolicy::class, 'viewPendingRegistrations']);
         EventFacade::listen(
             [
                 MentorshipRequestCreated::class,
