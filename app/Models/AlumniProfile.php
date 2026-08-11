@@ -6,6 +6,7 @@ use App\Builders\AlumniProfileBuilder;
 use App\Enums\ProfileStatus;
 use Illuminate\Database\Eloquent\Attributes\Appends;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -72,6 +73,7 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
     'completeness_score',
     'missing_fields',
 ])]
+
 class AlumniProfile extends Model
 {
     use HasFactory;
@@ -153,6 +155,10 @@ class AlumniProfile extends Model
     protected function totalExperienceYears(): Attribute
     {
         return Attribute::get(function () {
+            if (! $this->relationLoaded('workExperiences')) {
+                return 0.0;
+            }
+
             $totalMonths = $this->workExperiences->sum(function (WorkExperience $exp) {
                 $end = $exp->end_date ?? now();
 
@@ -170,12 +176,14 @@ class AlumniProfile extends Model
      */
     protected function isCurrentlyEmployed(): Attribute
     {
-        return Attribute::get(
-            fn () => $this->workExperiences->contains(fn (WorkExperience $exp) => is_null($exp->end_date))
-        );
+        return Attribute::get(function () {
+            if (! $this->relationLoaded('workExperiences')) {
+                return false;
+            }
+
+            return $this->workExperiences->contains(fn (WorkExperience $exp) => is_null($exp->end_date));
+        });
     }
-
-
 
     /**
      * Accessor for profile completeness percentage score based on configured weights.
@@ -230,9 +238,7 @@ class AlumniProfile extends Model
             'country' => ! empty($this->country),
             'current_job_title' => ! empty($this->current_job_title),
             'current_company' => ! empty($this->current_company),
-            'has_at_least_one_skill' => $this->relationLoaded('skills')
-                ? $this->skills->isNotEmpty()
-                : $this->skills()->exists(),
+            'has_at_least_one_skill' => $this->relationLoaded('skills') && $this->skills->isNotEmpty(),
         ];
     }
 

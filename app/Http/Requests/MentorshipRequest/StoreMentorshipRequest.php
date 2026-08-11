@@ -23,7 +23,7 @@ class StoreMentorshipRequest extends FormRequest
     {
         // Inject the currently authenticated user ID as the mentee_id
         $this->merge([
-            'mentee_id' => auth()->id(),
+            'mentee_id' => $this->user()?->id,
         ]);
     }
 
@@ -33,17 +33,15 @@ class StoreMentorshipRequest extends FormRequest
     public function rules(): array
     {
         return [
-            // Validate program existence
-            // prevent user request to a closed program
+            // Validate active program existence
             'program_id' => [
                 'required',
                 'integer',
-                'exists:mentorship_programs,id',
-                   Rule::exists('mentorship_programs', 'id')->where(function ($query) {
-        $query->where('status', 'active')
-              ->whereDate('start_date', '<=', now())
-              ->whereDate('end_date', '>=', now());
-    }),
+                Rule::exists('mentorship_programs', 'id')->where(function ($query) {
+                    $query->where('status', 'active')
+                          ->whereDate('start_date', '<=', now())
+                          ->whereDate('end_date', '>=', now());
+                }),
             ],
 
             // Validate mentor ID & prevent duplicate requests or self-requesting
@@ -52,14 +50,12 @@ class StoreMentorshipRequest extends FormRequest
                 'integer',
                 'exists:users,id',
                 'different:mentee_id',
-                // Ensures user cannot send request to themselves
-               new MatchMentorCollege(),
-                // Prevent duplicate requests for the same program, mentor, and mentee
+                new MatchMentorCollege(),
+                // Prevent duplicate requests for the same program and mentee
                 Rule::unique('mentorship_requests')->where(function ($query) {
                     return $query->where('program_id', $this->program_id)
-                                 ->where('mentee_id', auth()->id());
+                                 ->where('mentee_id', $this->user()?->id);
                 }),
-
             ],
 
             // Optional introduction message
@@ -78,7 +74,7 @@ class StoreMentorshipRequest extends FormRequest
     {
         return [
             'program_id.required' => 'Please select a mentorship program.',
-            'program_id.exists'   => 'The selected mentorship program does not exist.',
+            'program_id.exists'   => 'The selected mentorship program does not exist or is currently inactive.',
 
             'mentor_id.required'  => 'Please select a mentor.',
             'mentor_id.exists'    => 'The selected mentor does not exist.',

@@ -17,7 +17,6 @@ use Illuminate\Http\Request;
 
 class MentorshipProgramController extends Controller
 {
-
     /**
      * GET /universities/{university}/mentorship-programs
      *
@@ -25,17 +24,11 @@ class MentorshipProgramController extends Controller
      */
     public function index(University $university, Request $request, ListMentorshipProgramsAction $listPrograms): JsonResponse
     {
-        // try {
+        $programs = $listPrograms->handle(
+            $university->id
+        );
 
-            $programs = $listPrograms->handle(
-                $university->id
-            );
-
-            return $this->successResponse($programs, 'Mentorship programs retrieved successfully.');
-        // } catch (\Throwable $exception) {
-        //     report($exception);
-        //     return $this->error('Unable to retrieve mentorship programs.', 500, ['exception' => $exception->getMessage()]);
-        // }
+        return $this->successResponse($programs, 'Mentorship programs retrieved successfully.');
     }
 
     /**
@@ -45,14 +38,9 @@ class MentorshipProgramController extends Controller
      */
     public function store(StoreMentorshipProgramRequest $request, University $university, CreateMentorshipProgramAction $createProgram): JsonResponse
     {
-        try {
-            $program = $createProgram->handle($university->id, $request->validated());
+        $program = $createProgram->handle($university->id, $request->validated());
 
-            return $this->successResponse( $program, 'Mentorship program created successfully.', [], 201);
-        } catch (\Throwable $exception) {
-            report($exception);
-            return $this->errorResponse('Unable to create mentorship program.', [], 500);
-        }
+        return $this->successResponse($program, 'Mentorship program created successfully.', [], 201);
     }
 
     /**
@@ -67,14 +55,9 @@ class MentorshipProgramController extends Controller
         UpdateMentorshipProgramAction $updateProgram
     ): JsonResponse
     {
-        try {
-            $updatedProgram = $updateProgram->handle($mentorshipProgram, $request->validated());
+        $updatedProgram = $updateProgram->handle($mentorshipProgram, $request->validated());
 
-            return $this->successResponse( $updatedProgram, 'Mentorship program updated successfully.');
-        } catch (\Throwable $exception) {
-            report($exception);
-            return $this->errorResponse('Unable to update mentorship program.', [], 500);
-        }
+        return $this->successResponse($updatedProgram, 'Mentorship program updated successfully.');
     }
 
     /**
@@ -88,14 +71,9 @@ class MentorshipProgramController extends Controller
         ActivateMentorshipProgramAction $activateProgram
     ): JsonResponse
     {
-        try {
-            $activatedProgram = $activateProgram->handle($mentorshipProgram);
+        $activatedProgram = $activateProgram->handle($mentorshipProgram);
 
-            return $this->successResponse( $activatedProgram, 'Mentorship program activated successfully.');
-        } catch (\Throwable $exception) {
-            report($exception);
-            return $this->errorResponse('Unable to activate mentorship program.', [], 500);
-        }
+        return $this->successResponse($activatedProgram, 'Mentorship program activated successfully.');
     }
 
     /**
@@ -109,13 +87,8 @@ class MentorshipProgramController extends Controller
         CloseMentorshipProgramAction $closeProgram
     ): JsonResponse
     {
-        try {
-            $closedProgram = $closeProgram->handle($mentorshipProgram);
+        $closedProgram = $closeProgram->handle($mentorshipProgram);
 
-            return $this->successResponse($closedProgram, 'Mentorship program closed successfully.');
-        } catch (\Throwable $exception) {
-            report($exception);
-            return $this->errorResponse('Unable to close mentorship program.', [], 500);
-        }
+        return $this->successResponse($closedProgram, 'Mentorship program closed successfully.');
     }
 }

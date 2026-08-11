@@ -2,17 +2,16 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-
- use App\Http\Controllers\Controller;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\Message\SendMessageRequest;
 use App\Http\Resources\ConversationResource;
 use App\Models\Conversation;
 use App\V1\Actions\Messages\GetConversationMessagesAction;
 use App\V1\Actions\Messages\ListConversationsAction;
 use App\V1\Actions\Messages\MarkMessagesAsReadAction;
- use App\V1\Actions\Messages\SendMessageAction;
- use Illuminate\Http\Request;
-
+use App\V1\Actions\Messages\SendMessageAction;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class MessageController extends Controller
 {
@@ -25,38 +24,26 @@ class MessageController extends Controller
      * List paginated messages within a conversation.
      *
      * GET /conversations/{conversation}/messages
-     *
-     * @param Conversation $conversation The conversation to list messages for.
      */
-    public function show(Conversation $conversation)
-    {
-        $this->authorize('view', $conversation);
+   public function show(Conversation $conversation): JsonResponse
+{
+    $this->authorize('view', $conversation);
 
-        $messages = $this->getConversationMessagesAction->handle($conversation);
-        return $this->successResponse(
-            data: $messages->items(),
-            message: "Messages retrieved successfully.",
-            meta: [
-                'path'          => $messages->path(),
-                'per_page'      => $messages->perPage(),
-                'next_cursor'   => $messages->nextCursor()?->encode(),
-                'prev_cursor'   => $messages->previousCursor()?->encode(),
-                'next_page_url' => $messages->nextPageUrl(),
-                'prev_page_url' => $messages->previousPageUrl(),
-            ],
-            code: 200,
-        );
-    }
+    $messages = $this->getConversationMessagesAction->handle($conversation);
+
+    return $this->successResponse(
+        data: $messages,
+        message: "Messages retrieved successfully."
+    );
+}
 
     /**
      * Send a message to another user, creating the conversation
      * between them if it doesn't already exist.
      *
      * POST /messages
-     *
-     * @param SendMessageRequest $request Validated: receiver_id, content.
      */
-    public function store(SendMessageRequest $request)
+    public function store(SendMessageRequest $request): JsonResponse
     {
         $data = $request->validated();
 
@@ -73,19 +60,12 @@ class MessageController extends Controller
         );
     }
 
-
-/**
+    /**
      * Display a paginated list of conversations for the authenticated user.
-     *
-     * @param Request $request The incoming HTTP request instance.
-     * @param ListConversationsAction $action The action responsible for fetching conversations.
-     * @return \Illuminate\Http\JsonResponse JSON response containing the conversation resource collection.
      */
-    public function index(Request $request, ListConversationsAction $action)
+    public function index(Request $request, ListConversationsAction $action): JsonResponse
     {
-        $user = $request->user();
-
-        $conversations = $action->handle($user);
+        $conversations = $action->handle($request->user());
 
         return $this->successResponse(
             data: ConversationResource::collection($conversations),
@@ -96,21 +76,15 @@ class MessageController extends Controller
 
     /**
      * Mark all unread messages from a specific sender as read.
-     *
-     * @param Request $request The incoming HTTP request instance.
-     * @param mixed $uid The ID of the sender whose messages are being marked as read.
-     * @param MarkMessagesAsReadAction $action The action responsible for updating message statuses and broadcasting events.
-     * @return \Illuminate\Http\JsonResponse JSON response indicating success.
      */
-    public function markAsRead(Request $request, $uid, MarkMessagesAsReadAction $action)
+    public function markAsRead(Request $request, mixed $uid, MarkMessagesAsReadAction $action): JsonResponse
     {
-        $action->handle($request->user()->id, (int)$uid);
+        $action->handle($request->user()->id, (int) $uid);
 
         return $this->successResponse(
             data: null,
             message: 'Messages marked as read',
             code: 200,
         );
-    } }
-
-
+    }
+}

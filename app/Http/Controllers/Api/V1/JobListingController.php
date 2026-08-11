@@ -19,7 +19,6 @@ use App\V1\Actions\Job\UpdateJobApplicationStatusAction;
 use App\V1\Actions\Job\UpdateJobListingAction;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Validation\ValidationException;
 
 class JobListingController extends Controller
 {
@@ -44,11 +43,7 @@ class JobListingController extends Controller
      */
     public function store(StoreJobListingRequest $request, CreateJobListingAction $createJobListing): JsonResponse
     {
-        try {
-            $job = $createJobListing->handle($request->validated(), $request->user()->id);
-        } catch (ValidationException $e) {
-            return $this->errorResponse($e->getMessage(), $e->errors(), 422);
-        }
+        $job = $createJobListing->handle($request->validated(), $request->user()->id);
 
         return $this->successResponse(
             data: $job,
@@ -79,11 +74,7 @@ class JobListingController extends Controller
     {
         // Gate::authorize('edit-own-job', $jobListing);
 
-        try {
-            $job = $updateJobListing->handle($jobListing, $request->validated());
-        } catch (ValidationException $e) {
-            return $this->errorResponse($e->getMessage(), $e->errors(), 422);
-        }
+        $job = $updateJobListing->handle($jobListing, $request->validated());
 
         return $this->successResponse(
             data: $job,
@@ -98,11 +89,7 @@ class JobListingController extends Controller
     {
         // Gate::authorize('delete-own-job', $jobListing);
 
-        try {
-            $jobListing->delete();
-        } catch (ValidationException $e) {
-            return $this->errorResponse($e->getMessage(), $e->errors(), 422);
-        }
+        $jobListing->delete();
 
         return $this->successResponse(
             message: 'Job listing deleted successfully.',
@@ -116,11 +103,7 @@ class JobListingController extends Controller
     {
         // Gate::authorize('close-job', $jobListing);
 
-        try {
-            $job = $closeJobListing->handle($jobListing);
-        } catch (ValidationException $e) {
-            return $this->errorResponse($e->getMessage(), $e->errors(), 422);
-        }
+        $job = $closeJobListing->handle($jobListing);
 
         return $this->successResponse(
             data: $job,
@@ -135,11 +118,7 @@ class JobListingController extends Controller
     {
         // Gate::authorize('apply-for-job');
 
-        try {
-            $application = $applyForJob->handle($jobListing, $request->user()->id, $request->validated());
-        } catch (ValidationException $e) {
-            return $this->errorResponse($e->getMessage(), $e->errors(), 422);
-        }
+        $application = $applyForJob->handle($jobListing, $request->user()->id, $request->validated());
 
         return $this->successResponse(
             data: $application,
@@ -187,11 +166,7 @@ class JobListingController extends Controller
 
         // Gate::authorize('update-application-status', $application);
 
-        try {
-            $updated = $updateApplicationStatus->handle($application, $request->validated()['status']);
-        } catch (ValidationException $e) {
-            return $this->errorResponse($e->getMessage(), $e->errors(), 422);
-        }
+        $updated = $updateApplicationStatus->handle($application, $request->validated()['status']);
 
         return $this->successResponse(
             data: $updated,

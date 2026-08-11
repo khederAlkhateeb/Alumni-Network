@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Scope;
 
 /**
  * Class UniversityScope
- * 
+ *
  * An Eloquent global scope that automatically restricts query results to the
  * authenticated user's university. Bypassed for guests and super admins.
  */
@@ -17,7 +17,7 @@ class UniversityScope implements Scope
 {
     /**
      * Apply the scope to a given Eloquent query builder.
-     * 
+     *
      * @param  Builder  $builder
      * @param  Model  $model
      * @return void

@@ -17,7 +17,6 @@ use App\V1\Actions\Connection\SendConnectionAction;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Validation\ValidationException;
 
 class ConnectionContoller extends Controller
 {
@@ -57,7 +56,7 @@ class ConnectionContoller extends Controller
     public function pending()
     {
         Gate::authorize('viewAny', Connection::class);
-        $connections = $this->listConnections->handle(enConnectionStatus::PENGING->value);
+        $connections = $this->listConnections->handle(enConnectionStatus::PENDING->value);
 
         return $this->successResponse(
             data: ConnectionResource::collection($connections),
@@ -75,15 +74,7 @@ class ConnectionContoller extends Controller
     {
         Gate::authorize('create', Connection::class);
 
-        try {
-            $connection = $this->sendConnectionAction->handle($request->user(), $user);
-        } catch (ValidationException $e) {
-            return $this->errorResponse(
-                message: $e->getMessage(),
-                errors: $e->errors(),
-                code: 422,
-            );
-        }
+        $connection = $this->sendConnectionAction->handle($request->user(), $user);
 
         return $this->successResponse(
             data: new ConnectionResource($connection->load('receiver')),
@@ -96,21 +87,13 @@ class ConnectionContoller extends Controller
      * Accept a pending connection request.
      *
      * @param  Connection  $connection  The pending connection request to accept.
-     * @return JsonResponse HTTP 200 with the updated connection, or HTTP 422 on a business rule violation.
+     * @return JsonResponse HTTP 200 with the updated connection.
      */
     public function accepte(Connection $connection): JsonResponse
     {
         Gate::authorize('accept', $connection);
 
-        try {
-            $connection = $this->acceptConnectionAction->handle(auth()->user(), $connection);
-        } catch (ValidationException $e) {
-            return $this->errorResponse(
-                message: $e->getMessage(),
-                errors: $e->errors(),
-                code: 422,
-            );
-        }
+        $connection = $this->acceptConnectionAction->handle(auth()->user(), $connection);
 
         return $this->successResponse(
             data: new ConnectionResource($connection->load('receiver')),
@@ -122,21 +105,13 @@ class ConnectionContoller extends Controller
      * Reject a pending connection request.
      *
      * @param  Connection  $connection  The pending connection request to reject.
-     * @return JsonResponse HTTP 200 with the updated connection, or HTTP 422 on a business rule violation.
+     * @return JsonResponse HTTP 200 with the updated connection.
      */
     public function reject(Connection $connection): JsonResponse
     {
         Gate::authorize('reject', $connection);
 
-        try {
-            $connection = $this->rejectConnectionAction->handle(auth()->user(), $connection);
-        } catch (ValidationException $e) {
-            return $this->errorResponse(
-                message: $e->getMessage(),
-                errors: $e->errors(),
-                code: 422,
-            );
-        }
+        $connection = $this->rejectConnectionAction->handle(auth()->user(), $connection);
 
         return $this->successResponse(
             data: new ConnectionResource($connection->load('receiver')),
@@ -148,21 +123,13 @@ class ConnectionContoller extends Controller
      * Remove an accepted connection.
      *
      * @param  Connection  $connection  The connection to remove.
-     * @return JsonResponse HTTP 200 on success, or HTTP 422 on a business rule violation.
+     * @return JsonResponse HTTP 200 on success.
      */
     public function destroy(Connection $connection): JsonResponse
     {
         Gate::authorize('delete', $connection);
 
-        try {
-            $this->deleteConnectionAction->handle(auth()->user(), $connection);
-        } catch (ValidationException $e) {
-            return $this->errorResponse(
-                message: $e->getMessage(),
-                errors: $e->errors(),
-                code: 422,
-            );
-        }
+        $this->deleteConnectionAction->handle(auth()->user(), $connection);
 
         return $this->successResponse(
             message: 'Connection deleted successfully.',
@@ -173,15 +140,7 @@ class ConnectionContoller extends Controller
     {
         Gate::authorize('block', $connection);
 
-        try {
-            $this->blockConnectionAction->handle(auth()->user(), $connection);
-        } catch (ValidationException $e) {
-            return $this->errorResponse(
-                message: $e->getMessage(),
-                errors: $e->errors(),
-                code: 422,
-            );
-        }
+        $this->blockConnectionAction->handle(auth()->user(), $connection);
 
         return $this->successResponse(
             message: 'Connection blocked successfully.',
