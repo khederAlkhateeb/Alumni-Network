@@ -2,11 +2,17 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Controller;
+
+ use App\Http\Controllers\Controller;
 use App\Http\Requests\Message\SendMessageRequest;
+use App\Http\Resources\ConversationResource;
 use App\Models\Conversation;
 use App\V1\Actions\Messages\GetConversationMessagesAction;
-use App\V1\Actions\Messages\SendMessageAction;
+use App\V1\Actions\Messages\ListConversationsAction;
+use App\V1\Actions\Messages\MarkMessagesAsReadAction;
+ use App\V1\Actions\Messages\SendMessageAction;
+ use Illuminate\Http\Request;
+
 
 class MessageController extends Controller
 {
@@ -66,4 +72,45 @@ class MessageController extends Controller
             code: 201,
         );
     }
-}
+
+
+/**
+     * Display a paginated list of conversations for the authenticated user.
+     *
+     * @param Request $request The incoming HTTP request instance.
+     * @param ListConversationsAction $action The action responsible for fetching conversations.
+     * @return \Illuminate\Http\JsonResponse JSON response containing the conversation resource collection.
+     */
+    public function index(Request $request, ListConversationsAction $action)
+    {
+        $user = $request->user();
+
+        $conversations = $action->handle($user);
+
+        return $this->successResponse(
+            data: ConversationResource::collection($conversations),
+            message: 'Get Conversation successfully',
+            code: 200,
+        );
+    }
+
+    /**
+     * Mark all unread messages from a specific sender as read.
+     *
+     * @param Request $request The incoming HTTP request instance.
+     * @param mixed $uid The ID of the sender whose messages are being marked as read.
+     * @param MarkMessagesAsReadAction $action The action responsible for updating message statuses and broadcasting events.
+     * @return \Illuminate\Http\JsonResponse JSON response indicating success.
+     */
+    public function markAsRead(Request $request, $uid, MarkMessagesAsReadAction $action)
+    {
+        $action->handle($request->user()->id, (int)$uid);
+
+        return $this->successResponse(
+            data: null,
+            message: 'Messages marked as read',
+            code: 200,
+        );
+    } }
+
+

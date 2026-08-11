@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+
+use App\Builders\ConversationQueryBuilder;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -34,5 +36,11 @@ class Conversation extends Model
     public function messages(): HasMany
     {
         return $this->hasMany(Message::class);
+    }
+
+
+    public function newEloquentBuilder($query):ConversationQueryBuilder
+    {
+        return new ConversationQueryBuilder($query);
     }
 }
