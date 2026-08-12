@@ -6,24 +6,21 @@ use App\Models\Event;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
-/*
-|--------------------------------------------------------------------------
-| Record Event Attendance Action
-|--------------------------------------------------------------------------
-|
-| Handles the business logic for marking a registered user as having
-| attended an event. Attendance may only be recorded while the event
-| is actually taking place (between its start and end dates).
-|
-*/
-
+/**
+ * Action to record attendance for a registered user.
+ *
+ * Enforces business rules:
+ * - Attendance can only be recorded while the event is currently ongoing.
+ */
 class RecordEventAttendance
 {
     /**
-     * Record attendance for the user referenced in $data.
+     * Record attendance for the specified user.
      *
      * @param  Event  $event
-     * @param  array{user_id: int|string}  $data
+     * @param  array{
+     *     user_id: int|string
+     * }  $data
      * @return void
      *
      * @throws ValidationException
@@ -31,8 +28,7 @@ class RecordEventAttendance
     public function handle(Event $event, array $data): void
     {
         DB::transaction(function () use ($event, $data) {
-            // Rule 6.4: attendance can only be recorded within the event's timeframe.
-            if (!now()->between($event->start_date, $event->end_date)) {
+            if (!$event->isOngoing()) {
                 throw ValidationException::withMessages([
                     'event' => ['Attendance can only be recorded during the event timeframe.'],
                 ]);

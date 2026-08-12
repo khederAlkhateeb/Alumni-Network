@@ -8,11 +8,14 @@ use App\Policies\UniversityPolicy;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Attributes\UsePolicy;
+use Illuminate\Database\Eloquent\Attributes\Appends;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Support\Facades\Storage;
 
 #[Fillable([
     'name',
@@ -24,9 +27,32 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 ])]
 #[UsePolicy(UniversityPolicy::class)]
 #[ScopedBy(UniversityScope::class)]
+#[Appends(['logo_url'])]
 class University extends Model
 {
     use HasFactory;
+    /**
+     * The attributes that should be hidden for serialization.
+     *
+     * @var array<int, string>
+     */
+    protected $hidden = [
+        'logo',
+        'created_by',
+        'updated_by',
+    ];
+
+    /**
+     * Interact with the university logo asset URL.
+     *
+     * @return Attribute
+     */
+    protected function logoUrl(): Attribute
+    {
+        return Attribute::get(
+            fn() => $this->logo ? Storage::url($this->logo) : null
+        );
+    }
 
     public function newEloquentBuilder($query): UniversityQueryBuilder
     {

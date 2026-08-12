@@ -13,31 +13,41 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
+
 #[Fillable([
     'user_id',
-        'major_id',
-        'enrollment_number',
-        'enrollment_year',
-        'expected_graduation_year',
-        'status',
+    'major_id',
+    'enrollment_number',
+    'enrollment_year',
+    'expected_graduation_year',
+    'status',
 ])]
 #[Appends([
     'years_until_graduation',
-        'is_pending',
+    'is_pending',
 ])]
 
 #[UseEloquentBuilder(StudentProfileBuilder::class)]
 class StudentProfile extends Model
-{use HasFactory;
+{
+    use HasFactory;
 
+    /**
+     * The attributes that should be hidden for serialization.
+     *
+     * @var array<int, string>
+     */
+    protected $hidden = [
+        'enrollment_number',
+    ];
 
     protected function casts(): array
     {
         return [
-        'enrollment_year'           => 'integer',
-        'expected_graduation_year'  => 'integer',
-        'created_at'                => 'datetime',
-        'status' => \App\Enums\ProfileStatus::class,
+            'enrollment_year'           => 'integer',
+            'expected_graduation_year'  => 'integer',
+            'created_at'                => 'datetime',
+            'status' => \App\Enums\ProfileStatus::class,
         ];
     }
 
@@ -68,7 +78,7 @@ class StudentProfile extends Model
     |--------------------------------------------------------------------
     */
 
-      protected function yearsUntilGraduation(): Attribute
+    protected function yearsUntilGraduation(): Attribute
     {
         return Attribute::get(function () {
             if (! $this->expected_graduation_year) {
@@ -82,9 +92,6 @@ class StudentProfile extends Model
 
     protected function isPending(): Attribute
     {
-        return Attribute::get(fn () => $this->status === ProfileStatus::PENDING);
+        return Attribute::get(fn() => $this->status === ProfileStatus::PENDING);
     }
 }
-
-
-

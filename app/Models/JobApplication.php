@@ -3,10 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use ILLuminate\Database\Eloquent\Attributes\Appends;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Builders\JobApplicationBuilder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Support\Facades\Storage;
 
 
 #[Fillable([
@@ -17,6 +20,7 @@ use App\Builders\JobApplicationBuilder;
     'status',
 
 ])]
+#[Appends(['resume_url'])]
 class JobApplication extends Model
 {
     use HasFactory;
@@ -32,6 +36,27 @@ class JobApplication extends Model
         self::STATUS_SHORTLISTED,
         self::STATUS_REJECTED,
     ];
+
+    /**
+     * The attributes that should be hidden for serialization.
+     *
+     * @var array<int, string>
+     */
+    protected $hidden = [
+        'resume',
+    ];
+
+    /**
+     * Interact with the application's resume download URL.
+     *
+     * @return Attribute
+     */
+    protected function resumeUrl(): Attribute
+    {
+        return Attribute::get(
+            fn() => $this->resume ? Storage::url($this->resume) : null
+        );
+    }
     public function jobListing(): BelongsTo
     {
         return $this->belongsTo(JobListing::class);
@@ -43,7 +68,7 @@ class JobApplication extends Model
     }
 
     public function newEloquentBuilder($query): JobApplicationBuilder
-{
-    return new JobApplicationBuilder($query);
-}
+    {
+        return new JobApplicationBuilder($query);
+    }
 }

@@ -6,11 +6,14 @@ use App\Enums\PostVisibility;
 use App\Policies\PostPolicy;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UsePolicy;
+use Illuminate\Database\Eloquent\Attributes\Appends;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * Class Post
@@ -35,6 +38,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
  */
 #[Fillable(['user_id', 'content', 'image', 'visibility'])]
 #[UsePolicy(PostPolicy::class)]
+#[Appends(['image_url'])]
 class Post extends Model
 {
     use HasFactory;
@@ -48,6 +52,27 @@ class Post extends Model
         return [
             'visibility' => PostVisibility::class,
         ];
+    }
+
+    /**
+     * The attributes that should be hidden for serialization.
+     *
+     * @var array<int, string>
+     */
+    protected $hidden = [
+        'image',
+    ];
+
+    /**
+     * Interact with the post image public asset URL.
+     *
+     * @return Attribute
+     */
+    protected function imageUrl(): Attribute
+    {
+        return Attribute::get(
+            fn() => $this->image ? Storage::url($this->image) : null
+        );
     }
 
     /**
@@ -105,14 +130,18 @@ class Post extends Model
     public function scopeUniversityAnnouncements($query, $universityId)
     {
         return $query->where('visibility', PostVisibility::University->value)
-            ->whereHas('user.alumniProfile.major.faculty',
-                fn($q) => $q->where('university_id', $universityId));
+            ->whereHas(
+                'user.alumniProfile.major.faculty',
+                fn($q) => $q->where('university_id', $universityId)
+            );
     }
 
     public function scopeFromSameUniversityAlumni($query, $universityId)
     {
         return $query->where('visibility', PostVisibility::Public->value)
-            ->whereHas('user.alumniProfile.major.faculty',
-                fn($q) => $q->where('university_id', $universityId));
+            ->whereHas(
+                'user.alumniProfile.major.faculty',
+                fn($q) => $q->where('university_id', $universityId)
+            );
     }
 }

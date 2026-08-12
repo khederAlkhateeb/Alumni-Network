@@ -79,6 +79,15 @@ class AlumniProfile extends Model
     use HasFactory;
 
     /**
+     * The attributes that should be hidden for serialization.
+     *
+     * @var array<int, string>
+     */
+    protected $hidden = [
+        'student_number',
+    ];
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
@@ -181,7 +190,7 @@ class AlumniProfile extends Model
                 return false;
             }
 
-            return $this->workExperiences->contains(fn (WorkExperience $exp) => is_null($exp->end_date));
+            return $this->workExperiences->contains(fn(WorkExperience $exp) => is_null($exp->end_date));
         });
     }
 
@@ -197,7 +206,7 @@ class AlumniProfile extends Model
 
             return collect($this->completionMap())
                 ->filter()
-                ->sum(fn ($_, $field) => $weights[$field] ?? 0);
+                ->sum(fn($_, $field) => $weights[$field] ?? 0);
         });
     }
 
@@ -213,7 +222,7 @@ class AlumniProfile extends Model
 
             return collect($this->completionMap())
                 ->reject()
-                ->map(fn ($_, $field) => [
+                ->map(fn($_, $field) => [
                     'field' => $field,
                     'points' => $weights[$field] ?? 0,
                 ])

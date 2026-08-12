@@ -4,6 +4,9 @@ namespace App\Http\Requests\Api\V1\Events;
 
 use App\Models\Event;
 use Illuminate\Foundation\Http\FormRequest;
+use App\Enums\EventStatus;
+use App\Enums\EventType;
+use Illuminate\Validation\Rules\Enum;
 
 /*
 |--------------------------------------------------------------------------
@@ -40,13 +43,13 @@ class StoreEventRequest extends FormRequest
         return [
             'title'        => ['required', 'string', 'max:255'],
             'description'  => ['nullable', 'string', 'max:5000'],
-            'type'         => ['required', 'in:campus,online,hybrid'],
+            'type'   => ['required', new Enum(EventType::class)],
             'location'     => ['required_if:type,campus,hybrid', 'nullable', 'string', 'max:255'],
             'meeting_link' => ['required_if:type,online,hybrid', 'nullable', 'url', 'max:255'],
             'start_date'   => ['required', 'date', 'after_or_equal:today'],
             'end_date'     => ['required', 'date', 'after:start_date'],
             'capacity'     => ['nullable', 'integer', 'min:1'],
-            'status'       => ['sometimes', 'in:upcoming,ongoing,completed,cancelled'],
+            'status' => ['required', new Enum(EventStatus::class)],
         ];
     }
 

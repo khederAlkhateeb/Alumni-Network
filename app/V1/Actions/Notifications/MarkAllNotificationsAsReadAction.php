@@ -4,20 +4,15 @@ namespace App\V1\Actions\Notifications;
 
 use App\Models\User;
 
-/*
-|--------------------------------------------------------------------------
-| Mark All Notifications As Read Action
-|--------------------------------------------------------------------------
-|
-| Marks ALL of the user's unread notifications as read in a single
-| bulk UPDATE query (not a per-row loop).
-|
-*/
-
+/**
+ * Action to mark all unread notifications of a user as read.
+ *
+ * Executes a single bulk update query for performance efficiency without using per-row loops.
+ */
 class MarkAllNotificationsAsReadAction
 {
     /**
-     * Mark all of the given user's unread notifications as read.
+     * Execute the bulk mark-as-read workflow.
      *
      * @param  User  $user
      * @return int  Number of notifications marked as read.

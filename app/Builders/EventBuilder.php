@@ -2,22 +2,16 @@
 
 namespace App\Builders;
 
+use App\Enums\EventStatus;
+use App\Enums\EventType;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
  * Custom query builder for the Event model.
  *
- * Encapsulates reusable query constraints (status filters, capacity
- * checks, date-range filters, etc.) so they stay out of controllers
- * and actions, and remain chainable and testable.
- *
  * @method static EventBuilder query()
- * @method static EventBuilder upcoming()
- * @method static EventBuilder ongoing()
- * @method static EventBuilder completed()
- * @method static EventBuilder cancelled()
- * @method static EventBuilder status(string $status)
- * @method static EventBuilder ofType(string $type)
+ * @method static EventBuilder status(EventStatus $status)
+ * @method static EventBuilder ofType(EventType $type)
  * @method static EventBuilder forUniversity(int $universityId)
  * @method static EventBuilder startingBetween(\DateTimeInterface|string $from, \DateTimeInterface|string $to)
  * @method static EventBuilder notFull()
@@ -27,61 +21,21 @@ class EventBuilder extends Builder
     /**
      * Filter events with the given status.
      *
-     * @param  string  $status
+     * @param EventStatus $status
      * @return static
      */
-    public function status(string $status): static
+    public function status(EventStatus $status): static
     {
-        return $this->where('status', $status);
-    }
-
-    /**
-     * Filter only upcoming events.
-     *
-     * @return static
-     */
-    public function upcoming(): static
-    {
-        return $this->status('upcoming');
-    }
-
-    /**
-     * Filter only ongoing (currently happening) events.
-     *
-     * @return static
-     */
-    public function ongoing(): static
-    {
-        return $this->status('ongoing');
-    }
-
-    /**
-     * Filter only completed events.
-     *
-     * @return static
-     */
-    public function completed(): static
-    {
-        return $this->status('completed');
-    }
-
-    /**
-     * Filter only cancelled events.
-     *
-     * @return static
-     */
-    public function cancelled(): static
-    {
-        return $this->status('cancelled');
+        return $this->where('status', $status); // Laravel automatically handles Enum casting
     }
 
     /**
      * Filter events by their type (on_campus, online, hybrid).
      *
-     * @param  string  $type
+     * @param EventType $type
      * @return static
      */
-    public function ofType(string $type): static
+    public function ofType(EventType $type): static
     {
         return $this->where('type', $type);
     }
@@ -89,7 +43,7 @@ class EventBuilder extends Builder
     /**
      * Filter events belonging to a specific university.
      *
-     * @param  int  $universityId
+     * @param int $universityId
      * @return static
      */
     public function forUniversity(int $universityId): static
@@ -100,8 +54,8 @@ class EventBuilder extends Builder
     /**
      * Filter events whose start date falls within the given range.
      *
-     * @param  \DateTimeInterface|string  $from
-     * @param  \DateTimeInterface|string  $to
+     * @param \DateTimeInterface|string $from
+     * @param \DateTimeInterface|string $to
      * @return static
      */
     public function startingBetween(\DateTimeInterface|string $from, \DateTimeInterface|string $to): static
@@ -111,7 +65,7 @@ class EventBuilder extends Builder
 
     /**
      * Filter events that have not yet reached their capacity.
-     * Events with a null capacity are considered unlimited and always included.
+     * Events with a null capacity are considered unlimited.
      *
      * @return static
      */
