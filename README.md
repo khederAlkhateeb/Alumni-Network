@@ -285,7 +285,6 @@ alumni-network/
 | :--- | :--- | :--- | :--- |
 | `Accept` | `application/json` | Ensures the API returns JSON instead of an HTML error page. | لضمان استجابة JSON بدلاً من صفحة خطأ HTML. |
 | `Authorization` | `Bearer {token}` | Required on every protected route — a Sanctum personal access token. | مطلوب في كل مسار محمي — توكن وصول شخصي عبر Sanctum. |
-| `Accept-Language` | `en` \| `ar` | Preferred locale for validation and system messages. | اللغة المفضلة لرسائل التحقق ورسائل النظام. |
 | `Content-Type` | `application/json` or `multipart/form-data` | JSON for standard payloads; multipart when uploading a file (e.g. profile photo, post image). | JSON للحمولات العادية، ومتعدد الأجزاء عند رفع ملف. |
 
 ### Standard Error Envelope | صيغة الأخطاء الموحدة
