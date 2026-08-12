@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\V1\AlumniProfileController;
+use App\Http\Middleware\EnsureTokenIsFullAccess;
 use Illuminate\Support\Facades\Route;
 
 /**
@@ -44,7 +45,8 @@ Route::middleware(['auth:sanctum', 'role:alumni'])->group(function () {
      *
      * @see AlumniProfileController::showMe()
      */
-    Route::get('alumni/me', [AlumniProfileController::class, 'showMe']);
+    Route::get('alumni/me', [AlumniProfileController::class, 'showMe'])
+        ->withoutMiddleware([EnsureTokenIsFullAccess::class]);
 
     /**
      * Update the authenticated alumni user's profile.
@@ -54,7 +56,8 @@ Route::middleware(['auth:sanctum', 'role:alumni'])->group(function () {
      *
      * @see AlumniProfileController::updateMe()
      */
-    Route::put('alumni/me/updateMe', [AlumniProfileController::class, 'updateMe']);
+    Route::put('alumni/me/updateMe', [AlumniProfileController::class, 'updateMe'])
+        ->withoutMiddleware([EnsureTokenIsFullAccess::class]);
 
     /**
      * Toggle mentor status for the authenticated alumni user.
@@ -67,7 +70,7 @@ Route::middleware(['auth:sanctum', 'role:alumni'])->group(function () {
     Route::post('alumni/me/toggle-mentor', [AlumniProfileController::class, 'toggleMentor'])
         ->name('alumni.me.toggle-mentor');
 
-    
+
 
     /**
      * Retrieve a specific alumni profile by ID.
@@ -92,5 +95,5 @@ Route::middleware(['auth:sanctum', 'role:alumni'])->group(function () {
      * @see AlumniProfileController::completeProfile()
      */
     Route::post('alumni/me/complete-profile', [AlumniProfileController::class, 'completeProfile'])
-        ->name('alumni.me.complete-profile');
+        ->withoutMiddleware([EnsureTokenIsFullAccess::class])->name('alumni.me.complete-profile');
 });

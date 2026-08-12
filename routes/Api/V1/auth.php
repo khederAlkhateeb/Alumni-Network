@@ -1,8 +1,9 @@
 <?php
 
 use App\Http\Controllers\Api\V1\AuthController;
-use App\Http\Controllers\Api\V1\SessionController;
 use App\Http\Controllers\Api\V1\RegistrationManagementController;
+use App\Http\Controllers\Api\V1\SessionController;
+use App\Http\Middleware\EnsureTokenIsFullAccess;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -58,7 +59,9 @@ Route::middleware('auth:sanctum')->prefix('auth')->group(function () {
      * Return the currently authenticated user's data.
      * @see SessionController::me()
      */
-    Route::get('/me', [SessionController::class, 'me'])->name('api.v1.auth.me');
+    Route::get('/me', [SessionController::class, 'me'])->name('api.v1.auth.me')
+    ->withoutMiddleware([EnsureTokenIsFullAccess::class]);
+
     /**
      * Change the authenticated user's password.
      * @see AuthController::changePassword()

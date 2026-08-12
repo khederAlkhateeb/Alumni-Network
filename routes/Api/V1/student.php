@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\V1\StudentProfileController;
+use App\Http\Middleware\EnsureTokenIsFullAccess;
 use Illuminate\Support\Facades\Route;
 
 /**
@@ -36,7 +37,8 @@ Route::middleware('auth:sanctum')->group(function () {
      *
      * @see StudentProfileController::showMe()
      */
-    Route::get('/students/me', [StudentProfileController::class, 'showMe']);
+    Route::get('/students/me', [StudentProfileController::class, 'showMe'])
+    ->withoutMiddleware([EnsureTokenIsFullAccess::class]);
 
     /**
      * Update the authenticated student's profile.
@@ -46,7 +48,8 @@ Route::middleware('auth:sanctum')->group(function () {
      *
      * @see StudentProfileController::updateMe()
      */
-    Route::put('/students/me', [StudentProfileController::class, 'updateMe']);
+    Route::put('/students/me', [StudentProfileController::class, 'updateMe'])
+    ->withoutMiddleware([EnsureTokenIsFullAccess::class]);
 
     /**
      * View another student's public profile.

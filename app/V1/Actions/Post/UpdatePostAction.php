@@ -2,10 +2,10 @@
 
 namespace App\V1\Actions\Post;
 
+use App\Events\PostUpdated;
 use App\Models\Post;
 use App\Models\User;
 use App\Services\UploadFileService;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 /**

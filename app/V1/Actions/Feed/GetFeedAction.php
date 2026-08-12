@@ -30,6 +30,7 @@ class GetFeedAction
             "feed_user_{$user->id}",
             300,
             function () use ($user) {
+                $user->loadMissing(['alumniProfile.major.faculty']);
                 $connectionIds = $user->connectedUserIds();
                 $universityId = $user->alumniProfile?->major?->faculty?->university_id;
 
