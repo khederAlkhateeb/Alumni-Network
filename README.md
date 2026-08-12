@@ -19,18 +19,40 @@
 <details>
 <summary><strong>English</strong></summary>
 
-**Alumni Network** is a **Laravel 13** backend API that powers a multi-university alumni platform. It manages the full lifecycle of an academic community — from **registration and university-scoped approval workflows**, through **alumni/student profiles, job listings, mentorship programs, and connections**, to a **real-time private messaging engine** and an activity **feed** driven by domain events.
+The day a student graduates, their formal relationship with the university ends — there's no place to return to for career guidance, and no channel to hear about opportunities from fellow alumni once they walk out the gate. A graduate who spent years building a network of peers gradually loses touch with it. **Alumni Network exists to close that gap**: it is a permanent bridge between a university and its graduates — an active professional network connecting alumni to each other and to current students, bringing job opportunities, mentorship, and events into one place. *The university doesn't end at graduation — it becomes a lifelong community.*
 
-The codebase is deliberately engineered around **thin controllers**, **single-purpose Action classes**, and a **hardened file-upload pipeline**, so that every unit of business logic is small, independently testable, and easy to reason about — even as the number of domains (alumni, students, universities, jobs, events, mentorship, messaging, reports…) keeps growing.
+**Alumni Network** is the **Laravel 13** backend API that implements this platform. It is built around four roles with clearly separated responsibilities:
+
+| Role | Core capabilities |
+| :--- | :--- |
+| **Super Admin** | Creates universities in the system and assigns each one's University Admin; views cross-university statistics. |
+| **University Admin** | Manages the academic structure (faculties & majors); manually reviews and approves/rejects alumni & student registrations; creates official events and mentorship programs; manages university-posted job listings. |
+| **Alumni** | A verified graduate (student ID + graduation year checked by an admin). Builds a professional profile, connects with the network, posts to the Feed, publishes/closes job opportunities, and can act as a **Mentor** or **Mentee** in mentorship programs. |
+| **Current Student** | Verified via enrollment ID. Browses alumni profiles and applies to jobs, requests a mentor from alumni in their own faculty — but **cannot** publish job listings or Feed posts. |
+
+Functionally, the platform covers: **university-scoped registration approval**, **alumni/student profiles** (with work experience & a shared skills taxonomy), a **connections graph** (pending → accepted/rejected/blocked, with a 30-day cooldown on re-requesting after rejection), a **cursor-paginated Feed** aggregating posts from connections, university announcements, and fellow alumni, **job listings** with an application pipeline, **university events** with capacity-aware registration and attendance tracking, **mentorship programs** with mentor-capacity enforcement, and **direct messaging** restricted to connected users (with an explicit mentor↔mentee exception).
+
+The codebase is deliberately engineered around **thin controllers**, **single-purpose Action classes**, and a **hardened file-upload pipeline** (see [Key Architectural Decisions](#key-architectural-decisions--القرارات-المعمارية-الأساسية) below), so that every one of these business rules lives in a small, independently testable unit — even as the number of domains (alumni, students, universities, jobs, events, mentorship, messaging, reports…) keeps growing.
 
 </details>
 
 <details>
 <summary><strong>العربية</strong></summary>
 
-**Alumni Network** هو Backend API مبني بإطار عمل **Laravel 13**، يشغّل منصة خريجين متعددة الجامعات. يدير النظام الدورة الكاملة لمجتمع أكاديمي متكامل — بدءاً من **التسجيل وتدفقات الموافقة على مستوى كل جامعة**، مروراً بـ **ملفات الخريجين والطلاب، وإعلانات الوظائف، وبرامج الإرشاد الأكاديمي (Mentorship)، وشبكة التواصل بينهم**، وصولاً إلى **محرك مراسلة فورية خاصة** وخلاصة أنشطة (Feed) مبنية على الأحداث (Events).
+في اليوم الذي يتخرج فيه الطالب، تنتهي رسمياً علاقته بالجامعة — لا يوجد مكان يعود إليه إذا احتاج توجيهاً مهنياً، ولا قناة يعرف من خلالها الفرص القادمة من زملائه الخريجين بمجرد مغادرته البوابة الجامعية. الخريج الذي أمضى سنوات في بناء شبكة من الزملاء يفقدها تدريجياً. **من هنا وُلدت فكرة Alumni Network**: جسر دائم بين الجامعة وخريجيها — شبكة مهنية نشطة تربط الخريجين بعضهم ببعض وبالطلاب الحاليين، وتُتيح فرص العمل والإرشاد المهني والفعاليات في مكان واحد. *الجامعة لا تنتهي بالتخرج — هي تصبح مجتمعاً يدوم.*
 
-تم بناء الكود البرمجي عن قصد حول مبدأ **المتحكمات النحيفة (Thin Controllers)**، وفئات **أفعال (Actions) أحادية المسؤولية**، و**خط أنابيب رفع ملفات محصّن أمنياً**، بحيث تبقى كل وحدة من منطق العمل صغيرة، قابلة للاختبار بشكل مستقل، وسهلة الفهم — حتى مع استمرار نمو عدد النطاقات (خريجون، طلاب، جامعات، وظائف، فعاليات، إرشاد أكاديمي، مراسلة، تقارير...).
+**Alumni Network** هو الـ Backend API المبني بإطار عمل **Laravel 13** الذي يُجسّد هذه الفكرة عملياً. يقوم النظام على أربعة أدوار بمسؤوليات مفصولة بوضوح:
+
+| الدور | أبرز الصلاحيات |
+| :--- | :--- |
+| **Super Admin** | ينشئ الجامعات في النظام ويُعيّن الـ University Admin لكل جامعة؛ يرى إحصائيات جميع الجامعات. |
+| **University Admin** | يدير البنية الأكاديمية للجامعة (الكليات والتخصصات)؛ يعتمد يدوياً طلبات تسجيل الخريجين والطلاب بعد التحقق؛ ينشئ الفعاليات وبرامج الإرشاد الرسمية؛ يدير فرص العمل المنشورة من الجامعة. |
+| **Alumni** | خريج موثّق (يُقدّم رقم هويته الجامعية وسنة تخرجه للتحقق). يبني ملفه المهني، يتواصل مع الشبكة، ينشر في الـ Feed، ينشر/يُلغي فرص عمل، ويشارك في برامج الإرشاد كـ Mentor أو Mentee. |
+| **Current Student** | يُقدّم رقم قيده للتحقق من انتسابه للجامعة. يتصفح ملفات الخريجين ويتقدم لفرص العمل، ويطلب Mentor من الخريجين في تخصصه — لكنه **لا يستطيع** نشر فرص عمل أو منشورات في الـ Feed. |
+
+على مستوى الوظائف، يغطي النظام: **موافقة تسجيل مقيّدة بكل جامعة**، **ملفات الخريجين والطلاب** (مع تجارب العمل وقائمة مهارات موحّدة)، **شبكة اتصالات** (معلّق ← مقبول/مرفوض/محظور، مع فترة انتظار 30 يوماً قبل إعادة إرسال طلب مرفوض)، **Feed مرتّب زمنياً وقائم على Cursor Pagination** يجمع منشورات المتواصلين وإعلانات الجامعة ومنشورات خريجي نفس الجامعة، **فرص عمل** بدورة تقديم كاملة، **فعاليات جامعية** بتسجيل مقيّد بالسعة وتتبع حضور فعلي، **برامج إرشاد** بحدّ أقصى لعدد المتدربين لكل مرشد، و**مراسلة مباشرة** مقيّدة بالمتواصلين (مع استثناء صريح بين المرشد والمتدرب).
+
+تم بناء الكود البرمجي عن قصد حول مبدأ **المتحكمات النحيفة (Thin Controllers)**، وفئات **أفعال (Actions) أحادية المسؤولية**، و**خط أنابيب رفع ملفات محصّن أمنياً** (انظر [القرارات المعمارية الأساسية](#key-architectural-decisions--القرارات-المعمارية-الأساسية) أدناه)، بحيث تعيش كل قاعدة من قواعد العمل هذه داخل وحدة صغيرة وقابلة للاختبار بشكل مستقل — حتى مع استمرار نمو عدد النطاقات (خريجون، طلاب، جامعات، وظائف، فعاليات، إرشاد أكاديمي، مراسلة، تقارير...).
 
 </details>
 
@@ -300,6 +322,92 @@ Centralized in `bootstrap/app.php` via `withExceptions()` — every API exceptio
 ### Authentication Flow | تدفق المصادقة
 
 `POST /api/v1/auth/register` → account created with **pending** status → a university admin (`role:uni_admin`) reviews it via `POST /api/v1/uni_admin/universities/{university}/registrations/{user}/approve` → the user can then `POST /api/v1/auth/login` to receive a Sanctum bearer token.
+
+### Endpoints | نقاط النهاية
+
+All endpoints below are relative to `/api/v1` and require `Authorization: Bearer {token}` unless marked **Public**. This is the as-implemented route list (`routes/Api/V1/*.php`), grouped by domain.
+
+#### 🔐 Authentication | المصادقة
+
+| Method | Endpoint | Description | الوصف | Access |
+| :--- | :--- | :--- | :--- | :--- |
+| `POST` | `/auth/register` | Register a new account (alumni or student) — created as `pending` | تسجيل حساب جديد بحالة معلّق | Public |
+| `POST` | `/auth/login` | Authenticate an approved user, issue a Sanctum token | تسجيل الدخول والحصول على توكن | Public |
+| `POST` | `/auth/forgot-password` | Send a password reset link | إرسال رابط استعادة كلمة المرور | Public |
+| `POST` | `/auth/reset-password` | Reset password using the reset token | تعيين كلمة مرور جديدة | Public |
+| `POST` | `/auth/logout` | Revoke the current access token | إلغاء التوكن الحالي | Auth |
+| `GET` | `/auth/me` | Return the authenticated user's data | بيانات المستخدم الحالي | Auth |
+| `PUT` | `/auth/change-password` | Change the authenticated user's password | تغيير كلمة المرور | Auth |
+
+#### ✅ Registration Approvals | اعتماد التسجيل
+
+| Method | Endpoint | Description | الوصف | Access |
+| :--- | :--- | :--- | :--- | :--- |
+| `GET` | `/uni_admin/universities/{university}/pending-registrations` | List pending registrations for a university | طلبات التسجيل المعلّقة | Uni Admin |
+| `POST` | `/uni_admin/universities/{university}/registrations/{user}/approve` | Approve a user's registration | اعتماد تسجيل مستخدم | Uni Admin |
+| `POST` | `/uni_admin/universities/{university}/registrations/{user}/reject` | Reject a user's registration | رفض تسجيل مستخدم | Uni Admin |
+
+#### 🤝 Connections | الاتصالات
+
+| Method | Endpoint | Description | الوصف | Access |
+| :--- | :--- | :--- | :--- | :--- |
+| `GET` | `/connections` | List the authenticated user's connections | قائمة اتصالاتي | Auth |
+| `GET` | `/connections/pending` | List incoming pending connection requests | الطلبات الواردة المعلّقة | Auth |
+| `POST` | `/connections/{user}` | Send a connection request | إرسال طلب اتصال | Auth |
+| `POST` | `/connections/{connection}/accept` | Accept a pending request | قبول طلب اتصال | Auth |
+| `POST` | `/connections/{connection}/reject` | Reject a pending request | رفض طلب اتصال | Auth |
+| `DELETE` | `/connections/{connection}` | Remove an accepted connection | إلغاء اتصال قائم | Auth |
+| `POST` | `/connections/{connection}/block` | Block a connection | حظر مستخدم | Auth |
+
+#### 📰 Feed & Posts | الخلاصة والمنشورات
+
+| Method | Endpoint | Description | الوصف | Access |
+| :--- | :--- | :--- | :--- | :--- |
+| `GET` | `/feed` | Cursor-paginated feed (connections + university announcements + fellow alumni) | الخلاصة المخصصة | Auth |
+| `POST` | `/posts` | Create a new post (optional image, 3 visibility levels) | نشر منشور جديد | Auth |
+| `GET` | `/posts/{post}` | Get a single post's details | تفاصيل منشور | Auth |
+| `PUT` | `/posts/{post}` | Update a post (owner only) | تعديل منشور (صاحبه فقط) | Auth |
+| `DELETE` | `/posts/{post}` | Delete a post | حذف منشور | Auth |
+| `POST` | `/posts/{post}/comments` | Add a comment (or threaded reply) | إضافة تعليق | Auth |
+| `GET` | `/posts/{post}/comments` | List a post's comments | قائمة التعليقات | Auth |
+| `DELETE` | `/posts/{post}/comments/{comment}` | Delete a comment | حذف تعليق | Auth |
+
+#### 💼 Job Listings | فرص العمل
+
+| Method | Endpoint | Description | الوصف | Access |
+| :--- | :--- | :--- | :--- | :--- |
+| `GET` | `/jobs` | List job listings | قائمة فرص العمل | `view-jobs` |
+| `POST` | `/jobs` | Publish a job listing | نشر فرصة عمل | `create-job` |
+| `GET` | `/jobs/my-applications` | List my own job applications | طلباتي للوظائف | `apply-for-job` |
+| `GET` | `/jobs/{jobListing}` | Job listing details | تفاصيل فرصة عمل | `view-jobs` |
+| `PUT` | `/jobs/{jobListing}` | Update a job listing | تعديل فرصة عمل | `edit-own-job` |
+| `DELETE` | `/jobs/{jobListing}` | Delete a job listing | حذف فرصة عمل | `delete-own-job` \| `delete-any-job` |
+| `PATCH` | `/jobs/{jobListing}/close` | Close the application window | إغلاق باب التقديم | `close-job` |
+| `POST` | `/jobs/{jobListing}/apply` | Apply to a job listing | التقدم لفرصة عمل | `apply-for-job` |
+| `GET` | `/jobs/{jobListing}/applications` | List applicants for a listing | قائمة المتقدمين | `view-job-applications` |
+| `PATCH` | `/jobs/{jobListing}/applications/{application}/status` | Update an applicant's status | تحديث حالة متقدم | `update-application-status` |
+
+#### 🎓 Events | الفعاليات
+
+*Nested under `/universities/{university}`; the `event` route binding is scoped to `university`.*
+
+| Method | Endpoint | Description | الوصف | Access |
+| :--- | :--- | :--- | :--- | :--- |
+| `GET` | `/events` | List a university's events | قائمة الفعاليات | Auth |
+| `GET` | `/events/{event}` | Event details | تفاصيل فعالية | Auth |
+| `POST` | `/events/{event}/register` | Register for an event | التسجيل بفعالية | Auth |
+| `DELETE` | `/events/{event}/register` | Cancel event registration | إلغاء التسجيل | Auth |
+| `POST` | `/events` | Create a new event | إنشاء فعالية | Uni Admin |
+| `PUT` | `/events/{event}` | Update an event | تعديل فعالية | Uni Admin |
+| `GET` | `/events/{event}/registrations` | List an event's registrations | قائمة المسجلين | Uni Admin |
+| `POST` | `/events/{event}/attend` | Mark a registrant's attendance | تسجيل الحضور | Uni Admin |
+
+#### 💬 Messages | الرسائل
+
+| Method | Endpoint | Description | الوصف | Access |
+| :--- | :--- | :--- | :--- | :--- |
+| `POST` | `/messages` | Send a message (implicitly creates the conversation) — broadcasts `MessageSent` on the conversation's private channel | إرسال رسالة (تُنشئ المحادثة ضمنياً) وتُبث فورياً | Auth |
+| `GET` | `/conversations/{conversation}/messages` | List a conversation's message history | سجل رسائل محادثة | Auth |
 
 ---
 
