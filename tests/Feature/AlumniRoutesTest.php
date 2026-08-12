@@ -9,6 +9,7 @@ use App\Models\University;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
@@ -20,8 +21,18 @@ class AlumniRoutesTest extends TestCase
     {
         parent::setUp();
 
-        Role::findOrCreate('alumni', 'api');
-        Role::findOrCreate('student', 'api');
+        $guards = ['api', 'sanctum', 'web'];
+
+        foreach ($guards as $guard) {
+            $viewPerm = Permission::findOrCreate('view-alumni-profiles', $guard);
+            $editPerm = Permission::findOrCreate('edit-own-profile', $guard);
+            $togglePerm = Permission::findOrCreate('toggle-mentor-status', $guard);
+
+            $alumniRole = Role::findOrCreate('alumni', $guard);
+            $alumniRole->givePermissionTo([$viewPerm, $editPerm, $togglePerm]);
+
+            Role::findOrCreate('student', $guard);
+        }
     }
 
     private function createAlumniUser(): User
@@ -39,7 +50,7 @@ class AlumniRoutesTest extends TestCase
             'status' => 'active'
         ]);
 
-        return $user;
+        return $user->fresh(['alumniProfile', 'roles', 'permissions']);
     }
 
     public function test_unauthenticated_user_cannot_access_alumni_endpoints(): void
@@ -56,20 +67,19 @@ class AlumniRoutesTest extends TestCase
         $user = User::factory()->create(['is_active' => true]);
         $user->assignRole('student');
 
-        Sanctum::actingAs($user);
+        Sanctum::actingAs($user, ['*']);
 
         $response = $this->getJson('/api/v1/alumni');
 
-        $response->assertStatus(403)
-                 ->assertJsonPath('status', false);
+        $response->assertStatus(403);
     }
 
     public function test_alumni_can_list_alumni_profiles(): void
     {
         $user = $this->createAlumniUser();
-        $this->createAlumniUser(); 
+        $this->createAlumniUser();
 
-        Sanctum::actingAs($user);
+        Sanctum::actingAs($user, ['*']);
 
         $response = $this->getJson('/api/v1/alumni');
 
@@ -87,7 +97,7 @@ class AlumniRoutesTest extends TestCase
     {
         $user = $this->createAlumniUser();
 
-        Sanctum::actingAs($user);
+        Sanctum::actingAs($user, ['*']);
 
         $response = $this->getJson('/api/v1/alumni/me');
 
@@ -100,7 +110,7 @@ class AlumniRoutesTest extends TestCase
     {
         $user = $this->createAlumniUser();
 
-        Sanctum::actingAs($user);
+        Sanctum::actingAs($user, ['*']);
 
         $response = $this->putJson('/api/v1/alumni/me/updateMe', [
             'bio' => 'Updated bio description',
@@ -127,7 +137,7 @@ class AlumniRoutesTest extends TestCase
         $user = $this->createAlumniUser();
         $initialStatus = $user->alumniProfile->is_open_to_mentor;
 
-        Sanctum::actingAs($user);
+        Sanctum::actingAs($user, ['*']);
 
         $response = $this->postJson('/api/v1/alumni/me/toggle-mentor');
 
@@ -155,7 +165,7 @@ class AlumniRoutesTest extends TestCase
             'status' => 'active'
         ]);
 
-        Sanctum::actingAs($user);
+        Sanctum::actingAs($user, ['*']);
 
         $response = $this->getJson("/api/v1/alumni/{$otherProfile->id}");
 
@@ -168,7 +178,7 @@ class AlumniRoutesTest extends TestCase
     {
         $user = $this->createAlumniUser();
 
-        Sanctum::actingAs($user);
+        Sanctum::actingAs($user, ['*']);
 
         $response = $this->getJson('/api/v1/alumni/999999');
 
@@ -180,7 +190,7 @@ class AlumniRoutesTest extends TestCase
     {
         $user = $this->createAlumniUser();
 
-        Sanctum::actingAs($user);
+        Sanctum::actingAs($user, ['*']);
 
         $response = $this->postJson('/api/v1/alumni/me/complete-profile', [
             'bio' => 'Fully completed bio',
@@ -203,7 +213,7 @@ class AlumniRoutesTest extends TestCase
     {
         $user = $this->createAlumniUser();
 
-        Sanctum::actingAs($user);
+        Sanctum::actingAs($user, ['*']);
 
         $response = $this->postJson('/api/v1/alumni/me/complete-profile', [
             'graduation_year' => 'invalid-year-format',

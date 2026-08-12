@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Contracts\Pagination\CursorPaginator;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Validation\ValidatesRequests;
@@ -60,31 +61,30 @@ abstract class Controller extends BaseController
 
     /**
      * Extract structured pagination metrics from a paginator instance.
-     *//**
- * Extract structured pagination metrics from a paginator instance.
- */
-private function getPaginationMeta(Paginator|CursorPaginator $paginator): array
-{
-    if ($paginator instanceof CursorPaginator) {
+     */
+    private function getPaginationMeta(Paginator|CursorPaginator $paginator): array
+    {
+        if ($paginator instanceof CursorPaginator) {
+            return [
+                'per_page'      => $paginator->perPage(),
+                'next_cursor'   => $paginator->nextCursor()?->encode(),
+                'prev_cursor'   => $paginator->previousCursor()?->encode(),
+                'has_more'      => $paginator->hasMorePages(),
+                'path'          => $paginator->path(),
+                'next_page_url' => $paginator->nextPageUrl(),
+                'prev_page_url' => $paginator->previousPageUrl(),
+            ];
+        }
+
         return [
+            'current_page'  => $paginator->currentPage(),
+            'last_page'     => $paginator instanceof LengthAwarePaginator ? $paginator->lastPage() : null,
             'per_page'      => $paginator->perPage(),
-            'next_cursor'   => $paginator->nextCursor()?->encode(),
-            'prev_cursor'   => $paginator->previousCursor()?->encode(),
+            'total'         => $paginator instanceof LengthAwarePaginator ? $paginator->total() : null,
             'has_more'      => $paginator->hasMorePages(),
             'path'          => $paginator->path(),
             'next_page_url' => $paginator->nextPageUrl(),
             'prev_page_url' => $paginator->previousPageUrl(),
         ];
     }
-
-    return [
-        'current_page'  => $paginator->currentPage(),
-        'last_page'     => method_exists($paginator, 'lastPage') ? $paginator->lastPage() : null,
-        'per_page'      => $paginator->perPage(),
-        'total'         => method_exists($paginator, 'total') ? $paginator->total() : null,
-        'path'          => $paginator->path(),
-        'next_page_url' => $paginator->nextPageUrl(),
-        'prev_page_url' => $paginator->previousPageUrl(),
-    ];
-}
 }
