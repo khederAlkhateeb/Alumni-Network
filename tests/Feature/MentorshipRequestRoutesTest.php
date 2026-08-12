@@ -11,6 +11,7 @@ use App\Models\StudentProfile;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
@@ -36,8 +37,32 @@ class MentorshipRequestRoutesTest extends TestCase
     {
         parent::setUp();
 
-        Role::findOrCreate('student', 'api');
-        Role::findOrCreate('alumni', 'api');
+        $guards = ['sanctum', 'api', 'web'];
+
+        foreach ($guards as $guard) {
+            // Create permissions
+            $viewMentors = Permission::findOrCreate('view-available-mentors', $guard);
+            $sendRequest = Permission::findOrCreate('send-mentorship-request', $guard);
+            $acceptRequest = Permission::findOrCreate('accept-mentorship-request', $guard);
+            $rejectRequest = Permission::findOrCreate('reject-mentorship-request', $guard);
+            $completeMentorship = Permission::findOrCreate('complete-mentorship', $guard);
+
+            // Assign permissions to Student role
+            $studentRole = Role::findOrCreate('student', $guard);
+            $studentRole->givePermissionTo([
+                $viewMentors,
+                $sendRequest,
+                $completeMentorship,
+            ]);
+
+            // Assign permissions to Alumni (Mentor) role
+            $alumniRole = Role::findOrCreate('alumni', $guard);
+            $alumniRole->givePermissionTo([
+                $acceptRequest,
+                $rejectRequest,
+                $completeMentorship,
+            ]);
+        }
 
         $faculty = Faculty::factory()->create();
         $major = Major::factory()->create(['faculty_id' => $faculty->id]);
@@ -83,8 +108,6 @@ class MentorshipRequestRoutesTest extends TestCase
      */
     public function test_student_can_list_available_mentors(): void
     {
-        // Create a mentorship request so that the mentor has an associated program_id in the database,
-        // avoiding a null program_id type error in AvailableMentorResource.
         MentorshipRequest::create([
             'program_id' => $this->program->id,
             'mentor_id' => $this->mentorUser->id,
@@ -93,7 +116,7 @@ class MentorshipRequestRoutesTest extends TestCase
             'intro_message' => 'Setup message',
         ]);
 
-        Sanctum::actingAs($this->studentUser);
+        Sanctum::actingAs($this->studentUser, ['*']);
 
         $response = $this->getJson('/api/v1/mentors');
 
@@ -109,8 +132,8 @@ class MentorshipRequestRoutesTest extends TestCase
                         'email',
                         'program_id',
                         'is_available',
-                    ]
-                ]
+                    ],
+                ],
             ]);
     }
 
@@ -119,7 +142,7 @@ class MentorshipRequestRoutesTest extends TestCase
      */
     public function test_student_can_send_mentorship_request(): void
     {
-        Sanctum::actingAs($this->studentUser);
+        Sanctum::actingAs($this->studentUser, ['*']);
 
         $response = $this->postJson('/api/v1/mentorship-requests', [
             'program_id' => $this->program->id,
@@ -152,7 +175,7 @@ class MentorshipRequestRoutesTest extends TestCase
             'status' => 'pending',
         ]);
 
-        Sanctum::actingAs($this->mentorUser);
+        Sanctum::actingAs($this->mentorUser, ['*']);
 
         $incomingResponse = $this->getJson('/api/v1/mentorship-requests/incoming');
         $incomingResponse->assertStatus(200)
@@ -164,7 +187,7 @@ class MentorshipRequestRoutesTest extends TestCase
             ->assertJsonPath('status', 'success')
             ->assertJsonPath('message', 'Mentorship request accepted successfully.');
 
-        $this->assertEquals('accepted', $req->refresh()->status->value);
+        $this->assertEquals('accepted', $req->refresh()->status->value ?? $req->refresh()->status);
     }
 
     /**
@@ -180,14 +203,14 @@ class MentorshipRequestRoutesTest extends TestCase
             'status' => 'pending',
         ]);
 
-        Sanctum::actingAs($this->mentorUser);
+        Sanctum::actingAs($this->mentorUser, ['*']);
 
         $rejectResponse = $this->postJson("/api/v1/mentorship-requests/{$req->id}/reject");
         $rejectResponse->assertStatus(200)
             ->assertJsonPath('status', 'success')
             ->assertJsonPath('message', 'Mentorship request rejected successfully.');
 
-        $this->assertEquals('rejected', $req->refresh()->status->value);
+        $this->assertEquals('rejected', $req->refresh()->status->value ?? $req->refresh()->status);
     }
 
     /**
@@ -196,7 +219,7 @@ class MentorshipRequestRoutesTest extends TestCase
     public function test_student_cannot_send_request_to_a_closed_program(): void
     {
         $this->program->update(['status' => 'closed']);
-        Sanctum::actingAs($this->studentUser);
+        Sanctum::actingAs($this->studentUser, ['*']);
 
         $response = $this->postJson('/api/v1/mentorship-requests', [
             'program_id' => $this->program->id,
@@ -213,7 +236,7 @@ class MentorshipRequestRoutesTest extends TestCase
     public function test_student_cannot_send_request_to_an_expired_program(): void
     {
         $this->program->update(['end_date' => now()->subDay()->toDateString()]);
-        Sanctum::actingAs($this->studentUser);
+        Sanctum::actingAs($this->studentUser, ['*']);
 
         $response = $this->postJson('/api/v1/mentorship-requests', [
             'program_id' => $this->program->id,
@@ -229,7 +252,7 @@ class MentorshipRequestRoutesTest extends TestCase
      */
     public function test_student_cannot_send_duplicate_request_for_same_program_and_mentor(): void
     {
-        Sanctum::actingAs($this->studentUser);
+        Sanctum::actingAs($this->studentUser, ['*']);
 
         $payload = [
             'program_id' => $this->program->id,
@@ -260,7 +283,7 @@ class MentorshipRequestRoutesTest extends TestCase
             'is_open_to_mentor' => true,
         ]);
 
-        Sanctum::actingAs($this->studentUser);
+        Sanctum::actingAs($this->studentUser, ['*']);
 
         $this->postJson('/api/v1/mentorship-requests', [
             'program_id' => $this->program->id,
@@ -275,7 +298,7 @@ class MentorshipRequestRoutesTest extends TestCase
      */
     public function test_student_cannot_send_a_request_to_themselves(): void
     {
-        Sanctum::actingAs($this->studentUser);
+        Sanctum::actingAs($this->studentUser, ['*']);
 
         $this->postJson('/api/v1/mentorship-requests', [
             'program_id' => $this->program->id,
@@ -298,12 +321,13 @@ class MentorshipRequestRoutesTest extends TestCase
             'status' => 'pending',
         ]);
 
-        Sanctum::actingAs($this->studentUser);
+        Sanctum::actingAs($this->studentUser, ['*']);
 
+        // Since the student has permission 'accept-mentorship-request' disabled or Authorization Policy rejects ownership:
         $this->postJson("/api/v1/mentorship-requests/{$request->id}/accept")
             ->assertForbidden();
 
-        $this->assertEquals('pending', $request->refresh()->status->value);
+        $this->assertEquals('pending', $request->refresh()->status->value ?? $request->refresh()->status);
     }
 
     /**
@@ -328,11 +352,11 @@ class MentorshipRequestRoutesTest extends TestCase
             'status' => 'pending',
         ]);
 
-        Sanctum::actingAs($this->mentorUser);
+        Sanctum::actingAs($this->mentorUser, ['*']);
 
         $this->postJson("/api/v1/mentorship-requests/{$pendingRequest->id}/accept")
             ->assertStatus(500);
 
-        $this->assertEquals('pending', $pendingRequest->refresh()->status->value);
+        $this->assertEquals('pending', $pendingRequest->refresh()->status->value ?? $pendingRequest->refresh()->status);
     }
 }

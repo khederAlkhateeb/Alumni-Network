@@ -9,6 +9,7 @@ use App\Models\University;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
@@ -22,13 +23,25 @@ class StudentRoutesTest extends TestCase
     {
         parent::setUp();
 
-        Role::findOrCreate('student', 'api');
+        $guards = ['sanctum', 'api', 'web'];
+
+        foreach ($guards as $guard) {
+            $viewPerm = Permission::findOrCreate('view-student-profiles', $guard);
+            $editPerm = Permission::findOrCreate('edit-own-profile', $guard);
+
+            $role = Role::findOrCreate('student', $guard);
+            $role->givePermissionTo([$viewPerm, $editPerm]);
+        }
+
         $this->university = University::factory()->create();
     }
 
     private function createStudentUser(University $university): User
     {
-        $user = User::factory()->create(['is_active' => true]);
+        $user = User::factory()->create([
+            'is_active' => true,
+        ]);
+
         $user->assignRole('student');
 
         $faculty = Faculty::factory()->create(['university_id' => $university->id]);
@@ -37,9 +50,10 @@ class StudentRoutesTest extends TestCase
         StudentProfile::factory()->create([
             'user_id' => $user->id,
             'major_id' => $major->id,
+            'status' => 'active',
         ]);
 
-        return $user;
+        return $user->fresh(['studentProfile', 'roles', 'permissions']);
     }
 
     public function test_unauthenticated_user_cannot_access_students_endpoints(): void
@@ -53,7 +67,7 @@ class StudentRoutesTest extends TestCase
     {
         $user = $this->createStudentUser($this->university);
 
-        Sanctum::actingAs($user);
+        Sanctum::actingAs($user, ['*']);
 
         $response = $this->getJson('/api/v1/students/me');
 
@@ -68,7 +82,7 @@ class StudentRoutesTest extends TestCase
     {
         $user = $this->createStudentUser($this->university);
 
-        Sanctum::actingAs($user);
+        Sanctum::actingAs($user, ['*']);
 
         $payload = [
             'enrollment_number' => 'ENR-9999',
@@ -94,7 +108,7 @@ class StudentRoutesTest extends TestCase
     {
         $user = $this->createStudentUser($this->university);
 
-        Sanctum::actingAs($user);
+        Sanctum::actingAs($user, ['*']);
 
         $response = $this->putJson('/api/v1/students/me', [
             'enrollment_year' => 'not-a-number',
@@ -109,7 +123,7 @@ class StudentRoutesTest extends TestCase
         $user = $this->createStudentUser($this->university);
         $otherStudentUser = $this->createStudentUser($this->university);
 
-        Sanctum::actingAs($user);
+        Sanctum::actingAs($user, ['*']);
 
         $response = $this->getJson("/api/v1/students/{$otherStudentUser->studentProfile->id}");
 
@@ -125,7 +139,7 @@ class StudentRoutesTest extends TestCase
         $otherUniversity = University::factory()->create();
         $otherStudentUser = $this->createStudentUser($otherUniversity);
 
-        Sanctum::actingAs($user);
+        Sanctum::actingAs($user, ['*']);
 
         $response = $this->getJson("/api/v1/students/{$otherStudentUser->studentProfile->id}");
 
@@ -136,7 +150,7 @@ class StudentRoutesTest extends TestCase
     {
         $user = $this->createStudentUser($this->university);
 
-        Sanctum::actingAs($user);
+        Sanctum::actingAs($user, ['*']);
 
         $response = $this->getJson('/api/v1/students/999999');
 
