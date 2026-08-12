@@ -1,5 +1,6 @@
 <?php
 
+use App\Exceptions\ApiExceptionHandler;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -27,25 +28,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'role_or_permission' => RoleOrPermissionMiddleware::class,
         ]);
     })
-    ->withExceptions(function (Exceptions $exceptions): void {
+  ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->render(function (Throwable $e, Request $request) {
             if ($request->is('api/*') || $request->wantsJson()) {
-
-                if ($e instanceof NotFoundHttpException) {
-                    return response()->json([
-                        'status'  => 'error',
-                        'message' => 'The requested resource was not found.'
-                    ], 404);
-                }
-
-                if (
-                    $e instanceof AccessDeniedHttpException || $e instanceof AuthorizationException || $e instanceof UnauthorizedException
-                ) {
-                    return response()->json([
-                        'status'  => 'error',
-                        'message' => 'This action is unauthorized.'
-                    ], 403);
-                }
+                return ApiExceptionHandler::map($e);
             }
         });
     })->create();

@@ -3,6 +3,7 @@
 namespace App\V1\Actions\AlumniProfile;
 
 use App\Models\AlumniProfile;
+use Cache;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class ShowAlumniProfileAction
@@ -17,16 +18,26 @@ class ShowAlumniProfileAction
      *
      * @throws ModelNotFoundException If the profile does not exist or is not active.
      */
+
+
         $profile = AlumniProfile::query()
             ->with([
                 'user',
                 'major.faculty.university',
                 'workExperiences',
-                'skills',
                 'photo'
             ])
-            ->find($alumniProfileId);
+            ->findOrFail($alumniProfileId);
+
+
+        $skills = Cache::rememberForever("alumni_skills_{$alumniProfileId}", function () use ($profile) {
+            return $profile->skills()->get();
+        });
+
+
+        $profile->setRelation('skills', $skills);
 
         return $profile;
     }
-}
+    }
+

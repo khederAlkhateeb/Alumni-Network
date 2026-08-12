@@ -3,6 +3,7 @@
 namespace App\V1\Actions\AlumniProfile\Skill;
 
 use App\Models\AlumniProfile;
+use Cache;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 /**
@@ -35,7 +36,7 @@ class DestroyAlumniSkillAction
                 "Skill with ID {$skillId} is not attached to your profile."
             );
         }
-
+Cache::forget("alumni_skills_{$profile->id}");
         $profile->skills()->detach($skillId);
     }
 }
