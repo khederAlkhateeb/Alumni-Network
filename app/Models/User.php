@@ -214,4 +214,9 @@ class User extends Authenticatable
             ->orWhere('user_two_id', $this->id)
             ->get();
     }
+
+    public function linkedSocialAccounts(): HasMany
+    {
+        return $this->hasMany(LinkedSocialAccount::class);
+    }
 }

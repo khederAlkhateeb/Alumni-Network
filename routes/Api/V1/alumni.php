@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\V1\AlumniProfileController;
+use App\Http\Middleware\EnsureTokenIsFullAccess;
 use App\Http\Middleware\EnsureProfileIsActive;
 use Illuminate\Support\Facades\Route;
 
@@ -54,6 +55,7 @@ Route::middleware(['auth:sanctum', 'role:alumni', EnsureProfileIsActive::class])
      * @see AlumniProfileController::showMe()
      */
     Route::get('alumni/me', [AlumniProfileController::class, 'showMe'])
+        ->withoutMiddleware([EnsureTokenIsFullAccess::class])
         ->middleware('permission:view-alumni-profiles')
         ->name('alumni.me.show');
 
@@ -69,6 +71,7 @@ Route::middleware(['auth:sanctum', 'role:alumni', EnsureProfileIsActive::class])
      * @see AlumniProfileController::updateMe()
      */
     Route::put('alumni/me/updateMe', [AlumniProfileController::class, 'updateMe'])
+        ->withoutMiddleware([EnsureTokenIsFullAccess::class])
         ->middleware('permission:edit-own-profile')
         ->name('alumni.me.update');
 
@@ -86,6 +89,7 @@ Route::middleware(['auth:sanctum', 'role:alumni', EnsureProfileIsActive::class])
     Route::post('alumni/me/toggle-mentor', [AlumniProfileController::class, 'toggleMentor'])
         ->middleware('permission:toggle-mentor-status')
         ->name('alumni.me.toggle-mentor');
+
 
     /**
      * Complete the authenticated alumni user's profile.
@@ -120,4 +124,16 @@ Route::middleware(['auth:sanctum', 'role:alumni', EnsureProfileIsActive::class])
     Route::get('alumni/{alumni}', [AlumniProfileController::class, 'show'])
         ->middleware('permission:view-alumni-profiles')
         ->name('alumni.show');
+
+    /**
+     * Complete the authenticated alumni user's profile.
+     *
+     * Endpoint:
+     * - POST /api/v1/alumni/me/complete-profile
+     *
+     * @see AlumniProfileController::completeProfile()
+     */
+    Route::post('alumni/me/complete-profile', [AlumniProfileController::class, 'completeProfile'])
+        ->withoutMiddleware([EnsureTokenIsFullAccess::class])
+        ->name('alumni.me.complete-profile');
 });

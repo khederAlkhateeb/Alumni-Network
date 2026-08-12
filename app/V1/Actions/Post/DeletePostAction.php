@@ -5,7 +5,6 @@ namespace App\V1\Actions\Post;
 use App\Events\PostDeleted;
 use App\Models\Post;
 use App\Services\UploadFileService;
-use Illuminate\Support\Facades\Cache;
 
 /**
  * Handles deleting a post along with its associated image file (if any).
@@ -26,6 +25,11 @@ class DeletePostAction
      * a failed deletion does not leave the post pointing to a file
      * that no longer exists.
      *
+     * The post's ID and author ID are captured BEFORE deletion and
+     * passed as primitives to the PostDeleted event — the event must
+     * never carry the Post model itself, since it's already gone from
+     * the database by the time a queued listener tries to use it.
+     *
      * @param Post $post The post to delete.
      *
      * @return void
@@ -33,12 +37,15 @@ class DeletePostAction
     public function handle(Post $post): void
     {
         $imagePath = $post->image;
-        $userId = $post->user_id;
+        $postId = $post->id;
+        $authorId = $post->user_id;
+
         $post->delete();
 
         if ($imagePath) {
             $this->service->deleteFile($imagePath);
         }
-        event(new PostDeleted($post));
+
+        event(new PostDeleted($postId, $authorId));
     }
 }

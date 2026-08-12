@@ -185,8 +185,8 @@ public function test_feed_respects_visibility_mix(): void
     $response = $this->getJson('/api/v1/feed');
 
     $response->assertStatus(200)
-        ->assertJsonCount(2, 'data')                        // Public + University only
-        ->assertJsonPath('data.0.id', $publicPost->id)      // order depends on `latest()`
+        ->assertJsonCount(2, 'data')
+        ->assertJsonPath('data.0.id', $publicPost->id)
         ->assertJsonPath('data.1.id', $universityPost->id);
 }
 
@@ -417,7 +417,6 @@ public function test_feed_respects_visibility_mix(): void
         Sanctum::actingAs($this->alumniUser, ['*'], 'api');
 
         $response = $this->deleteJson("/api/v1/posts/{$post->id}");
-
         $response->assertStatus(200)
             ->assertJsonPath('status', 'success')
             ->assertJsonPath('message', 'Post deleted successfully');

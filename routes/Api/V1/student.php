@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\V1\StudentProfileController;
+use App\Http\Middleware\EnsureTokenIsFullAccess;
 use App\Http\Middleware\EnsureProfileIsActive;
 use Illuminate\Support\Facades\Route;
 
@@ -26,6 +27,7 @@ Route::middleware(['auth:sanctum', EnsureProfileIsActive::class])->group(functio
      * @see StudentProfileController::showMe()
      */
     Route::get('/students/me', [StudentProfileController::class, 'showMe'])
+    ->withoutMiddleware([EnsureTokenIsFullAccess::class])
         ->middleware('permission:view-student-profiles')
         ->name('students.me.show');
 
@@ -38,6 +40,7 @@ Route::middleware(['auth:sanctum', EnsureProfileIsActive::class])->group(functio
      * @see StudentProfileController::updateMe()
      */
     Route::put('/students/me', [StudentProfileController::class, 'updateMe'])
+        ->withoutMiddleware([EnsureTokenIsFullAccess::class])
         ->middleware('permission:edit-own-profile')
         ->name('students.me.update');
 
