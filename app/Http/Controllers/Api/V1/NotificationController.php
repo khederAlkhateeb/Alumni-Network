@@ -7,10 +7,8 @@ use App\Http\Resources\Api\V1\NotificationResource;
 use App\V1\Actions\Notifications\GetUserNotificationsAction;
 use App\V1\Actions\Notifications\MarkAllNotificationsAsReadAction;
 use App\V1\Actions\Notifications\MarkNotificationAsReadAction;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Throwable;
 
 /*
 | Notification Controller (API v1)
@@ -25,8 +23,7 @@ use Throwable;
 | The controller stays thin on purpose: business logic lives in the
 | Actions (each exposing a single handle() method), and this class
 | is only responsible for wiring the Request to the right Action
-| and translating the outcome into the unified success/error
-| response shape via try/catch. None of these three endpoints take
+| and returning the outcome. None of these three endpoints take
 | meaningful input worth a dedicated Form Request, so a plain
 | Request is used throughout.
 |
@@ -58,24 +55,12 @@ class NotificationController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        try {
-            $notifications = $this->getUserNotifications->handle($request->user());
+        $notifications = $this->getUserNotifications->handle($request->user());
 
-            return $this->successResponse(
-                data: NotificationResource::collection($notifications)->resolve($request),
-                message: 'Notifications retrieved successfully.',
-                meta: [
-                    'current_page' => $notifications->currentPage(),
-                    'last_page'    => $notifications->lastPage(),
-                    'per_page'     => $notifications->perPage(),
-                    'total'        => $notifications->total(),
-                ],
-            );
-        } catch (Throwable $e) {
-            report($e);
-
-            return $this->errorResponse('Failed to retrieve notifications.', code: 500);
-        }
+        return $this->successResponse(
+            data: NotificationResource::collection($notifications)->resolve($request),
+            message: 'Notifications retrieved successfully.',
+        );
     }
 
     /**
@@ -90,20 +75,12 @@ class NotificationController extends Controller
      */
     public function markAsRead(Request $request, string $notification): JsonResponse
     {
-        try {
-            $model = $this->markNotificationAsRead->handle($request->user(), $notification);
+        $model = $this->markNotificationAsRead->handle($request->user(), $notification);
 
-            return $this->successResponse(
-                data: new NotificationResource($model),
-                message: 'Notification marked as read.',
-            );
-        } catch (ModelNotFoundException $e) {
-            return $this->errorResponse('Notification not found.', code: 404);
-        } catch (Throwable $e) {
-            report($e);
-
-            return $this->errorResponse('Failed to mark notification as read.', code: 500);
-        }
+        return $this->successResponse(
+            data: new NotificationResource($model),
+            message: 'Notification marked as read.',
+        );
     }
 
     /**
@@ -116,17 +93,11 @@ class NotificationController extends Controller
      */
     public function markAllAsRead(Request $request): JsonResponse
     {
-        try {
-            $count = $this->markAllNotificationsAsRead->handle($request->user());
+        $count = $this->markAllNotificationsAsRead->handle($request->user());
 
-            return $this->successResponse(
-                data: ['marked_count' => $count],
-                message: 'All notifications marked as read.',
-            );
-        } catch (Throwable $e) {
-            report($e);
-
-            return $this->errorResponse('Failed to mark notifications as read.', code: 500);
-        }
+        return $this->successResponse(
+            data: ['marked_count' => $count],
+            message: 'All notifications marked as read.',
+        );
     }
 }

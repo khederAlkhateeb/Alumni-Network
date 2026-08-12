@@ -2,6 +2,8 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Conversation;
+use App\Models\User;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -26,5 +28,12 @@ class EnsureProfileIsActive
         }
 
         return $next($request);
+    }
+
+    public function markAsRead(User $user, Conversation $conversation): bool
+    {
+
+        return $conversation->user_one_id === $user->id
+            || $conversation->user_two_id === $user->id;
     }
 }

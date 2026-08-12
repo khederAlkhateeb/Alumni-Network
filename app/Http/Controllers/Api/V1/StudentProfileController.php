@@ -8,6 +8,7 @@ use App\Http\Resources\StudentProfileResource;
 use App\Models\StudentProfile;
 use App\V1\Actions\StudentProfile\ShowStudentProfileAction;
 use App\V1\Actions\StudentProfile\UpdateStudentProfileAction;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
@@ -16,11 +17,8 @@ use Illuminate\Http\JsonResponse;
  *
  * Features:
  * - Retrieve authenticated student's profile.
- * - Retrieve any student profile by ID (with authorization).
+ * - Retrieve any student profile by ID (scoped by university and authorized via policy).
  * - Update authenticated student's profile.
- *
- * Authorization:
- * - Viewing and updating profiles is controlled via StudentProfilePolicy.
  *
  * Routes:
  * - GET  /api/v1/students/me
@@ -32,33 +30,13 @@ class StudentProfileController extends Controller
     /**
      * Display the authenticated student's own profile.
      *
-     * Endpoint:
-     * - GET /api/v1/students/me
-     *
-     * Behavior:
-     * - Retrieves the student profile associated with the authenticated user.
-     * - Returns 404 if the user has no student profile.
-     * - Loads missing relations (major → faculty) to support policy checks.
-     * - Authorizes the view operation via StudentProfilePolicy.
-     * - Delegates business logic to ShowStudentProfileAction.
-     *
-     * @param Request $request The incoming HTTP request containing the authenticated user.
-     * @param ShowStudentProfileAction $action The action responsible for preparing the profile data.
-     *
-     * @return JsonResponse JSON response containing the authenticated student's profile.
+     * @param Request $request
+     * @param ShowStudentProfileAction $action
+     * @return JsonResponse
      */
     public function showMe(Request $request, ShowStudentProfileAction $action): JsonResponse
     {
-        $profile = $request->user()->studentProfile;
-
-        if (!$profile) {
-            return response()->json([
-                'status'  => 'error',
-                'message' => 'Student profile not found.',
-            ], 404);
-        }
-
-        $profile->loadMissing('major.faculty');
+        $profile = $this->getAuthenticatedStudentProfile($request);
 
         $this->authorize('view', $profile);
 
@@ -66,71 +44,43 @@ class StudentProfileController extends Controller
 
         return $this->successResponse(
             data: new StudentProfileResource($loadedProfile),
-            message: 'My Profile get successfully.',
+         message: 'My Profile get successfully.',
+
         );
     }
 
     /**
      * Display a specific student profile by ID.
      *
-     * Endpoint:
-     * - GET /api/v1/students/{student}
+     * Note: Route Model Binding ($student) automatically applies the UniversityScope!
+     * If the student belongs to another university, Laravel throws 404 ModelNotFoundException automatically.
      *
-     * Behavior:
-     * - Loads missing relations (major → faculty).
-     * - Authorizes the view operation via StudentProfilePolicy.
-     * - Delegates business logic to ShowStudentProfileAction.
-     *
-     * @param StudentProfile $student The student profile resolved via route model binding.
-     * @param ShowStudentProfileAction $action The action responsible for preparing the profile data.
-     *
-     * @return JsonResponse JSON response containing the requested student profile.
+     * @param StudentProfile $student
+     * @param ShowStudentProfileAction $action
+     * @return JsonResponse
      */
     public function show(StudentProfile $student, ShowStudentProfileAction $action): JsonResponse
     {
-        $student->loadMissing('major.faculty');
-
         $this->authorize('view', $student);
 
         $profile = $action->handle($student);
 
         return $this->successResponse(
             data: new StudentProfileResource($profile),
-            message: 'Profile show successfully.',
+            message: 'Student profile retrieved successfully.',
         );
     }
 
     /**
      * Update the authenticated student's own profile.
      *
-     * Endpoint:
-     * - PUT /api/v1/students/me
-     *
-     * Behavior:
-     * - Validates input using UpdateStudentProfileRequest.
-     * - Retrieves the authenticated user's student profile.
-     * - Returns 404 if no profile exists.
-     * - Loads missing relations (major → faculty) to support policy checks.
-     * - Authorizes the update operation via StudentProfilePolicy.
-     * - Delegates update logic to UpdateStudentProfileAction.
-     *
-     * @param UpdateStudentProfileRequest $request The validated request containing update data.
-     * @param UpdateStudentProfileAction $action The action responsible for performing the update.
-     *
-     * @return JsonResponse JSON response containing the updated student profile.
+     * @param UpdateStudentProfileRequest $request
+     * @param UpdateStudentProfileAction $action
+     * @return JsonResponse
      */
     public function updateMe(UpdateStudentProfileRequest $request, UpdateStudentProfileAction $action): JsonResponse
     {
-        $profile = $request->user()->studentProfile;
-
-        if (!$profile) {
-            return response()->json([
-                'status'  => 'error',
-                'message' => 'Student profile not found for the authenticated user.',
-            ], 404);
-        }
-
-        $profile->loadMissing('major.faculty');
+        $profile = $this->getAuthenticatedStudentProfile($request);
 
         $this->authorize('update', $profile);
 
@@ -140,5 +90,25 @@ class StudentProfileController extends Controller
             data: new StudentProfileResource($updatedProfile),
             message: 'Profile updated successfully.',
         );
+    }
+
+    /**
+     * Retrieve the student profile associated with the authenticated user.
+     *
+     * @param Request $request
+     * @return StudentProfile
+     * @throws ModelNotFoundException
+     */
+    private function getAuthenticatedStudentProfile(Request $request): StudentProfile
+    {
+        $profile = $request->user()?->studentProfile;
+
+        if (! $profile) {
+            throw (new ModelNotFoundException)->setModel(
+                StudentProfile::class
+            );
+        }
+
+        return $profile;
     }
 }

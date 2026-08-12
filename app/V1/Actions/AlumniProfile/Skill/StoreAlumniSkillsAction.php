@@ -4,6 +4,7 @@ namespace App\V1\Actions\AlumniProfile\Skill;
 
 use App\Models\AlumniProfile;
 use App\Models\Skill;
+use Cache;
 
 /**
  * Class StoreAlumniSkillsAction
@@ -37,8 +38,8 @@ class StoreAlumniSkillsAction
         });
 
         $profile->skills()->syncWithoutDetaching($skillIds);
+       Cache::forget("alumni_skills_{$profile->id}");
 
-  
         return $profile->load('skills');
     }
 }

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\V1\StudentProfileController;
 use App\Http\Middleware\EnsureTokenIsFullAccess;
+use App\Http\Middleware\EnsureProfileIsActive;
 use Illuminate\Support\Facades\Route;
 
 /**
@@ -9,25 +10,13 @@ use Illuminate\Support\Facades\Route;
  * Student Profile Routes
  * --------------------------------------------------------------------------
  *
- * These routes allow authenticated student users to view and update
- * their own profile, as well as view other students' public profiles.
- *
  * Base Prefix:
  * - /api/v1/students
  *
  * Controller:
  * - App\Http\Controllers\Api\V1\StudentProfileController
- *
- * Features:
- * - View own student profile
- * - Update own student profile
- * - View public student profiles
- *
- * Authorization:
- * - All operations require Sanctum authentication.
- * - Viewing other students' profiles is allowed for any authenticated user.
  */
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum', EnsureProfileIsActive::class])->group(function () {
 
     /**
      * Get the authenticated student's profile.
@@ -38,7 +27,9 @@ Route::middleware('auth:sanctum')->group(function () {
      * @see StudentProfileController::showMe()
      */
     Route::get('/students/me', [StudentProfileController::class, 'showMe'])
-    ->withoutMiddleware([EnsureTokenIsFullAccess::class]);
+    ->withoutMiddleware([EnsureTokenIsFullAccess::class])
+        ->middleware('permission:view-student-profiles')
+        ->name('students.me.show');
 
     /**
      * Update the authenticated student's profile.
@@ -49,7 +40,9 @@ Route::middleware('auth:sanctum')->group(function () {
      * @see StudentProfileController::updateMe()
      */
     Route::put('/students/me', [StudentProfileController::class, 'updateMe'])
-    ->withoutMiddleware([EnsureTokenIsFullAccess::class]);
+        ->withoutMiddleware([EnsureTokenIsFullAccess::class])
+        ->middleware('permission:edit-own-profile')
+        ->name('students.me.update');
 
     /**
      * View another student's public profile.
@@ -59,8 +52,11 @@ Route::middleware('auth:sanctum')->group(function () {
      *
      * Notes:
      * - {student} is resolved via route model binding.
+     * - Kept at the bottom to avoid routing conflicts with /students/me.
      *
      * @see StudentProfileController::show()
      */
-    Route::get('/students/{student}', [StudentProfileController::class, 'show']);
+    Route::get('/students/{student}', [StudentProfileController::class, 'show'])
+        ->middleware('permission:view-student-profiles')
+        ->name('students.show');
 });

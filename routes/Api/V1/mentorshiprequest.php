@@ -19,43 +19,60 @@ Route::middleware(['auth:sanctum', EnsureProfileIsActive::class])->group(functio
      * Get a list of all available mentors.
      * @see MentorshipRequestController::availableMentors()
      */
-    Route::get('/mentors', [MentorshipRequestController::class, 'availableMentors']);
+    Route::get('/mentors', [MentorshipRequestController::class, 'availableMentors'])
+        ->middleware('permission:view-available-mentors')
+        ->name('mentors.index');
 
-    Route::prefix('mentorship-requests')->group(function () {
-        /**
-         * Get incoming mentorship requests for the authenticated mentor.
-         * @see MentorshipRequestController::incoming()
-         */
-        Route::get('/incoming', [MentorshipRequestController::class, 'incoming']);
+    Route::prefix('mentorship-requests')
+        ->name('mentorship-requests.')
+        ->group(function () {
 
-        /**
-         * Get outgoing mentorship requests sent by the authenticated mentee.
-         * @see MentorshipRequestController::outgoing()
-         */
-        Route::get('/outgoing', [MentorshipRequestController::class, 'outgoing']);
+            /**
+             * Get incoming mentorship requests for the authenticated mentor.
+             * @see MentorshipRequestController::incoming()
+             */
+            Route::get('/incoming', [MentorshipRequestController::class, 'incoming'])
+                ->middleware('permission:accept-mentorship-request')
+                ->name('incoming');
 
-        /**
-         * Store a new mentorship request.
-         * @see MentorshipRequestController::store()
-         */
-        Route::post('/', [MentorshipRequestController::class, 'store']);
+            /**
+             * Get outgoing mentorship requests sent by the authenticated mentee.
+             * @see MentorshipRequestController::outgoing()
+             */
+            Route::get('/outgoing', [MentorshipRequestController::class, 'outgoing'])
+                ->middleware('permission:send-mentorship-request')
+                ->name('outgoing');
 
-        /**
-         * Accept a specific mentorship request.
-         * @see MentorshipRequestController::accept()
-         */
-        Route::post('/{mentorshipRequest}/accept', [MentorshipRequestController::class, 'accept']);
+            /**
+             * Store a new mentorship request.
+             * @see MentorshipRequestController::store()
+             */
+            Route::post('/', [MentorshipRequestController::class, 'store'])
+                ->middleware('permission:send-mentorship-request')
+                ->name('store');
 
-        /**
-         * Reject a specific mentorship request.
-         * @see MentorshipRequestController::reject()
-         */
-        Route::post('/{mentorshipRequest}/reject', [MentorshipRequestController::class, 'reject']);
+            /**
+             * Accept a specific mentorship request.
+             * @see MentorshipRequestController::accept()
+             */
+            Route::post('/{mentorshipRequest}/accept', [MentorshipRequestController::class, 'accept'])
+                ->middleware('permission:accept-mentorship-request')
+                ->name('accept');
 
-        /**
-         * Mark a specific mentorship request as complete.
-         * @see MentorshipRequestController::complete()
-         */
-        Route::post('/{mentorshipRequest}/complete', [MentorshipRequestController::class, 'complete']);
-    });
+            /**
+             * Reject a specific mentorship request.
+             * @see MentorshipRequestController::reject()
+             */
+            Route::post('/{mentorshipRequest}/reject', [MentorshipRequestController::class, 'reject'])
+                ->middleware('permission:reject-mentorship-request')
+                ->name('reject');
+
+            /**
+             * Mark a specific mentorship request as complete.
+             * @see MentorshipRequestController::complete()
+             */
+            Route::post('/{mentorshipRequest}/complete', [MentorshipRequestController::class, 'complete'])
+                ->middleware('permission:complete-mentorship')
+                ->name('complete');
+        });
 });

@@ -47,6 +47,7 @@ class RoleAndPermissionSeeder extends Seeder
         $createPermission('view-student-profiles');
         $createPermission('edit-own-profile');
         $createPermission('manage-work-experiences');
+        $createPermission(' edit-own-profile');
         $createPermission('manage-skills');
         $createPermission('toggle-mentor-status');
 

@@ -5,27 +5,23 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Alumni\ListAlumniRequest;
 use App\Http\Requests\Alumni\UpdateAlumniProfile;
-use App\Http\Requests\Alumni\UploadAlumniPhotoRequest;
 use App\Http\Resources\AlumniProfileListResource;
 use App\Http\Resources\AlumniProfileResource;
 use App\Models\AlumniProfile;
 use App\V1\Actions\AlumniProfile\CompleteAlumniProfileAction;
-use App\V1\Actions\AlumniProfile\DeleteAlumniPhotoAction;
 use App\V1\Actions\AlumniProfile\ListAlumniNetworkAction;
 use App\V1\Actions\AlumniProfile\ShowAlumniProfileAction;
 use App\V1\Actions\AlumniProfile\ToggleMentorAvailabilityAction;
-use App\V1\Actions\AlumniProfile\UpdateAlumniPhotoAction;
 use App\V1\Actions\AlumniProfile\UpdateAlumniProfileAction;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 
 /**
  * Class AlumniProfileController
  *
  * Manages alumni profile actions including network listings, profile retrieval,
- * updates, mentorship status toggling, and photo uploads.
+ * updates, mentorship status toggling, and completion steps.
  *
  * @package App\Http\Controllers\Api\V1
  */
@@ -36,9 +32,7 @@ class AlumniProfileController extends Controller
      *
      * @param ListAlumniRequest $request Validated request containing query filters and pagination.
      * @param ListAlumniNetworkAction $action Action class executing the filtered query.
-     * @return JsonResponse Paginated alumni list with metadata.
-     *
-     * @throws \Illuminate\Auth\Access\AuthorizationException If user is not authorized to view network.
+     * @return JsonResponse Paginated alumni list with automatic metadata.
      */
     public function index(ListAlumniRequest $request, ListAlumniNetworkAction $action): JsonResponse
     {
@@ -47,14 +41,8 @@ class AlumniProfileController extends Controller
         $alumni = $action->execute($request->validated());
 
         return $this->successResponse(
-            data: AlumniProfileListResource::collection($alumni->items()),
-            message: 'Alumni network retrieved successfully.',
-            meta: [
-                'current_page' => $alumni->currentPage(),
-                'last_page'    => $alumni->lastPage(),
-                'per_page'     => $alumni->perPage(),
-                'total'        => $alumni->total(),
-            ]
+            data: AlumniProfileListResource::collection($alumni),
+            message: 'Alumni network retrieved successfully.'
         );
     }
 
@@ -63,17 +51,11 @@ class AlumniProfileController extends Controller
      *
      * @param int $alumni The ID of the target alumni profile.
      * @param ShowAlumniProfileAction $action Action class fetching the profile.
-     * @return JsonResponse Alumni profile details or 404 response if not found.
-     *
-     * @throws \Illuminate\Auth\Access\AuthorizationException If user cannot view the profile.
+     * @return JsonResponse Alumni profile details.
      */
     public function show(int $alumni, ShowAlumniProfileAction $action): JsonResponse
     {
-        try {
-            $profile = $action->execute($alumni);
-        } catch (ModelNotFoundException) {
-            return $this->profileNotFoundResponse();
-        }
+        $profile = $action->execute($alumni);
 
         $this->authorize('view', $profile);
 
@@ -87,16 +69,10 @@ class AlumniProfileController extends Controller
      * Display the profile associated with the currently authenticated user.
      *
      * @return JsonResponse Detailed user profile with eager loaded relations.
-     *
-     * @throws \Illuminate\Auth\Access\AuthorizationException If user cannot view the profile.
      */
     public function showMe(): JsonResponse
     {
         $profile = $this->getAuthenticatedAlumniProfile();
-
-        if (! $profile) {
-            return $this->profileNotFoundResponse();
-        }
 
         $this->authorize('view', $profile);
 
@@ -119,18 +95,12 @@ class AlumniProfileController extends Controller
      * @param UpdateAlumniProfile $request Validated profile updates payload.
      * @param UpdateAlumniProfileAction $action Action class executing the updates.
      * @return JsonResponse Updated alumni profile resource.
-     *
-     * @throws \Illuminate\Auth\Access\AuthorizationException If user cannot update the profile.
      */
     public function updateMe(
         UpdateAlumniProfile $request,
         UpdateAlumniProfileAction $action
     ): JsonResponse {
         $profile = $this->getAuthenticatedAlumniProfile();
-
-        if (! $profile) {
-            return $this->profileNotFoundResponse();
-        }
 
         $this->authorize('update', $profile);
 
@@ -148,8 +118,6 @@ class AlumniProfileController extends Controller
      * @param UpdateAlumniProfile $request Validated profile payload.
      * @param CompleteAlumniProfileAction $action Action executing profile completion logic.
      * @return JsonResponse Completed alumni profile resource.
-     *
-     * @throws \Illuminate\Auth\Access\AuthorizationException If user cannot update the profile.
      */
     public function completeProfile(
         UpdateAlumniProfile $request,
@@ -157,11 +125,7 @@ class AlumniProfileController extends Controller
     ): JsonResponse {
         $profile = $this->getAuthenticatedAlumniProfile();
 
-        if (! $profile) {
-            return $this->profileNotFoundResponse();
-        }
-
-        $this->authorize('update', $profile);
+        $this->authorize('completeProfile', $profile);
 
         $updatedProfile = $action->execute($profile, $request->validated());
 
@@ -176,16 +140,10 @@ class AlumniProfileController extends Controller
      *
      * @param ToggleMentorAvailabilityAction $action Action class switching the mentorship flag.
      * @return JsonResponse Profile resource with dynamic success message.
-     *
-     * @throws \Illuminate\Auth\Access\AuthorizationException If user cannot toggle mentorship.
      */
     public function toggleMentor(ToggleMentorAvailabilityAction $action): JsonResponse
     {
         $profile = $this->getAuthenticatedAlumniProfile();
-
-        if (! $profile) {
-            return $this->profileNotFoundResponse();
-        }
 
         $this->authorize('toggleMentor', $profile);
 
@@ -199,30 +157,22 @@ class AlumniProfileController extends Controller
         );
     }
 
-
-
-
     /**
      * Retrieve the alumni profile associated with the currently authenticated user.
      *
-     * @return AlumniProfile|null Profile instance if exists, otherwise null.
+     * @return AlumniProfile
+     * @throws ModelNotFoundException If the authenticated user has no associated alumni profile.
      */
-    private function getAuthenticatedAlumniProfile(): ?AlumniProfile
+    private function getAuthenticatedAlumniProfile(): AlumniProfile
     {
-        return Auth::user()?->alumniProfile;
-    }
+        $profile = Auth::user()?->alumniProfile;
 
-    /**
-     * Generate a standardized 404 error response when an alumni profile is missing.
-     *
-     * @return JsonResponse Structured error response.
-     */
-    private function profileNotFoundResponse(): JsonResponse
-    {
-        return $this->errorResponse(
-            message: 'No alumni profile associated with your account.',
-            code: 404,
-        );
-    }
+        if (! $profile) {
+            throw (new ModelNotFoundException)->setModel(
+                AlumniProfile::class
+            );
+        }
 
+        return $profile;
+    }
 }

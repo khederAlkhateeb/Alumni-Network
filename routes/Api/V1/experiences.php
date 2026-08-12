@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\V1\WorkExperienceController;
+use App\Http\Middleware\EnsureProfileIsActive;
 use Illuminate\Support\Facades\Route;
 
 /**
@@ -8,26 +9,25 @@ use Illuminate\Support\Facades\Route;
  * Alumni Work Experience Routes
  * --------------------------------------------------------------------------
  *
- * These routes allow authenticated alumni users to manage their work
- * experience entries. All routes are protected by Sanctum authentication
- * and require the user to have the "alumni" role.
- *
  * Base Prefix:
  * - /api/v1/alumni/me/work-experiences
  *
+ * Base Middleware:
+ * - auth:sanctum
+ * - role:alumni
+ * - EnsureProfileIsActive
+ * - permission:manage-work-experiences
+ *
  * Controller:
  * - App\Http\Controllers\Api\V1\WorkExperienceController
- *
- * Features:
- * - Add new work experience
- * - Update existing work experience
- * - Delete work experience
- *
- * Authorization:
- * - All operations are authorized through WorkExperiencePolicy.
  */
 Route::prefix('alumni/me/work-experiences')
-    ->middleware(['auth:sanctum', 'role:alumni'])
+    ->middleware([
+        'auth:sanctum',
+        'role:alumni',
+        EnsureProfileIsActive::class,
+        'permission:manage-work-experiences',
+    ])
     ->name('alumni.me.work-experiences.')
     ->group(function () {
 

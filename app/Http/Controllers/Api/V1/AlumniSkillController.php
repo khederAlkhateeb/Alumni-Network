@@ -29,18 +29,13 @@ class AlumniSkillController extends Controller
      *
      * @param  StoreAlumniSkillRequest   $request The validated skills payload.
      * @param  StoreAlumniSkillsAction  $action  Handles the skill attachment logic.
-     * @return JsonResponse HTTP 200 with the collection of attached skills resources, or HTTP 404 if profile is missing.
+     * @return JsonResponse HTTP 200 with the collection of attached skills resources.
+     *
+     * @throws ModelNotFoundException If the profile is missing.
      */
     public function store(StoreAlumniSkillRequest $request, StoreAlumniSkillsAction $action): JsonResponse
     {
         $profile = $this->getAuthenticatedAlumniProfile();
-
-        if (! $profile) {
-            return $this->errorResponse(
-                message: 'No alumni profile associated with your account.',
-                code: 404,
-            );
-        }
 
         $updatedProfile = $action->execute($profile, $request->validated());
 
@@ -58,20 +53,13 @@ class AlumniSkillController extends Controller
      *
      * @param  int                        $skill  The ID of the skill to detach.
      * @param  DestroyAlumniSkillAction   $action Handles the skill removal logic.
-     * @return JsonResponse HTTP 200 on successful removal, or HTTP 404 if profile or skill is not found.
+     * @return JsonResponse HTTP 200 on successful removal.
      *
-     * @throws ModelNotFoundException If the specified skill record does not exist or is not associated with the profile.
+     * @throws ModelNotFoundException If the specified skill or profile record does not exist.
      */
     public function destroy(int $skill, DestroyAlumniSkillAction $action): JsonResponse
     {
         $profile = $this->getAuthenticatedAlumniProfile();
-
-        if (! $profile) {
-            return $this->errorResponse(
-                message: 'No alumni profile associated with your account.',
-                code: 404,
-            );
-        }
 
         $action->execute($profile, $skill);
 
@@ -83,10 +71,19 @@ class AlumniSkillController extends Controller
     /**
      * Get the authenticated user's alumni profile relation.
      *
-     * @return AlumniProfile|null The associated alumni profile or null if unauthenticated/unassociated.
+     * @return AlumniProfile
+     * @throws ModelNotFoundException If the authenticated user has no associated alumni profile.
      */
-    private function getAuthenticatedAlumniProfile(): ?AlumniProfile
+    private function getAuthenticatedAlumniProfile(): AlumniProfile
     {
-        return Auth::user()?->alumniProfile;
+        $profile = Auth::user()?->alumniProfile;
+
+        if (! $profile) {
+            throw (new ModelNotFoundException)->setModel(
+                AlumniProfile::class
+            );
+        }
+
+        return $profile;
     }
 }
