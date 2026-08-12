@@ -1,11 +1,8 @@
 <?php
 
-<<<<<<< HEAD
 use App\Http\Middleware\EnsureTokenIsFullAccess;
 use Illuminate\Auth\Access\AuthorizationException;
-=======
 use App\Exceptions\ApiExceptionHandler;
->>>>>>> haedar
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
