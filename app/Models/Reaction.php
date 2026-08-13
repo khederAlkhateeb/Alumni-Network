@@ -48,7 +48,6 @@ class Reaction extends Model
         ];
     }
 
-
     /**
      * Get the parent reactable model (Post, Comment, etc.).
      *
