@@ -4,7 +4,7 @@ namespace App\V1\Actions\Notifications;
 
 use App\Models\Notification;
 use App\Models\User;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Action to mark a specific notification as read.
@@ -20,12 +20,18 @@ class MarkNotificationAsReadAction
      * @param  string  $notificationId
      * @return Notification
      *
-     * @throws ModelNotFoundException
+     * @throws ValidationException
      */
     public function handle(User $user, string $notificationId): Notification
     {
-        /** @var Notification $notification */
-        $notification = $user->notifications()->findOrFail($notificationId);
+        /** @var Notification|null $notification */
+        $notification = $user->notifications()->find($notificationId);
+
+        if (! $notification) {
+            throw ValidationException::withMessages([
+                'notification_id' => ['This notification does not exist or does not belong to you.'],
+            ]);
+        }
 
         if (is_null($notification->read_at)) {
             $notification->update(['read_at' => now()]);
