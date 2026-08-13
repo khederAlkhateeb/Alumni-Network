@@ -43,7 +43,7 @@ class DeletePostAction
         $post->delete();
 
         if ($imagePath) {
-            $this->service->deleteFile($imagePath);
+            $this->service->deleteFile($imagePath, string($authorId));
         }
 
         event(new PostDeleted($postId, $authorId));
