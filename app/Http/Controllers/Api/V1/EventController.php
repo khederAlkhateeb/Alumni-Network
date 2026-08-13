@@ -84,6 +84,24 @@ class EventController extends Controller
     }
 
     /**
+     * GET /universities/{university}/events/{event}
+     *
+     * Show a single event's details.
+     *
+     * @param  University  $university
+     * @param  Event  $event
+     * @return JsonResponse
+     */
+    public function show(University $university, Event $event): JsonResponse
+    {
+        $this->authorize('view', $event);
+
+        return $this->successResponse(
+            data: new EventResource($event),
+            message: 'Event retrieved successfully.',
+        );
+    }
+    /**
      * PUT /universities/{university}/events/{event}
      *
      * Update an existing event.

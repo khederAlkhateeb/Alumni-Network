@@ -46,10 +46,10 @@ class StoreEventRequest extends FormRequest
             'type'   => ['required', new Enum(EventType::class)],
             'location'     => ['required_if:type,campus,hybrid', 'nullable', 'string', 'max:255'],
             'meeting_link' => ['required_if:type,online,hybrid', 'nullable', 'url', 'max:255'],
-            'start_date'   => ['required', 'date', 'after_or_equal:today'],
+            'start_date'   => ['required', 'date', 'after_or_equal:now'],
             'end_date'     => ['required', 'date', 'after:start_date'],
             'capacity'     => ['nullable', 'integer', 'min:1'],
-            'status' => ['required', new Enum(EventStatus::class)],
+            'status' => ['sometimes', new Enum(EventStatus::class)],
         ];
     }
 

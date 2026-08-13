@@ -12,6 +12,7 @@ use Illuminate\Validation\ValidationException;
  *
  * Enforces business rules:
  * - Cancellation is prohibited once the event has already started.
+ * - The user must have an existing registration for the event.
  */
 class CancelEventRegistration
 {
@@ -35,7 +36,13 @@ class CancelEventRegistration
 
             $registration = $event->registrations()
                 ->where('user_id', $user->id)
-                ->firstOrFail();
+                ->first();
+
+            if (! $registration) {
+                throw ValidationException::withMessages([
+                    'event' => ['You are not registered for this event.'],
+                ]);
+            }
 
             $registration->delete();
         });

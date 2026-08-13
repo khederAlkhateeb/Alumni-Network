@@ -11,6 +11,7 @@ use Illuminate\Validation\ValidationException;
  *
  * Enforces business rules:
  * - Attendance can only be recorded while the event is currently ongoing.
+ * - The user must have an existing registration for the event.
  */
 class RecordEventAttendance
 {
@@ -36,7 +37,13 @@ class RecordEventAttendance
 
             $registration = $event->registrations()
                 ->where('user_id', $data['user_id'])
-                ->firstOrFail();
+                ->first();
+
+            if (! $registration) {
+                throw ValidationException::withMessages([
+                    'user_id' => ['This user is not registered for this event.'],
+                ]);
+            }
 
             $registration->update([
                 'attended_at' => now(),

@@ -4,6 +4,8 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\User;
+use App\Models\University;
+use App\Models\UniversityAdmin;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
 
@@ -38,6 +40,8 @@ class UserRoleSeeder extends Seeder
                 'name'     => 'University Admin',
                 'email'    => 'uniadmin@example.com',
                 'role'     => 'uni_admin',
+                'is_active' => true,
+
             ],
             [
                 'name'     => 'Faculty Admin',
@@ -50,6 +54,8 @@ class UserRoleSeeder extends Seeder
                 'role'     => 'student',
             ],
         ];
+        $university = University::first() ?? University::factory()->create();
+
 
         foreach ($usersData as $data) {
             $user = User::updateOrCreate(
@@ -62,6 +68,13 @@ class UserRoleSeeder extends Seeder
             );
 
             $user->assignRole($data['role']);
+
+            if ($data['role'] === 'uni_admin') {
+                UniversityAdmin::updateOrCreate(
+                    ['user_id' => $user->id],
+                    ['university_id' => $university->id]
+                );
+            }
         }
     }
 }
