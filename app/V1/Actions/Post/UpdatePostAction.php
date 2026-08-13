@@ -58,7 +58,7 @@ class UpdatePostAction
         });
 
         if ($oldImagePath) {
-            $this->service->deleteFile($oldImagePath);
+            $this->service->deleteFile($oldImagePath, string($user->id));
         }
         event(new PostUpdated($post));
         return $post->fresh()->load(['user', 'comments', 'reactions']);

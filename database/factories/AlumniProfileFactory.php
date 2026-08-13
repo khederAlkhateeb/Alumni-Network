@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
-use App\Models\User;
 use App\Models\Major;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -17,9 +17,19 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  * - Automated tests
  * - Local development environments
  *
+ * IMPORTANT: major_id defaults to reusing an EXISTING Major if one is
+ * already present in the database, falling back to Major::factory()
+ * only when none exists yet. Always using Major::factory() directly
+ * would silently create a brand new Major -> Faculty -> University
+ * chain on every single call, which is rarely what a test actually
+ * wants — e.g. tests that create multiple AlumniProfiles expecting
+ * them to share the same university (feed visibility tests, mentorship
+ * matching, etc.) would end up with each profile pointing to a
+ * completely unrelated, randomly generated university instead.
+ *
  * Relationships:
  * - user_id → User::factory()
- * - major_id → Major::factory()
+ * - major_id → existing Major, or Major::factory() as a fallback
  *
  * Fields:
  * - student_number: Unique student identifier (STU-######)
@@ -46,7 +56,7 @@ class AlumniProfileFactory extends Factory
     {
         return [
             'user_id' => User::factory(),
-            'major_id' => Major::factory(),
+            'major_id' => Major::inRandomOrder()->first()?->id ?? Major::factory(),
             'student_number' => 'STU-' . $this->faker->unique()->numerify('######'),
             'graduation_year' => $this->faker->numberBetween(2010, 2025),
             'current_job_title' => $this->faker->jobTitle(),
