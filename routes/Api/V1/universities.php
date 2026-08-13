@@ -24,6 +24,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::delete('/universities/{university}', [UniversityController::class, 'destroy'])->name('api.v1.universities.destroy');
 
     // stats 
-    Route::get('/{university}/stats', UniversityStatsController::class)
+    Route::get('/universities/{university}/stats', UniversityStatsController::class)
         ->name('api.universities.stats');
 });
