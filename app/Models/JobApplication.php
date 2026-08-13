@@ -20,7 +20,6 @@ use Illuminate\Support\Facades\Storage;
     'status',
 
 ])]
-#[Appends(['resume_url'])]
 class JobApplication extends Model
 {
     use HasFactory;
@@ -37,26 +36,6 @@ class JobApplication extends Model
         self::STATUS_REJECTED,
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
-    protected $hidden = [
-        'resume',
-    ];
-
-    /**
-     * Interact with the application's resume download URL.
-     *
-     * @return Attribute
-     */
-    protected function resumeUrl(): Attribute
-    {
-        return Attribute::get(
-            fn() => $this->resume ? Storage::url($this->resume) : null
-        );
-    }
     public function jobListing(): BelongsTo
     {
         return $this->belongsTo(JobListing::class);

@@ -38,7 +38,6 @@ use Illuminate\Support\Facades\Storage;
  */
 #[Fillable(['user_id', 'content', 'image', 'visibility'])]
 #[UsePolicy(PostPolicy::class)]
-#[Appends(['image_url'])]
 class Post extends Model
 {
     use HasFactory;
@@ -54,26 +53,6 @@ class Post extends Model
         ];
     }
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
-    protected $hidden = [
-        'image',
-    ];
-
-    /**
-     * Interact with the post image public asset URL.
-     *
-     * @return Attribute
-     */
-    protected function imageUrl(): Attribute
-    {
-        return Attribute::get(
-            fn() => $this->image ? Storage::url($this->image) : null
-        );
-    }
 
     /**
      * Get the user that authored the post.

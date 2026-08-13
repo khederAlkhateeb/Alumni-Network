@@ -32,15 +32,6 @@ class Notification extends Model
     ];
 
     /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
-    protected $hidden = [
-        'related_type',
-    ];
-
-    /**
      * The attributes that should be cast to native types.
      *
      * @var array<string, string>

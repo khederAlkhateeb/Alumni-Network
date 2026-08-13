@@ -32,14 +32,6 @@ class StudentProfile extends Model
 {
     use HasFactory;
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
-    protected $hidden = [
-        'enrollment_number',
-    ];
 
     protected function casts(): array
     {

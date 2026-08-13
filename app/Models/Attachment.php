@@ -12,31 +12,9 @@ use Illuminate\Support\Facades\Storage;
 
 
 #[Fillable(['file_path',])]
-#[Appends(['url'])]
 class Attachment extends Model
 {
     use HasFactory;
-
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
-    protected $hidden = [
-        'file_path',
-    ];
-
-    /**
-     * Interact with the attachment's public URL.
-     *
-     * @return Attribute
-     */
-    protected function url(): Attribute
-    {
-        return Attribute::get(
-            fn() => $this->file_path ? Storage::url($this->file_path) : null
-        );
-    }
 
     const UPDATED_AT = null;
 

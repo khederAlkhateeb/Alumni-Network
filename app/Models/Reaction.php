@@ -48,14 +48,6 @@ class Reaction extends Model
         ];
     }
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
-    protected $hidden = [
-        'reactable_type',
-    ];
 
     /**
      * Get the parent reactable model (Post, Comment, etc.).
