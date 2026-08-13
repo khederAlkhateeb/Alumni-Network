@@ -37,7 +37,7 @@ class AcceptConnectionAction
             ]);
         }
 
-        if ($connection->status !== enConnectionStatus::PENGING) {
+        if ($connection->status !== enConnectionStatus::PENDING) {
             throw ValidationException::withMessages([
                 'connection' => 'This connection request is no longer pending.',
             ]);
