@@ -10,46 +10,43 @@ use App\Http\Resources\Api\V1\EventRegistrationResource;
 use App\Http\Requests\Api\V1\Events\StoreEventRequest;
 use App\Http\Requests\Api\V1\Events\UpdateEventRequest;
 use App\Http\Requests\Api\V1\Events\RecordAttendanceRequest;
+use App\V1\Actions\Events\ListUniversityEvents;
+use App\V1\Actions\Events\CreateEvent;
+use App\V1\Actions\Events\UpdateEvent;
 use App\V1\Actions\Events\RegisterForEvent;
 use App\V1\Actions\Events\CancelEventRegistration;
 use App\V1\Actions\Events\RecordEventAttendance;
+use App\V1\Actions\Events\ListEventRegistrations;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-
-/*
-|--------------------------------------------------------------------------
-| Event Controller (API v1)
-|--------------------------------------------------------------------------
-|
-| Handles CRUD operations for university events, along with user
-| registration, cancellation, and attendance actions. Authorization
-| for "store", "update", and "attend" is handled inside their
-| respective Form Requests, so it is not duplicated here. Route model
-| bindings for {event} are scoped to {university} (see routes file),
-| so every $event here is guaranteed to belong to $university.
-|
-*/
 
 class EventController extends Controller
 {
     /**
-     * Inject action classes used to handle event registration workflows.
+     * Inject action classes used to handle event workflows.
      *
+     * @param  ListUniversityEvents  $listUniversityEvents
+     * @param  CreateEvent  $createEvent
+     * @param  UpdateEvent  $updateEvent
      * @param  RegisterForEvent  $registerForEvent
      * @param  CancelEventRegistration  $cancelRegistration
      * @param  RecordEventAttendance  $recordAttendance
+     * @param  ListEventRegistrations  $listEventRegistrations
      */
     public function __construct(
+        private readonly ListUniversityEvents $listUniversityEvents,
+        private readonly CreateEvent $createEvent,
+        private readonly UpdateEvent $updateEvent,
         private readonly RegisterForEvent $registerForEvent,
         private readonly CancelEventRegistration $cancelRegistration,
         private readonly RecordEventAttendance $recordAttendance,
+        private readonly ListEventRegistrations $listEventRegistrations,
     ) {}
 
     /**
      * GET /universities/{university}/events
      *
      * List all events belonging to the given university.
-     * Rule 5.7: Pagination (20 items per page).
      *
      * @param  University  $university
      * @return JsonResponse
@@ -58,7 +55,7 @@ class EventController extends Controller
     {
         $this->authorize('viewAny', [Event::class, $university]);
 
-        $events = $university->events()->latest('start_date')->paginate(20);
+        $events = $this->listUniversityEvents->handle($university);
 
         return $this->successResponse(
             data: EventResource::collection($events)->resolve(),
@@ -69,8 +66,7 @@ class EventController extends Controller
     /**
      * POST /universities/{university}/events
      *
-     * Create a new event for the university. Authorization is handled
-     * by StoreEventRequest::authorize().
+     * Create a new event for the university.
      *
      * @param  StoreEventRequest  $request
      * @param  University  $university
@@ -78,7 +74,7 @@ class EventController extends Controller
      */
     public function store(StoreEventRequest $request, University $university): JsonResponse
     {
-        $event = $university->events()->create($request->validated());
+        $event = $this->createEvent->handle($university, $request->validated());
 
         return $this->successResponse(
             data: new EventResource($event),
@@ -88,29 +84,9 @@ class EventController extends Controller
     }
 
     /**
-     * GET /universities/{university}/events/{event}
-     *
-     * Show a single event's details, including its registrations count.
-     *
-     * @param  University  $university
-     * @param  Event  $event
-     * @return JsonResponse
-     */
-    public function show(University $university, Event $event): JsonResponse
-    {
-        $this->authorize('view', $event);
-
-        return $this->successResponse(
-            data: new EventResource($event->loadCount('registrations')),
-            message: 'Event retrieved successfully.',
-        );
-    }
-
-    /**
      * PUT /universities/{university}/events/{event}
      *
-     * Update an existing event. Authorization is handled by
-     * UpdateEventRequest::authorize().
+     * Update an existing event.
      *
      * @param  UpdateEventRequest  $request
      * @param  University  $university
@@ -119,10 +95,10 @@ class EventController extends Controller
      */
     public function update(UpdateEventRequest $request, University $university, Event $event): JsonResponse
     {
-        $event->update($request->validated());
+        $updatedEvent = $this->updateEvent->handle($event, $request->validated());
 
         return $this->successResponse(
-            data: new EventResource($event),
+            data: new EventResource($updatedEvent),
             message: 'Event updated successfully.',
         );
     }
@@ -130,7 +106,7 @@ class EventController extends Controller
     /**
      * POST /universities/{university}/events/{event}/register
      *
-     * Register the authenticated (active) user for the given event.
+     * Register the authenticated user for the given event.
      *
      * @param  Request  $request
      * @param  University  $university
@@ -168,8 +144,7 @@ class EventController extends Controller
     /**
      * POST /universities/{university}/events/{event}/attend
      *
-     * Record attendance for a user at the given event (Uni Admin only).
-     * Authorization is handled by RecordAttendanceRequest::authorize().
+     * Record attendance for a user at the given event.
      *
      * @param  RecordAttendanceRequest  $request
      * @param  University  $university
@@ -187,7 +162,6 @@ class EventController extends Controller
      * GET /universities/{university}/events/{event}/registrations
      *
      * List all registrations for a specific event (Uni Admin only).
-     * Rule 5.7: Pagination (20 items per page).
      *
      * @param  University  $university
      * @param  Event  $event
@@ -197,7 +171,7 @@ class EventController extends Controller
     {
         $this->authorize('manage', $event);
 
-        $registrations = $event->registrations()->with('user')->paginate(20);
+        $registrations = $this->listEventRegistrations->handle($event);
 
         return $this->successResponse(
             data: EventRegistrationResource::collection($registrations)->resolve(),

@@ -4,27 +4,23 @@ namespace App\V1\Actions\Notifications;
 
 use App\Models\Notification;
 use App\Models\User;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
-/*
-|--------------------------------------------------------------------------
-| Mark Notification As Read Action
-|--------------------------------------------------------------------------
-|
-| Marks ONE notification as read. The query is scoped through
-| $user->notifications(), so if the notification does not belong
-| to the user, findOrFail() throws ModelNotFoundException — the
-| Controller catches it and returns a 404 through errorResponse().
-|
-*/
-
+/**
+ * Action to mark a specific notification as read.
+ *
+ * Scopes the query through the user's notifications to ensure ownership security.
+ */
 class MarkNotificationAsReadAction
 {
     /**
-     * Mark the given notification (owned by $user) as read.
+     * Execute the single notification mark-as-read workflow.
      *
      * @param  User  $user
      * @param  string  $notificationId
      * @return Notification
+     *
+     * @throws ModelNotFoundException
      */
     public function handle(User $user, string $notificationId): Notification
     {
@@ -32,10 +28,9 @@ class MarkNotificationAsReadAction
         $notification = $user->notifications()->findOrFail($notificationId);
 
         if (is_null($notification->read_at)) {
-            $notification->read_at = now();
-            $notification->save();
+            $notification->update(['read_at' => now()]);
         }
 
-        return $notification;
+        return $notification->fresh();
     }
 }

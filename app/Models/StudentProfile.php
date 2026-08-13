@@ -85,6 +85,3 @@ class StudentProfile extends Model
         return Attribute::get(fn () => $this->status === ProfileStatus::PENDING);
     }
 }
-
-
-

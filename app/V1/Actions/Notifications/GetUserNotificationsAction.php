@@ -2,29 +2,31 @@
 
 namespace App\V1\Actions\Notifications;
 
+use App\Models\Notification;
 use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
-/*
-|--------------------------------------------------------------------------
-| Get User Notifications Action
-|--------------------------------------------------------------------------
-|
-| Fetches the authenticated user's notifications, newest first,
-| paginated (Rule 5.7: 20 items per page).
-|
-*/
-
+/**
+ * Action to retrieve a paginated list of user notifications.
+ *
+ * Fetches the authenticated user's notifications ordered by newest first,
+ * with configurable pagination items per page.
+ */
 class GetUserNotificationsAction
 {
     /**
-     * Fetch the given user's notifications.
+     * Execute the notification listing workflow.
      *
      * @param  User  $user
-     * @return LengthAwarePaginator
+     * @param  int|null  $perPage
+     * @return LengthAwarePaginator<int, Notification>
      */
-    public function handle(User $user): LengthAwarePaginator
+    public function handle(User $user, ?int $perPage = null): LengthAwarePaginator
     {
-        return $user->notifications()->paginate(20);
+        $perPage = $perPage ?? config('app.pagination.per_page', 20);
+
+        return $user->notifications()
+            ->latest()
+            ->paginate((int) $perPage);
     }
 }
