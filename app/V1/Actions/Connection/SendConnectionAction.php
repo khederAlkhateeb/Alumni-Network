@@ -43,7 +43,7 @@ class SendConnectionAction
             ]);
         }
 
-        if ($existing && $existing->status === enConnectionStatus::PENGING) {
+        if ($existing && $existing->status === enConnectionStatus::PENDING) {
             throw ValidationException::withMessages([
                 'receiver_id' => 'A connection request has already been sent to this user.',
             ]);
@@ -51,7 +51,7 @@ class SendConnectionAction
 
         if ($existing) {
             $existing->forceFill([
-                'status' => enConnectionStatus::PENGING,
+                'status' => enConnectionStatus::PENDING,
                 'accepted_at' => null,
                 'rejected_at' => null,
             ])->save();
@@ -62,7 +62,7 @@ class SendConnectionAction
         return Connection::create([
             'requester_id' => $requester->id,
             'receiver_id' => $receiver->id,
-            'status' => enConnectionStatus::PENGING,
+            'status' => enConnectionStatus::PENDING,
         ]);
     }
 }
