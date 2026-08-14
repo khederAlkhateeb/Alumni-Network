@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::prefix('v1')->group(function () {
+Route::middleware('throttle:60,1')->prefix('v1')->group(function () {
     foreach (File::allFiles(__DIR__ . '/Api/V1') as $file) {
         require $file->getPathname();
     }
