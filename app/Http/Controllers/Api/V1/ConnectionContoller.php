@@ -5,17 +5,21 @@ namespace App\Http\Controllers\Api\V1;
 use App\Enums\enConnectionStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Connection\ConnectionRequest;
+
+use App\Http\Requests\Connection\FilterConnectionByNameRequest;
 use App\Http\Resources\ConnectionResource;
 use App\Models\Connection;
 use App\Models\User;
 use App\V1\Actions\Connection\AcceptConnectionAction;
 use App\V1\Actions\Connection\BlockConnectionAction;
 use App\V1\Actions\Connection\DeleteConnectionAction;
+use App\V1\Actions\Connection\FilterConnectionsByNameAction;
 use App\V1\Actions\Connection\ListConnectionsAction;
 use App\V1\Actions\Connection\RejectConnectionAction;
 use App\V1\Actions\Connection\SendConnectionAction;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Gate;
 
 class ConnectionContoller extends Controller
@@ -48,6 +52,21 @@ class ConnectionContoller extends Controller
         );
     }
 
+    /**
+     * Filter connections by name for the authenticated user.
+     * @return JsonResponse
+     */
+    public function filterByName(
+        FilterConnectionByNameRequest $request,
+        FilterConnectionsByNameAction $action
+    ) {
+        $connections = $action->handle($request->validated('name'));
+        return $this->successResponse(
+            data: ConnectionResource::collection($connections),
+            message: 'Connections retrieved successfully.',
+            code: 200
+        );
+    }
     /**
      * Display the list of pending connections
      *
