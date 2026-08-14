@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\V1\UniversityController;
+use App\Http\Controllers\Api\V1\UniversityStatsController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -21,4 +22,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/universities/{university}', [UniversityController::class, 'show'])->name('api.v1.universities.show');
     Route::put('/universities/{university}', [UniversityController::class, 'update'])->name('api.v1.universities.update');
     Route::delete('/universities/{university}', [UniversityController::class, 'destroy'])->name('api.v1.universities.destroy');
+
+    // stats 
+    Route::get('/universities/{university}/stats', UniversityStatsController::class)
+        ->name('api.universities.stats');
 });

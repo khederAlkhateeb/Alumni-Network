@@ -3,7 +3,10 @@
 namespace App\Models;
 
 use App\Builders\UniversityQueryBuilder;
+use App\Models\AlumniProfile;
+use App\Models\MentorshipProgram;
 use App\Models\Scopes\UniversityScope;
+use App\Models\StudentProfile;
 use App\Policies\UniversityPolicy;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
@@ -77,5 +80,14 @@ class University extends Model
     public function mentorshipPrograms(): HasMany
     {
         return $this->hasMany(MentorshipProgram::class);
+    }
+
+
+    // Attributes
+    public function getPendingApprovalsAttribute():int {
+        $studentsCount = StudentProfile::sameUniversityAs($this->id)->pending()->count();
+        $alumniCount = AlumniProfile::sameUniversityAs($this->id)->pending()->count();
+
+        return $studentsCount + $alumniCount ;
     }
 }
