@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Event;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -99,5 +100,36 @@ class EventRegistration extends Model
     public function hasAttended(): bool
     {
         return !is_null($this->attended_at);
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Scopes
+    |--------------------------------------------------------------------------
+    */
+
+    /**
+     * 
+     * Filter registerations belonging to a specific university.
+     * @param Builder $query
+     * @param int $universityId
+     * @return Builder
+     */
+    public function scopeForUniversity(Builder $query, int $universityId): Builder
+    {
+        return $query->where('university_id', $universityId);
+    }
+
+    /**
+     * Only include registrations for the given event.
+     *
+     * @param  Illuminate\Database\Eloquent\Builder  $query
+     * @param  int  $event_id
+     * @return Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeForEvent(Builder $query, int $event_id): Builder
+    {
+        return $query->where('event_id', $event_id);
     }
 }
