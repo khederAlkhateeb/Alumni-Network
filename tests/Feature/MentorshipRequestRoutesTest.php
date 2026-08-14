@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\AlumniProfile;
+use App\Models\Conversation;
 use App\Models\Faculty;
 use App\Models\Major;
 use App\Models\MentorshipProgram;
@@ -437,3 +438,142 @@ describe('Mentor Request Decision Workflow & Capacity Constraints', function () 
     });
 
 });
+  describe(' Mentorship Request Regression Tests', function () {
+
+    /**
+     * A pending request can be accepted once, but a rejected request * be accepted again.
+     */
+    it('does not allow a rejected request to be accepted again', function () {
+        $request = MentorshipRequest::create([
+            'program_id' => $this->program->id,
+            'mentor_id'  => $this->mentorUser->id,
+            'mentee_id'  => $this->studentUser->id,
+            'status'     => 'rejected',
+        ]);
+
+        Sanctum::actingAs($this->mentorUser, ['*']);
+
+        $this->postJson("/api/v1/mentorship-requests/{$request->id}/accept")
+            ->assertStatus(500);
+
+        expect($request->fresh()->status->value ?? $request->fresh()->status)
+            ->toBe('rejected');
+    });
+
+    /**
+     * A completed request cannot be modified again.
+     */
+    it('does not allow a completed request to be modified again', function () {
+        $request = MentorshipRequest::create([
+            'program_id' => $this->program->id,
+            'mentor_id'  => $this->mentorUser->id,
+            'mentee_id'  => $this->studentUser->id,
+            'status'     => 'complete',
+        ]);
+
+        Sanctum::actingAs($this->mentorUser, ['*']);
+
+        $this->postJson("/api/v1/mentorship-requests/{$request->id}/reject")
+            ->assertStatus(500);
+
+        expect($request->fresh()->status->value ?? $request->fresh()->status)
+            ->toBe('complete');
+    });
+
+    /**
+     * A mentor cannot accept another request after reaching capacity.
+     * This is the sequential regression test for the capacity rule.
+     */
+    it('keeps the pending request pending when mentor capacity is full', function () {
+        $this->program->update(['mentor_per_mentees_max' => 1]);
+
+        $acceptedMentee = User::factory()->create(['is_active' => true]);
+        $pendingMentee  = User::factory()->create(['is_active' => true]);
+
+        MentorshipRequest::create([
+            'program_id' => $this->program->id,
+            'mentor_id'  => $this->mentorUser->id,
+            'mentee_id'  => $acceptedMentee->id,
+            'status'     => 'accepted',
+        ]);
+
+        $pendingRequest = MentorshipRequest::create([
+            'program_id' => $this->program->id,
+            'mentor_id'  => $this->mentorUser->id,
+            'mentee_id'  => $pendingMentee->id,
+            'status'     => 'pending',
+        ]);
+
+        Sanctum::actingAs($this->mentorUser, ['*']);
+
+        $this->postJson("/api/v1/mentorship-requests/{$pendingRequest->id}/accept")
+            ->assertStatus(500);
+
+        expect($pendingRequest->fresh()->status->value ?? $pendingRequest->fresh()->status)
+            ->toBe('pending');
+
+        $this->assertDatabaseCount('mentorship_requests', 2);
+    });
+
+    /**
+     * The status-change event must be dispatched when a request is accepted.
+     * Event::fake() intentionally isolates dispatch verification from the
+     * listener integration test below.
+     */
+    it('dispatches the mentorship status event when a request is accepted', function () {
+        $request = MentorshipRequest::create([
+            'program_id' => $this->program->id,
+            'mentor_id'  => $this->mentorUser->id,
+            'mentee_id'  => $this->studentUser->id,
+            'status'     => 'pending',
+        ]);
+
+        \Illuminate\Support\Facades\Event::fake([
+            \App\Events\MentorshipRequestStatusUpdated::class,
+        ]);
+
+        Sanctum::actingAs($this->mentorUser, ['*']);
+
+        $this->postJson("/api/v1/mentorship-requests/{$request->id}/accept")
+            ->assertStatus(200);
+
+        \Illuminate\Support\Facades\Event::assertDispatched(
+            \App\Events\MentorshipRequestStatusUpdated::class,
+            function ($event) use ($request) {
+                return $event->mentorshipRequest->id === $request->id
+                    && $event->mentorshipRequest->status->value === 'accepted'
+                    && $event->previousStatus->value === 'pending';
+            }
+        );
+
+});
+
+});
+it('creates a conversation when a mentorship request is accepted', function () {
+    // Arrange
+    $request = MentorshipRequest::create([
+        'program_id' => $this->program->id,
+        'mentor_id'  => $this->mentorUser->id,
+        'mentee_id'  => $this->studentUser->id,
+        'status'     => 'pending',
+    ]);
+
+    Sanctum::actingAs($this->mentorUser, ['*']);
+
+    // Act
+    $this->postJson("/api/v1/mentorship-requests/{$request->id}/accept")
+        ->assertStatus(200);
+
+    // Assert
+$this->assertTrue(
+    Conversation::where(function ($q) {
+        $q->where('user_one_id', $this->mentorUser->id)
+          ->where('user_two_id', $this->studentUser->id);
+    })->orWhere(function ($q) {
+        $q->where('user_one_id', $this->studentUser->id)
+          ->where('user_two_id', $this->mentorUser->id);
+    })->exists()
+);
+
+});
+

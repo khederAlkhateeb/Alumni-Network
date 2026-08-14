@@ -8,7 +8,8 @@ use App\Models\Conversation;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
 class CreateMentorshipChatConversation implements ShouldQueue
-{
+{ public $afterCommit = true;
+
     public function handle(MentorshipRequestStatusUpdated $event): void
     {
         $request = $event->mentorshipRequest;

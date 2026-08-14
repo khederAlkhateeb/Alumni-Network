@@ -180,18 +180,34 @@ class User extends Authenticatable
             'program_id'
         )->distinct();
     }
-    public function hasReachedLimit(int $programId): bool
-    {
-        $program = MentorshipProgram::find($programId);
-        if (!$program) return false;
-        $activeCount = MentorshipRequest::query()
-            ->where('mentor_id', $this->id)
-            ->where('program_id', $programId)
-            ->whereIn('status', ['accepted'])
-            ->count();
-
-        return $activeCount >= $program->mentor_per_mentees_max;
+    /**
+     *
+     * 
+     * @param mixed $programId
+     * @return bool
+     */
+    public function hasReachedLimit(?int $programId): bool
+{
+    if (!$programId) {
+        return false;
     }
+
+    $request = $this->receivedMentorshipRequests
+        ->firstWhere('program_id', $programId);
+
+    $program = $request?->program;
+
+    if (!$program) {
+        return false;
+    }
+
+    $activeCount = $this->receivedMentorshipRequests
+        ->where('program_id', $programId)
+        ->where('status', 'accepted')
+        ->count();
+
+    return $activeCount >= $program->mentor_per_mentees_max;
+}
     /**
      * All messages sent by this user (across all conversations).
      */

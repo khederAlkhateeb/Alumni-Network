@@ -11,7 +11,7 @@ class AvailableMentorResource extends JsonResource
     public function toArray(Request $request): array
     {
 
-        $programId = MentorshipRequest::where('mentor_id', $this->id)->value('program_id');
+        $programId = $this->receivedMentorshipRequests->first()?->program_id;
 
         return [
             'id'           => $this->id,
