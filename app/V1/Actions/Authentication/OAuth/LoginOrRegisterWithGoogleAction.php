@@ -88,13 +88,13 @@ class LoginOrRegisterWithGoogleAction
                 ]);
             }
 
-            if ($profile->status === ProfileStatus::Pending) {
+            if ($profile->status === ProfileStatus::PENDING) {
                 throw ValidationException::withMessages([
                     'email' => ['Your account is still pending approval.'],
                 ]);
             }
 
-            if ($profile->status === ProfileStatus::Suspended) {
+            if ($profile->status === ProfileStatus::SUSPENDED) {
                 throw ValidationException::withMessages([
                     'email' => ['Your registration was suspended.'],
                 ]);

@@ -2,11 +2,12 @@
 
 namespace App\Models;
 
+use App\Builders\JobApplicationBuilder;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use App\Builders\JobApplicationBuilder;
 
 
 #[Fillable([
@@ -17,6 +18,7 @@ use App\Builders\JobApplicationBuilder;
     'status',
 
 ])]
+#[Hidden(['updated_at'])]
 class JobApplication extends Model
 {
     use HasFactory;

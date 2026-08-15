@@ -40,7 +40,7 @@ class User extends Authenticatable
     protected string $guard_name = 'api';
 
     // append the Role label accessor
-    protected $appends = ['role_label'];
+    // protected $appends = ['role_label'];
 
     /**
      * Get the attributes that should be cast.

@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\Api\V1\NotificationResource;
+use App\Http\Resources\NotificationResource;
 use App\V1\Actions\Notifications\GetUserNotificationsAction;
 use App\V1\Actions\Notifications\MarkAllNotificationsAsReadAction;
 use App\V1\Actions\Notifications\MarkNotificationAsReadAction;

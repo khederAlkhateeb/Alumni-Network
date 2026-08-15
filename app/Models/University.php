@@ -9,6 +9,7 @@ use App\Models\Scopes\UniversityScope;
 use App\Models\StudentProfile;
 use App\Policies\UniversityPolicy;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Attributes\UsePolicy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -25,6 +26,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
     'created_by',
     'updated_by',
 ])]
+#[Hidden(['created_at', 'updated_at'])]
 #[UsePolicy(UniversityPolicy::class)]
 #[ScopedBy(UniversityScope::class)]
 class University extends Model

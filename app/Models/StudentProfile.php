@@ -2,14 +2,15 @@
 
 namespace App\Models;
 
-use App\Enums\ProfileStatus;
-use Illuminate\Database\Eloquent\Attributes\ScopedBy;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Builders\StudentProfileBuilder;
+use App\Enums\ProfileStatus;
 use Illuminate\Database\Eloquent\Attributes\Appends;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
@@ -25,7 +26,7 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
     'years_until_graduation',
         'is_pending',
 ])]
-
+#[Hidden(['created_at', 'updated_at'])]
 #[UseEloquentBuilder(StudentProfileBuilder::class)]
 class StudentProfile extends Model
 {use HasFactory;
