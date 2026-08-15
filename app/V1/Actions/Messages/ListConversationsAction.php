@@ -24,9 +24,7 @@ class ListConversationsAction
      */
     public function handle(User|int $user, ?int $per_page = null): LengthAwarePaginator
     {
-        $per_page = $filters['per_page']
-            ?? $per_page
-            ?? config('app.pagination.per_page');
+         $perPage = $perPage ?? config('app.pagination.per_page', 15);
 
         // Ensure we get the user ID correctly whether an ID or a Model was passed
         $userId = $user instanceof User ? $user->id : $user;

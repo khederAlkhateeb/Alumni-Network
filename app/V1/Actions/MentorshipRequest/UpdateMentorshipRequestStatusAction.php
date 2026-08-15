@@ -3,10 +3,12 @@
 namespace App\V1\Actions\MentorshipRequest;
 
 use App\Enums\MentorshipRequestStatus;
+use App\Events\MentorshipRequestStatusUpdated;
 use App\Jobs\SendMentorshipStatusNotification;
 use App\Jobs\SendMentorshipWaitlistNotification;
 use App\Jobs\SendMentorLimitReachedNotification;
 use App\Models\MentorshipRequest;
+use DB;
 use DomainException;
 
 class UpdateMentorshipRequestStatusAction
@@ -20,7 +22,10 @@ class UpdateMentorshipRequestStatusAction
      * @throws DomainException
      */
     public function handle(MentorshipRequest $mentorshipRequest, MentorshipRequestStatus $newStatus): MentorshipRequest
-    {
+{
+    return DB::transaction(function () use ($mentorshipRequest, $newStatus) {
+   $previousStatus = $mentorshipRequest->status;
+
         throw_if(
             in_array($mentorshipRequest->status, [
                 MentorshipRequestStatus::COMPLETED,
@@ -56,18 +61,17 @@ class UpdateMentorshipRequestStatusAction
             "Mentor has reached maximum capacity."
         );
 
-        $previousStatus = $mentorshipRequest->status;
-
         $mentorshipRequest->update([
             'status' => $newStatus,
         ]);
 
-        SendMentorshipStatusNotification::dispatch($mentorshipRequest);
+event(new MentorshipRequestStatusUpdated($mentorshipRequest, $previousStatus));
 
-           if ($newStatus === MentorshipRequestStatus::ACCEPTED) {
+SendMentorshipStatusNotification::dispatch($mentorshipRequest)->afterCommit();
+        if ($newStatus === MentorshipRequestStatus::ACCEPTED) {
             if ($mentor->hasReachedLimit($programId)) {
 
-                SendMentorLimitReachedNotification::dispatch($mentor, $mentorshipRequest->program);
+                SendMentorLimitReachedNotification::dispatch($mentor, $mentorshipRequest->program)->afterCommit();
 
                 $pendingRequests = $mentor->receivedMentorshipRequests()
                     ->forProgram($programId)
@@ -76,11 +80,12 @@ class UpdateMentorshipRequestStatusAction
                     ->get();
 
                 foreach ($pendingRequests as $pendingReq) {
-                    SendMentorshipWaitlistNotification::dispatch($pendingReq);
+                    SendMentorshipWaitlistNotification::dispatch($pendingReq)->afterCommit();
                 }
             }
         }
 
         return $mentorshipRequest;
-    }
+    });
+}
 }

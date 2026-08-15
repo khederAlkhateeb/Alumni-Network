@@ -73,7 +73,7 @@ class UpdateAlumniProfile extends FormRequest
             'city'              => ['nullable', 'string', 'max:100'],
             'linkedin_url'      => ['nullable', 'url', 'max:255'],
             'is_open_to_mentor' => ['sometimes', 'boolean'],
-          "photo" => ['sometimes','file','image', 'mimes:jpg,jpeg,png,webp' ,'nullable', 'max:5242880'],
+          "photo" => ['nullable','file','image', 'mimes:jpg,jpeg,png,webp' ,'nullable', 'max:5242880'],
           'delete_photo' => ['nullable', 'boolean'],
         ];
     }

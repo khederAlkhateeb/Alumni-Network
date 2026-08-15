@@ -69,6 +69,25 @@ class ConnectionQueryBuilder extends Builder
             fn (self $query) => $query->whereIn('status', $statuses)
         );
     }
+/**
+ * Filter by name 
+ * @param mixed $name
+ * @return ConnectionQueryBuilder
+ */
+public function filterByName(?string $name = null): self
+{
+    return $this->when(
+        filled($name),
+        function (self $query) use ($name) {
+            $searchTerm = '%' . trim($name) . '%';
+
+            return $query->where(function ($q) use ($searchTerm) {
+                $q->whereHas('sender', fn ($req) => $req->where('name', 'like', $searchTerm))
+                  ->orWhereHas('receiver', fn ($rec) => $rec->where('name', 'like', $searchTerm));
+            });
+        }
+    );
+}
 
     /**
      * Connections marked blocked between the two users (either direction).
