@@ -54,7 +54,7 @@ function actingAlumni(): User
  * Persist a Connection record directly, bypassing the action layer.
  * Use $extra to override any default attribute (e.g. rejected_at for cooldown tests).
  */
-function makeConnection(
+function createConnection(
     User $requester,
     User $receiver,
     enConnectionStatus $status = enConnectionStatus::PENDING,
@@ -91,8 +91,8 @@ test('authenticated user can list accepted connections', function () {
     $other = User::factory()->create();
     $outsider = User::factory()->create();
 
-    makeConnection($user, $other, enConnectionStatus::ACCEPTED);
-    makeConnection($user, $outsider, enConnectionStatus::PENDING);
+    createConnection($user, $other, enConnectionStatus::ACCEPTED);
+    createConnection($user, $outsider, enConnectionStatus::PENDING);
 
     $this->getJson('/api/v1/connections')
         ->assertStatus(200)
@@ -122,8 +122,8 @@ test('authenticated user can list pending connections', function () {
     $requester = User::factory()->create();
     $friend = User::factory()->create();
 
-    $pending = makeConnection($requester, $user, enConnectionStatus::PENDING);
-    makeConnection($user, $friend, enConnectionStatus::ACCEPTED);
+    $pending = createConnection($requester, $user, enConnectionStatus::PENDING);
+    createConnection($user, $friend, enConnectionStatus::ACCEPTED);
 
     $this->getJson('/api/v1/connections/pending')
         ->assertStatus(200)
@@ -203,7 +203,7 @@ test('cannot send duplicate pending connection request', function () {
     $sender = actingAlumni();
     $receiver = User::factory()->create();
 
-    makeConnection($sender, $receiver, enConnectionStatus::PENDING);
+    createConnection($sender, $receiver, enConnectionStatus::PENDING);
 
     $this->postJson("/api/v1/connections/{$receiver->id}")->assertStatus(422);
 });
@@ -216,7 +216,7 @@ test('cannot send connection request when already accepted', function () {
     $sender = actingAlumni();
     $receiver = User::factory()->create();
 
-    makeConnection($sender, $receiver, enConnectionStatus::ACCEPTED);
+    createConnection($sender, $receiver, enConnectionStatus::ACCEPTED);
 
     $this->postJson("/api/v1/connections/{$receiver->id}")->assertStatus(422);
 });
@@ -229,7 +229,7 @@ test('cannot send connection request when blocked', function () {
     $sender = actingAlumni();
     $receiver = User::factory()->create();
 
-    makeConnection($receiver, $sender, enConnectionStatus::BLOCKED);
+    createConnection($receiver, $sender, enConnectionStatus::BLOCKED);
 
     $this->postJson("/api/v1/connections/{$receiver->id}")->assertStatus(422);
 });
@@ -243,7 +243,7 @@ test('cannot send connection request during rejection cooldown', function () {
     $sender = actingAlumni();
     $receiver = User::factory()->create();
 
-    makeConnection($sender, $receiver, enConnectionStatus::REJECTED, [
+    createConnection($sender, $receiver, enConnectionStatus::REJECTED, [
         'rejected_at' => Carbon::now()->subDays(1),
     ]);
 
@@ -262,7 +262,7 @@ test('cannot send connection request during rejection cooldown', function () {
 test('receiver can accept pending connection', function () {
     $requester = User::factory()->create();
     $receiver = actingAlumni();
-    $connection = makeConnection($requester, $receiver, enConnectionStatus::PENDING);
+    $connection = createConnection($requester, $receiver, enConnectionStatus::PENDING);
 
     $this->postJson("/api/v1/connections/{$connection->id}/accept")
         ->assertStatus(200)
@@ -283,7 +283,7 @@ test('receiver can accept pending connection', function () {
 test('requester cannot accept own connection request', function () {
     $requester = actingAlumni();
     $receiver = User::factory()->create();
-    $connection = makeConnection($requester, $receiver, enConnectionStatus::PENDING);
+    $connection = createConnection($requester, $receiver, enConnectionStatus::PENDING);
 
     $this->postJson("/api/v1/connections/{$connection->id}/accept")->assertStatus(422);
 });
@@ -300,7 +300,7 @@ test('requester cannot accept own connection request', function () {
 test('receiver can reject pending connection', function () {
     $requester = User::factory()->create();
     $receiver = actingAlumni();
-    $connection = makeConnection($requester, $receiver, enConnectionStatus::PENDING);
+    $connection = createConnection($requester, $receiver, enConnectionStatus::PENDING);
 
     $this->postJson("/api/v1/connections/{$connection->id}/reject")
         ->assertStatus(200)
@@ -325,7 +325,7 @@ test('receiver can reject pending connection', function () {
 test('party can delete accepted connection', function () {
     $user = actingAlumni();
     $other = User::factory()->create();
-    $connection = makeConnection($user, $other, enConnectionStatus::ACCEPTED);
+    $connection = createConnection($user, $other, enConnectionStatus::ACCEPTED);
 
     $this->deleteJson("/api/v1/connections/{$connection->id}")
         ->assertStatus(200)
@@ -342,7 +342,7 @@ test('party can delete accepted connection', function () {
 test('cannot delete pending connection', function () {
     $user = actingAlumni();
     $other = User::factory()->create();
-    $connection = makeConnection($user, $other, enConnectionStatus::PENDING);
+    $connection = createConnection($user, $other, enConnectionStatus::PENDING);
 
     $this->deleteJson("/api/v1/connections/{$connection->id}")->assertStatus(422);
 });
@@ -354,7 +354,7 @@ test('cannot delete pending connection', function () {
 test('outsider cannot delete connection', function () {
     $requester = User::factory()->create();
     $receiver = User::factory()->create();
-    $connection = makeConnection($requester, $receiver, enConnectionStatus::ACCEPTED);
+    $connection = createConnection($requester, $receiver, enConnectionStatus::ACCEPTED);
 
     actingAlumni(); // unrelated third-party user
 
@@ -372,7 +372,7 @@ test('outsider cannot delete connection', function () {
 test('party can block accepted connection', function () {
     $user = actingAlumni();
     $other = User::factory()->create();
-    $connection = makeConnection($user, $other, enConnectionStatus::ACCEPTED);
+    $connection = createConnection($user, $other, enConnectionStatus::ACCEPTED);
 
     $this->postJson("/api/v1/connections/{$connection->id}/block")
         ->assertStatus(200)
@@ -393,7 +393,7 @@ test('party can block accepted connection', function () {
 test('cannot block pending connection', function () {
     $user = actingAlumni();
     $other = User::factory()->create();
-    $connection = makeConnection($user, $other, enConnectionStatus::PENDING);
+    $connection = createConnection($user, $other, enConnectionStatus::PENDING);
 
     $this->postJson("/api/v1/connections/{$connection->id}/block")->assertStatus(422);
 });

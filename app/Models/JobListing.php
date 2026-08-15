@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use App\Models\Scopes\UniversityScope;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -13,19 +15,19 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable([
     'university_id',
-        'posted_by_user_id',
-        'title',
-        'company',
-        'location',
-        'type',
-        'description',
-        'requirements',
-        'salary_range',
-        'expires_at',
-        'status',
+    'posted_by_user_id',
+    'title',
+    'company',
+    'location',
+    'type',
+    'description',
+    'requirements',
+    'salary_range',
+    'expires_at',
+    'status',
 ])]
 #[Hidden(['updated_at'])]
-
+#[ScopedBy(UniversityScope::class)]
 class JobListing extends Model
 {
     use HasFactory;

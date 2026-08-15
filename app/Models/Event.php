@@ -5,8 +5,10 @@ namespace App\Models;
 use App\Builders\EventBuilder;
 use App\Enums\EventStatus;
 use App\Enums\EventType;
-use App\Models\University;
 use App\Models\EventRegistration;
+use App\Models\Scopes\UniversityScope;
+use App\Models\University;
+use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -42,6 +44,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  *
  * @package App\Models
  */
+#[ScopedBy(UniversityScope::class)]
 class Event extends Model
 {
     use HasFactory;
