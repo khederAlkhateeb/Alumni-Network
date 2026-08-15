@@ -27,8 +27,8 @@ class ListAlumniNetworkAction
          ->with([
         'user',
         'skills',
-        'workExperiences',
-        'photo',
+        // 'workExperiences',
+        // 'photo',
         'major.faculty.university',
     ])
         ->filters($filters)

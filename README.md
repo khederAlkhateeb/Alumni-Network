@@ -244,6 +244,30 @@ flowchart TD
 
 ---
 
+## Database Schema (ERD) | مخطط قاعدة البيانات
+
+<details>
+<summary><strong>English</strong></summary>
+
+The full entity-relationship diagram for the schema (users, universities, faculties/majors, alumni & student profiles, connections, posts, jobs, events, mentorship programs & requests, messages, notifications) is checked into the repo root.
+
+> 📌 **ERD:** [ERD_Diagram.pdf](ERD_Diagram.pdf)
+> If a live, editable version is also published on dbdiagram.io, add that link here too, e.g. `https://dbdiagram.io/d/<diagram-id>`.
+
+</details>
+
+<details>
+<summary><strong>العربية</strong></summary>
+
+يتم الاحتفاظ بمخطط العلاقات الكامل لقاعدة البيانات (المستخدمون، الجامعات، الكليات/التخصصات، ملفات الخريجين والطلاب، الاتصالات، المنشورات، الوظائف، الفعاليات، برامج وطلبات الإرشاد، الرسائل، الإشعارات) داخل الريبو مباشرة.
+
+> 📌 **ملف الـ ERD:** [ERD_Diagram.pdf](ERD_Diagram.pdf)
+> إذا توفرت نسخة حية وقابلة للتعديل على dbdiagram.io لاحقاً، يمكن إضافة رابطها هنا أيضاً، مثال: `https://dbdiagram.io/d/<diagram-id>`.
+
+</details>
+
+---
+
 ## Directory Structure | هيكلية المجلدات
 
 ```text
@@ -408,6 +432,90 @@ All endpoints below are relative to `/api/v1` and require `Authorization: Bearer
 | :--- | :--- | :--- | :--- | :--- |
 | `POST` | `/messages` | Send a message (implicitly creates the conversation) — broadcasts `MessageSent` on the conversation's private channel | إرسال رسالة (تُنشئ المحادثة ضمنياً) وتُبث فورياً | Auth |
 | `GET` | `/conversations/{conversation}/messages` | List a conversation's message history | سجل رسائل محادثة | Auth |
+
+---
+
+## Core Business Workflows | آليات العمل الأساسية
+
+The three walkthroughs below trace a request end-to-end through the Action/Event/Queue layers described above — they're the workflows the delivery spec calls out explicitly.
+
+### 📝 Registration Verification | التحقق من التسجيل
+
+<details>
+<summary><strong>English</strong></summary>
+
+1. **Sign-up (`POST /auth/register`).** An alumni submits their university student ID and graduation year; a student submits their enrollment ID. The account is created with profile status **`pending`** — a pending user cannot see any content or interact with anyone (feed, connections, jobs, messages are all blocked until approval).
+2. **Manual admin review.** The relevant `University Admin` sees the request in `GET /uni_admin/universities/{university}/pending-registrations` and cross-checks the submitted ID / graduation year / faculty-major against the university's own academic structure (faculties & majors created in step "Academic Structure").
+3. **Decision.** The admin calls either:
+   - `POST .../registrations/{user}/approve` → `ApproveRegistrationAction` flips the profile to **`active`** and queues a welcome notification.
+   - `POST .../registrations/{user}/reject` → the profile is marked **`rejected`**; the user is not deleted, and this is a distinct state from a *connection* rejection (see below).
+4. **First login.** Only after approval can the user call `POST /auth/login` to receive a Sanctum bearer token — an account stuck at `pending`/`rejected` cannot authenticate into a usable session.
+5. **University scoping carries through.** Because every profile is tied to one `university_id`, an approved alumni/student only ever sees data scoped to their own university (jobs, events, feed, mentorship programs) — enforced at the Policy layer, not just in the UI.
+
+</details>
+
+<details>
+<summary><strong>العربية</strong></summary>
+
+1. **التسجيل (`POST /auth/register`).** يقدّم الخريج رقم هويته الجامعية وسنة تخرجه، ويقدّم الطالب رقم قيده. يُنشأ الحساب بحالة **`pending`** — والمستخدم المعلّق لا يرى أي محتوى ولا يتفاعل مع أحد (الـ Feed، الاتصالات، الوظائف، والرسائل كلها محجوبة حتى الاعتماد).
+2. **المراجعة اليدوية من الإدمن.** يرى `University Admin` الطلبات عبر `GET /uni_admin/universities/{university}/pending-registrations` ويتحقق من رقم الهوية/سنة التخرج/الكلية والتخصص المُدخلة مقابل البنية الأكاديمية الفعلية للجامعة (الكليات والتخصصات).
+3. **القرار.** يستدعي الإدمن أحد المسارين:
+   - `POST .../registrations/{user}/approve` → يحوّل `ApproveRegistrationAction` حالة الملف إلى **`active`** ويُضيف إشعار ترحيب إلى الطابور.
+   - `POST .../registrations/{user}/reject` → تصبح حالة الملف **`rejected`**؛ لا يُحذف الحساب، وهذه حالة مختلفة عن رفض *طلب اتصال* (انظر أدناه).
+4. **أول تسجيل دخول.** فقط بعد الاعتماد يستطيع المستخدم استدعاء `POST /auth/login` للحصول على توكن Sanctum — الحساب العالق على `pending`/`rejected` لا يستطيع الدخول لجلسة فعلية.
+5. **النطاق الجامعي يستمر بعد الاعتماد.** بما أن كل ملف مرتبط بـ `university_id` واحد، فإن الخريج/الطالب المعتمد لا يرى إلا بيانات جامعته (الوظائف، الفعاليات، الـ Feed، برامج الإرشاد) — وهذا مفروض على مستوى الـ Policy وليس فقط في الواجهة.
+
+</details>
+
+### 📡 Feed Algorithm | خوارزمية الـ Feed
+
+<details>
+<summary><strong>English</strong></summary>
+
+1. **Three sources, merged.** `GET /feed` aggregates posts from three places in a single timeline: (a) posts from the user's accepted **connections**, (b) official **university announcements**, and (c) posts from **fellow alumni of the same university** — even if not connected.
+2. **Newest-first, cursor-paginated.** Results are ordered by recency and paginated with a **cursor** (not offset-based `page=`), so a post created between two requests never causes the same item to appear twice or a later one to be skipped — important since the feed is a live-merging query across sources.
+3. **Cached per user, 5 minutes.** Each user's computed feed page is cached for 5 minutes to avoid re-running the three-source aggregation on every request.
+4. **Event-driven invalidation, not TTL alone.** When a post is created, `PostCreated` fires and the `InvalidateFeedCacheForConnections` listener proactively busts the cache for that author's connections (and, where relevant, fellow alumni) — so a new post shows up immediately for the people it's relevant to, instead of waiting out the 5-minute TTL.
+5. **Visibility is enforced at query time.** A post's visibility level (public / connections-only / university-alumni-only) is applied as part of the aggregation query itself, so the cache never has to be built per-viewer-permission — it's filtered correctly before caching.
+
+</details>
+
+<details>
+<summary><strong>العربية</strong></summary>
+
+1. **ثلاثة مصادر مدموجة.** يجمع `GET /feed` منشورات من ثلاثة مصادر في تايم لاين واحد: (أ) منشورات **المتواصلين المقبولين**، (ب) **إعلانات الجامعة** الرسمية، (ج) منشورات **خريجي نفس الجامعة** حتى لو لم يكونوا متواصلين.
+2. **الأحدث أولاً مع Cursor Pagination.** النتائج مرتبة بالأحدث ومُقسّمة صفحات عبر **Cursor** وليس `page=` (offset)، بحيث لا يظهر منشور جديد أنشئ بين طلبين مرتين ولا يختفي منشور آخر — وهذا مهم لأن الـ Feed هو استعلام دمج حي من عدة مصادر.
+3. **كاش لكل مستخدم لمدة 5 دقائق.** تُخزَّن صفحة الـ Feed المحسوبة لكل مستخدم في الكاش لمدة 5 دقائق لتفادي إعادة تنفيذ استعلام الدمج الثلاثي في كل طلب.
+4. **إبطال قائم على الأحداث، وليس على الـ TTL فقط.** عند نشر منشور جديد، يُطلَق حدث `PostCreated` ويقوم المستمع (`Listener`) `InvalidateFeedCacheForConnections` بإبطال الكاش فوراً لمتواصلي صاحب المنشور (وخريجي نفس الجامعة عند الاقتضاء) — بحيث يظهر المنشور الجديد فوراً لمن يهمهم دون انتظار انتهاء الـ 5 دقائق.
+5. **الرؤية (Visibility) تُطبَّق وقت الاستعلام.** مستوى رؤية المنشور (عام / متواصلون فقط / خريجو الجامعة فقط) يُطبَّق كجزء من استعلام الدمج نفسه، فلا حاجة لبناء كاش مختلف لكل صلاحية مشاهدة — تتم التصفية الصحيحة قبل التخزين المؤقت.
+
+</details>
+
+### 🎓 Mentorship Workflow | آلية الإرشاد المهني (Mentorship)
+
+<details>
+<summary><strong>English</strong></summary>
+
+1. **Program setup.** A `University Admin` creates a mentorship program scoped to their university, with a time window and a **mentor capacity** (`mentor_per_mentees_max` — the maximum number of active mentees any one mentor can take on in that program). Programs move through `draft → active → closed`.
+2. **Becoming available as a mentor.** An alumni must be **`active`** and must flip `POST /alumni/me/toggle-mentor` (`is_open_to_mentor = true`) to show up in `GET /mentors` — the available-mentors list is cached for 15 minutes and cleared by the `ClearAvailableMentorsCache` listener whenever mentor availability changes.
+3. **Sending a request.** A mentee (alumni or student) calls `POST /mentorship-requests` targeting a mentor **in their own faculty only**, with an intro message. A mentee cannot have more than one *active* request in the same program, and requests start at status **`pending`**.
+4. **Capacity enforcement on accept.** When the mentor calls `POST /mentorship-requests/{id}/accept`, the Action re-checks the program's `mentor_per_mentees_max` before confirming — a mentor can never accept past their capacity. Once a mentor's active mentee count reaches the cap, they're **automatically marked unavailable** for that specific program (they can still mentor in other programs where they have room).
+5. **Auto-created conversation.** On acceptance, `MentorshipRequestStatusUpdated` triggers automatic creation of a direct conversation between mentor and mentee — this is the **explicit exception** to the "messages require an accepted connection" rule, since a mentor/mentee pair is allowed to message each other even if they never separately connected.
+6. **Wrap-up.** Either side can later call `POST /mentorship-requests/{id}/complete` to close out the mentorship; a rejected request (`reject`) simply frees up the mentor's remaining capacity for the next incoming request.
+
+</details>
+
+<details>
+<summary><strong>العربية</strong></summary>
+
+1. **إنشاء البرنامج.** ينشئ `University Admin` برنامج إرشاد مرتبطاً بجامعته، بفترة زمنية محددة و**سعة قصوى للمرشد** (`mentor_per_mentees_max` — أقصى عدد متدربين نشطين يمكن لأي مرشد أخذهم ضمن هذا البرنامج). يمرّ البرنامج بالحالات `draft → active → closed`.
+2. **أن يصبح الخريج متاحاً كمرشد.** يجب أن يكون الخريج بحالة **`active`** وأن يُفعّل `POST /alumni/me/toggle-mentor` (`is_open_to_mentor = true`) ليظهر ضمن `GET /mentors` — قائمة المرشدين المتاحين مخزّنة في كاش لمدة 15 دقيقة ويتم إفراغها عبر المستمع `ClearAvailableMentorsCache` كلما تغيّرت حالة توفر أحد المرشدين.
+3. **إرسال الطلب.** يرسل المتدرب (خريج أو طالب) `POST /mentorship-requests` موجّهاً لمرشد **من نفس كليته فقط**، مع رسالة تعريفية. لا يستطيع المتدرب أن يكون لديه أكثر من طلب *نشط* واحد في نفس البرنامج، وتبدأ الطلبات بحالة **`pending`**.
+4. **فرض السعة القصوى عند القبول.** عند استدعاء المرشد لـ `POST /mentorship-requests/{id}/accept`، يعيد الـ Action التحقق من `mentor_per_mentees_max` الخاص بالبرنامج قبل التأكيد — لا يمكن للمرشد تجاوز سعته أبداً. عند وصول عدد المتدربين النشطين للمرشد إلى الحد الأقصى، يُعلَّم المرشد **تلقائياً كغير متاح** في ذلك البرنامج تحديداً (ويبقى متاحاً في برامج أخرى لديه فيها سعة متبقية).
+5. **إنشاء محادثة تلقائياً.** عند القبول، يُطلق حدث `MentorshipRequestStatusUpdated` إنشاءً تلقائياً لمحادثة مباشرة بين المرشد والمتدرب — وهذا هو **الاستثناء الصريح** لقاعدة "الرسائل تتطلب اتصالاً مقبولاً"، إذ يُسمح لثنائي المرشد/المتدرب بالتراسل حتى لو لم يتواصلا بشكل منفصل عبر شبكة الاتصالات.
+6. **الإنهاء.** يستطيع أي من الطرفين لاحقاً استدعاء `POST /mentorship-requests/{id}/complete` لإنهاء الإرشاد؛ أما رفض الطلب (`reject`) فيُحرِّر ببساطة سعة المرشد المتبقية للطلب التالي الوارد.
+
+</details>
 
 ---
 

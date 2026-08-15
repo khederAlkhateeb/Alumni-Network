@@ -3,6 +3,7 @@
 namespace App\Exceptions;
 
 use Throwable;
+use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
@@ -52,6 +53,10 @@ class ApiExceptionHandler
             //  Invalid HTTP Method (405)
             $e instanceof MethodNotAllowedHttpException
                 => self::respond('HTTP method is not allowed for this route.', 405),
+
+            //  Too many requests (429)
+            $e instanceof ThrottleRequestsException
+                => self::respond('Too many requests. Please try again later.', 429),
 
             //  Database Query Errors (500 - Logged securely, message masked)
             $e instanceof QueryException

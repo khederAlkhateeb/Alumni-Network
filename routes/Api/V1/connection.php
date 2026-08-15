@@ -25,6 +25,14 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/connections', [ConnectionContoller::class, 'index'])->name('api.v1.connections.index');
 
     /**
+     * Filter authenticated user's connections by name.
+     *
+     * @see ConnectionController::filterByName
+     */
+    Route::get('/connections/filter', [ConnectionContoller::class, 'filterByName'])
+        ->name('api.v1.connections.filter-by-name');
+        
+    /**
      * List the pending connection requests received by the authenticated user.
      * @see ConnectionContoller::pending()
      */
