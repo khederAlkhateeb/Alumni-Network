@@ -1,8 +1,10 @@
 <?php
 
-use App\Http\Middleware\EnsureTokenIsFullAccess;
-use Illuminate\Auth\Access\AuthorizationException;
 use App\Exceptions\ApiExceptionHandler;
+use App\Http\Middleware\ApiPerformanceLogger;
+use App\Http\Middleware\EnsureTokenIsFullAccess;
+use App\Http\Middleware\SecurityMiddleware;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -24,7 +26,9 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->api(append: [
-        EnsureTokenIsFullAccess::class,
+            EnsureTokenIsFullAccess::class,
+            ApiPerformanceLogger::class,
+            SecurityMiddleware::class,
         ]);
         $middleware->alias([
             'permission' => PermissionMiddleware::class,
@@ -32,7 +36,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'role_or_permission' => RoleOrPermissionMiddleware::class,
         ]);
     })
-  ->withExceptions(function (Exceptions $exceptions): void {
+    ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->render(function (Throwable $e, Request $request) {
             if ($request->is('api/*') || $request->wantsJson()) {
                 return ApiExceptionHandler::map($e);
