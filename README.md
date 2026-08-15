@@ -252,7 +252,7 @@ flowchart TD
 The full entity-relationship diagram for the schema (users, universities, faculties/majors, alumni & student profiles, connections, posts, jobs, events, mentorship programs & requests, messages, notifications) is checked into the repo root.
 
 > 📌 **ERD:** [ERD_Diagram.pdf](ERD_Diagram.pdf)
-> If a live, editable version is also published on dbdiagram.io, add that link here too, e.g. `https://dbdiagram.io/d/<diagram-id>`.
+
 
 </details>
 
@@ -262,7 +262,6 @@ The full entity-relationship diagram for the schema (users, universities, facult
 يتم الاحتفاظ بمخطط العلاقات الكامل لقاعدة البيانات (المستخدمون، الجامعات، الكليات/التخصصات، ملفات الخريجين والطلاب، الاتصالات، المنشورات، الوظائف، الفعاليات، برامج وطلبات الإرشاد، الرسائل، الإشعارات) داخل الريبو مباشرة.
 
 > 📌 **ملف الـ ERD:** [ERD_Diagram.pdf](ERD_Diagram.pdf)
-> إذا توفرت نسخة حية وقابلة للتعديل على dbdiagram.io لاحقاً، يمكن إضافة رابطها هنا أيضاً، مثال: `https://dbdiagram.io/d/<diagram-id>`.
 
 </details>
 
