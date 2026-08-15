@@ -347,7 +347,7 @@ test('returns 404 for nonexistent university', function () {
 test('stats requires authentication', function () {
     $university = University::factory()->create();
 
-    $this->getJson("/api/v1/{$university->id}/stats")->assertStatus(401);
+    $this->getJson("/api/v1/universities/{$university->id}/stats")->assertStatus(401);
 });
 
 /**
@@ -359,7 +359,7 @@ test('stats forbidden for regular user', function () {
     $university = University::factory()->create();
     Sanctum::actingAs(User::factory()->create());
 
-    $this->getJson("/api/v1/{$university->id}/stats")->assertStatus(403);
+    $this->getJson("/api/v1/universities/{$university->id}/stats")->assertStatus(403);
 });
 
 /**
@@ -372,7 +372,7 @@ test('stats forbidden for uni admin of different university', function () {
 
     actingAsUniAdmin($ownUniversity);
 
-    $this->getJson("/api/v1/{$otherUniversity->id}/stats")->assertStatus(403);
+    $this->getJson("/api/v1/universities/{$otherUniversity->id}/stats")->assertStatus(403);
 });
 
 /**
@@ -382,7 +382,7 @@ test('stats accessible by super admin', function () {
     ['university' => $university] = createUniversityWithMajor();
     actingAsSuperAdmin();
 
-    $this->getJson("/api/v1/{$university->id}/stats")
+    $this->getJson("/api/v1/universities/{$university->id}/stats")
         ->assertStatus(200)
         ->assertJsonPath('status', 'success');
 });
@@ -394,7 +394,7 @@ test('stats accessible by own uni admin', function () {
     ['university' => $university] = createUniversityWithMajor();
     actingAsUniAdmin($university);
 
-    $this->getJson("/api/v1/{$university->id}/stats")
+    $this->getJson("/api/v1/universities/{$university->id}/stats")
         ->assertStatus(200)
         ->assertJsonPath('status', 'success');
 });
@@ -409,7 +409,7 @@ test('stats response has expected structure', function () {
     ['university' => $university] = createUniversityWithMajor();
     actingAsSuperAdmin();
 
-    $this->getJson("/api/v1/{$university->id}/stats")
+    $this->getJson("/api/v1/universities/{$university->id}/stats")
         ->assertStatus(200)
         ->assertJsonStructure([
             'status',
