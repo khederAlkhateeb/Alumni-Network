@@ -138,7 +138,12 @@ class RoleAndPermissionSeeder extends Seeder
             'view-mentorship-programs', 'view-available-mentors',
             'view-conversations', 'send-message', 'mark-message-as-read',
             'view-notifications', 'mark-notification-as-read',
-            'view-university-reports'
+            'view-university-reports',
+            'view-connections',
+            'send-connection-request',
+            'accept-connection-request',
+            'reject-connection-request',
+            'remove-connection'
         ]);
 
         // Alumni
