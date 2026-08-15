@@ -13,8 +13,11 @@ beforeEach(function () {
     $this->currentUniversity = University::factory()->create();
     $this->otherUniversity = University::factory()->create();
 
-    app()->instance(UniversityContext::class, new class($this->currentUniversity->id) implements UniversityContext {
-        public function __construct(private int $universityId) {}
+    app()->instance(
+        UniversityContext::class,
+        new class ($this->currentUniversity->id) implements UniversityContext {
+        public function __construct(private int $universityId)
+        {}
 
         public function getUniversityId(): ?int
         {
@@ -30,7 +33,8 @@ beforeEach(function () {
         {
             return false;
         }
-    });
+        }
+    );
 });
 
 it('applies the university scope to events', function () {
