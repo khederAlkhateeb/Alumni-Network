@@ -21,6 +21,7 @@ class CreateFaculty
             $faculty = Faculty::create([
                 'name' => $data['name'],
                 'university_id' => $data['university_id'],
+                'created_at' => now(),
             ]);
             return $faculty->fresh();
         } catch (Throwable $exception) {

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Event;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -30,7 +31,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 | @property-read User $user
 |
 */
-
 class EventRegistration extends Model
 {
     use HasFactory;
@@ -110,7 +110,7 @@ class EventRegistration extends Model
     */
 
     /**
-     * 
+     *
      * Filter registerations belonging to a specific university.
      * @param Builder $query
      * @param int $universityId

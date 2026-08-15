@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Builders\MentorshipRequestBuilder;
 use App\Enums\MentorshipRequestStatus;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -24,6 +25,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'intro_message',
     'status',
 ])]
+#[Hidden(['created_at', 'updated_at'])]
+
 class MentorshipRequest extends Model
 {
     use HasFactory;

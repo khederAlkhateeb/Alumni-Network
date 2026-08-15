@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -27,6 +28,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property-read User $user The local user that owns this social account link.
  */
 #[Fillable(['provider_name', 'user_id', 'provider_id'])]
+#[Hidden(['created_at', 'updated_at'])]
+
 class LinkedSocialAccount extends Model
 {
     use HasFactory;

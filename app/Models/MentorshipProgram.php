@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -16,10 +17,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'mentor_per_mentees_max',
     'status',
 ])]
+#[Hidden(['created_at', 'updated_at'])]
 class MentorshipProgram extends Model
 {
     use HasFactory;
-  
+
     protected $guarded = [];
 
     /**

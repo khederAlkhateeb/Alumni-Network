@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\ReactionType;
 use App\Policies\ReactPolicy;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Attributes\UsePolicy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -31,6 +32,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @property-read User $user The user who created the reaction.
  */
 #[Fillable(['reactable_id', 'reactable_type', 'type', 'user_id'])]
+#[Hidden(['created_at', 'updated_at'])]
 #[UsePolicy(ReactPolicy::class)]
 class Reaction extends Model
 {
