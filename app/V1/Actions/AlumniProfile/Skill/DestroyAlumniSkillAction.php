@@ -25,7 +25,7 @@ class DestroyAlumniSkillAction
      *
      * @throws ModelNotFoundException If the skill is not associated with the profile.
      */
-    public function execute(AlumniProfile $profile, int $skillId): void
+    public function handle(AlumniProfile $profile, int $skillId): void
     {
         $exists = $profile->skills()
             ->where('skills.id', $skillId)

@@ -23,7 +23,7 @@ return new class extends Migration
             $table->text('bio')->nullable();
             $table->string('city')->nullable();
             $table->string('country')->nullable();
-            $table->enum('status', ['pending', 'active', 'suspended'])->default('pending');
+            $table->enum('status', ['pending', 'active', 'suspended','incomplete'])->default('pending');
             $table->boolean('is_open_to_mentor')->default(false);
             $table->timestamps();
 

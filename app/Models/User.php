@@ -182,7 +182,7 @@ class User extends Authenticatable
     }
     /**
      *
-     * 
+     *
      * @param mixed $programId
      * @return bool
      */
@@ -235,4 +235,8 @@ class User extends Authenticatable
     {
         return $this->hasMany(LinkedSocialAccount::class);
     }
+    public function reviewedGraduationRequests(): HasMany
+{
+    return $this->hasMany(GraduationRequest::class, 'reviewed_by');
+}
 }

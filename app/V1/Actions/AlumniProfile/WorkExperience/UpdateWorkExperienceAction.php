@@ -27,9 +27,9 @@ class UpdateWorkExperienceAction
      * @return WorkExperience
      * @throws ModelNotFoundException|ValidationException
      */
-    public function execute(AlumniProfile $profile, int $workExperienceId, array $data): WorkExperience
+    public function handle(AlumniProfile $profile, int $workExperienceId, array $data): WorkExperience
     {
-       
+
         $workExperience = $profile->workExperiences()->find($workExperienceId);
 
         if (! $workExperience) {

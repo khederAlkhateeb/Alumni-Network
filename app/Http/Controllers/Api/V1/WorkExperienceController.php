@@ -42,7 +42,7 @@ class WorkExperienceController extends Controller
     {
         $profile = $this->getAuthenticatedAlumniProfile();
 
-        $workExperience = $action->execute($profile, $request->validated());
+        $workExperience = $action->handle($profile, $request->validated());
 
         return $this->successResponse(
             data: new WorkExperienceResource($workExperience),
@@ -72,7 +72,7 @@ class WorkExperienceController extends Controller
     ): JsonResponse {
         $profile = $this->getAuthenticatedAlumniProfile();
 
-        $updated = $action->execute($profile, $workExperience, $request->validated());
+        $updated = $action->handle($profile, $workExperience, $request->validated());
 
         return $this->successResponse(
             data: new WorkExperienceResource($updated),
@@ -95,7 +95,7 @@ class WorkExperienceController extends Controller
     {
         $profile = $this->getAuthenticatedAlumniProfile();
 
-        $action->execute($profile, $workExperience);
+        $action->handle($profile, $workExperience);
 
         return $this->successResponse(
             message: 'Work experience deleted successfully.',

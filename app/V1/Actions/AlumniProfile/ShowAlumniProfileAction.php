@@ -23,7 +23,7 @@ class ShowAlumniProfileAction
      *
      * @throws ModelNotFoundException If no active alumni profile is found with the given ID.
      */
-    public function execute(int $alumniProfileId): AlumniProfile
+    public function handle(int $alumniProfileId): AlumniProfile
     {
         $profile = AlumniProfile::query()
             ->with([

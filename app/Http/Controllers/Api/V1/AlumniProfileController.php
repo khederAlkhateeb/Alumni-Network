@@ -38,7 +38,7 @@ class AlumniProfileController extends Controller
     {
         $this->authorize('viewAny', AlumniProfile::class);
 
-        $alumni = $action->execute($request->validated());
+        $alumni = $action->handle($request->validated());
 
         return $this->successResponse(
             data: AlumniProfileListResource::collection($alumni),
@@ -55,7 +55,7 @@ class AlumniProfileController extends Controller
      */
     public function show(int $alumni, ShowAlumniProfileAction $action): JsonResponse
     {
-        $profile = $action->execute($alumni);
+        $profile = $action->handle($alumni);
 
         $this->authorize('view', $profile);
 
@@ -104,7 +104,7 @@ class AlumniProfileController extends Controller
 
         $this->authorize('update', $profile);
 
-        $updatedProfile = $action->execute($profile, $request->validated());
+        $updatedProfile = $action->handle($profile, $request->validated());
 
         return $this->successResponse(
             data: new AlumniProfileResource($updatedProfile),
@@ -127,7 +127,7 @@ class AlumniProfileController extends Controller
 
         $this->authorize('completeProfile', $profile);
 
-        $updatedProfile = $action->execute($profile, $request->validated());
+        $updatedProfile = $action->handle($profile, $request->validated());
 
         return $this->successResponse(
             data: new AlumniProfileResource($updatedProfile),
@@ -147,7 +147,7 @@ class AlumniProfileController extends Controller
 
         $this->authorize('toggleMentor', $profile);
 
-        $updatedProfile = $action->execute($profile);
+        $updatedProfile = $action->handle($profile);
 
         return $this->successResponse(
             data: null,

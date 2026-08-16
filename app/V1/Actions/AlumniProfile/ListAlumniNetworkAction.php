@@ -17,7 +17,7 @@ class ListAlumniNetworkAction
      *     per_page?: int|null
      * } $filters
      */
-    public function execute(array $filters, ?int $per_page = null): LengthAwarePaginator
+    public function handle(array $filters, ?int $per_page = null): LengthAwarePaginator
 {
     $per_page = $filters['per_page']
         ?? $per_page

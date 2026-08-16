@@ -43,11 +43,12 @@ class DatabaseSeeder extends Seeder
             ConversationSeeder::class,
             MessageSeeder::class,
 
-            NotificationSeeder::class,
+            // NotificationSeeder::class,
             AttachmentSeeder::class,
 
             ReportSnapshotSeeder::class,
             UserRoleSeeder::class,
+            GraduationRequestSeeder::class,
 
         ]);
     }

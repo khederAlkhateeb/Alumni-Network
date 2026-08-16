@@ -37,7 +37,7 @@ class AlumniSkillController extends Controller
     {
         $profile = $this->getAuthenticatedAlumniProfile();
 
-        $updatedProfile = $action->execute($profile, $request->validated());
+        $updatedProfile = $action->handle($profile, $request->validated());
 
         return $this->successResponse(
             data: SkillResource::collection($updatedProfile->skills),
@@ -61,7 +61,7 @@ class AlumniSkillController extends Controller
     {
         $profile = $this->getAuthenticatedAlumniProfile();
 
-        $action->execute($profile, $skill);
+        $action->handle($profile, $skill);
 
         return $this->successResponse(
             message: 'Skill removed successfully.',
