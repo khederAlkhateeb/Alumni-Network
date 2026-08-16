@@ -3,6 +3,7 @@
 namespace App\Models\Scopes;
 
 use App\Contracts\UniversityContext;
+use App\Models\University;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Scope;
@@ -37,7 +38,14 @@ class UniversityScope implements Scope
         $universityId = $context->getUniversityId();
 
         if ($universityId !== null) {
-            $builder->where($model->getTable() . '.id', $universityId);
+            if ($model instanceof University)
+                $builder->where($model->getTable() . '.id', $universityId);
+            else {
+                $builder->where(
+                    $model->getTable() . '.university_id',
+                    $universityId
+                );
+            }
         } else {
             // Users without a university ID should not see any university data
             $builder->whereNull($model->getTable() . '.id');
