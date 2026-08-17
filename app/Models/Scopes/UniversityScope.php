@@ -52,3 +52,10 @@ class UniversityScope implements Scope
         }
     }
 }
+/**
+ * Note:
+ * University tenancy is enforced globally on direct university-owned models.
+ * Models without a direct university_id use explicit relationship-based
+ * builder scopes to avoid duplicating data and adding heavy constraints to
+ * every query.
+ */

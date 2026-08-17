@@ -32,7 +32,7 @@ class CreateMentorshipRequestAction
             'intro_message' => $data['intro_message'] ?? null,
             'status'        => \App\Enums\MentorshipRequestStatus::PENDING,
         ]);
-
+       $request->loadMissing(['mentor', 'program']);
         $mentor = $request->mentor;
         $program = $request->program;
 

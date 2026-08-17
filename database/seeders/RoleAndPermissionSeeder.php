@@ -145,15 +145,12 @@ class RoleAndPermissionSeeder extends Seeder
             'view-conversations', 'send-message', 'mark-message-as-read',
             'view-notifications', 'mark-notification-as-read',
             'view-university-reports',
-<<<<<<< Updated upstream
             'view-connections',
             'send-connection-request',
             'accept-connection-request',
             'reject-connection-request',
-            'remove-connection'
-=======
+            'remove-connection',
             'view-graduation-requests', 'approve-graduation-request', 'reject-graduation-request',
->>>>>>> Stashed changes
         ]);
 
         // Alumni

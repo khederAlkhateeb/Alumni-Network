@@ -114,10 +114,10 @@ class StudentProfile extends Model
     return $this->hasOneThrough(
         University::class,
         Major::class,
-        'id',            // Foreign key on Majors table (Major ID)
-        'id',            // Foreign key on University table (University ID)
-        'major_id',      // Local key on StudentProfile table
-        'university_id'  // Local key on Major table
+        'id',            
+        'id',
+        'major_id',
+        'university_id'
     );
 }
 }

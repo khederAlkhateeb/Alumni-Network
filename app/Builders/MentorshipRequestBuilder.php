@@ -3,6 +3,7 @@
 namespace App\Builders;
 
 use App\Enums\MentorshipRequestStatus;
+use DB;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
@@ -110,14 +111,19 @@ public function forUniversity(int $university): self
 
     public function countByStatuses(): array
     {
-        $counts = [];
 
+        $counts = (clone $this)
+            ->select('status', DB::raw('count(*) as aggregate'))
+            ->groupBy('status')
+            ->pluck('aggregate', 'status')
+            ->toArray();
+
+
+        $result = [];
         foreach (MentorshipRequestStatus::cases() as $status) {
-            $counts[$status->value] = (clone $this)
-                ->where('status', $status)
-                ->count();
+            $result[$status->value] = $counts[$status->value] ?? 0;
         }
 
-        return $counts;
+        return $result;
     }
 }

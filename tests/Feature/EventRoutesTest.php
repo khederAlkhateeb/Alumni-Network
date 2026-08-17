@@ -44,6 +44,7 @@ uses(RefreshDatabase::class);
  *
  * @return void
  */
+
 beforeEach(function () {
     // Ensure the 'uni_admin' role exists for the API guard
     Role::findOrCreate('uni_admin', 'api');
@@ -79,6 +80,23 @@ beforeEach(function () {
     // Create a regular user for general access testing
     $regularUser = User::factory()->create(['is_active' => true]);
     test()->regularUser = $regularUser;
+    app()->bind(\App\Contracts\UniversityContext::class, function () {
+        return new class implements \App\Contracts\UniversityContext {
+            public function isGuest(): bool { return false; }
+            public function isSuperAdmin(): bool { return false; }
+            public function getUniversityId(): ?int {
+        
+                if (request()->route('university')) {
+                    return request()->route('university')->id;
+                }
+
+                if (isset(test()->university)) {
+                    return test()->university->id;
+                }
+                return null;
+            }
+        };
+    });
 });
 
 /*

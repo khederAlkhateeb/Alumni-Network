@@ -4,13 +4,14 @@ namespace App\Rules;
 
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
-use App\Models\User;
+use App\Models\Major;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Class MatchMentorCollege
  *
  * Validation rule to ensure that the selected mentor belongs to the same
- * faculty or college as the authenticated student.
+ * faculty or college as the authenticated student by comparing their major faculties.
  *
  * @package App\Rules
  */
@@ -19,28 +20,32 @@ class MatchMentorCollege implements ValidationRule
     /**
      * Run the validation rule.
      *
-     * @param  string  $attribute
-     * @param  mixed  $value
-     * @param  \Closure(string): \Illuminate\Translation\PotentiallyTranslatedString  $fail
+     * @param string $attribute
+     * @param mixed $value The mentor ID being validated.
+     * @param \Closure(string): \Illuminate\Translation\PotentiallyTranslatedString $fail
      * @return void
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        $student = auth()->user();
-        $mentor = User::find($value);
+        $studentId = auth()->id();
+        $mentorId = $value;
 
-        $studentMajorId = optional($student->studentProfile)->major_id;
-        $mentorMajorId = optional($mentor?->alumniProfile)->major_id;
+        // Fetch student and mentor major IDs efficiently via query builder
+        $studentMajorId = DB::table('student_profiles')->where('user_id', $studentId)->value('major_id');
+        $mentorMajorId = DB::table('alumni_profiles')->where('user_id', $mentorId)->value('major_id');
 
         if (!$studentMajorId || !$mentorMajorId) {
             $fail('Could not verify the college for the student or mentor.');
             return;
         }
 
-        $studentFacultyId = \App\Models\Major::where('id', $studentMajorId)->value('faculty_id');
-        $mentorFacultyId = \App\Models\Major::where('id', $mentorMajorId)->value('faculty_id');
+        // Fetch faculties for both majors in a single query
+        $majors = Major::whereIn('id', [$studentMajorId, $mentorMajorId])->pluck('faculty_id', 'id');
 
-        if ($studentFacultyId !== $mentorFacultyId) {
+        $studentFacultyId = $majors[$studentMajorId] ?? null;
+        $mentorFacultyId = $majors[$mentorMajorId] ?? null;
+
+        if (!$studentFacultyId || !$mentorFacultyId || $studentFacultyId !== $mentorFacultyId) {
             $fail('The selected mentor must belong to your same faculty/college.');
         }
     }

@@ -25,6 +25,7 @@ uses(RefreshDatabase::class);
  * and authorization tests via $this->alumniUser.
  */
 beforeEach(function () {
+    Cache::flush();
     Role::findOrCreate('alumni', 'api');
 
     $this->alumniUser = User::factory()->create(['is_active' => true]);
@@ -126,29 +127,32 @@ it('returns an empty feed when no posts exist', function () {
  * - Public and University posts from same-university alumni should be visible.
  * - Connection-only posts are hidden because the user is not connected to themselves.
  */
-it('respects visibility rules in the feed', function () {
-    // This post is public and from the same university → will appear
-    $publicPost = Post::factory()->create([
-        'user_id' => $this->alumniUser->id,
-        'visibility' => PostVisibility::Public,
-    ]);
 
-    // This post is a university announcement and from the same university → will appear
+it('respects visibility rules in the feed', function () {
+
     $universityPost = Post::factory()->create([
         'user_id' => $this->alumniUser->id,
         'visibility' => PostVisibility::University,
+        'created_at' => now()->subMinutes(5),
+    ]);
+
+
+    $publicPost = Post::factory()->create([
+        'user_id' => $this->alumniUser->id,
+        'visibility' => PostVisibility::Public,
+        'created_at' => now(),
     ]);
 
     // This post is connections-only; user is not connected to themselves → will NOT appear
     Post::factory()->create([
         'user_id' => $this->alumniUser->id,
         'visibility' => PostVisibility::Connections,
+        'created_at' => now()->subMinutes(10),
     ]);
 
     Sanctum::actingAs($this->alumniUser, ['*'], 'api');
 
     $response = $this->getJson('/api/v1/feed');
-
     $response->assertStatus(200)
         ->assertJsonCount(2, 'data')
         ->assertJsonPath('data.0.id', $publicPost->id)

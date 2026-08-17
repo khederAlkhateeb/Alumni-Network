@@ -192,7 +192,7 @@ class User extends Authenticatable
         return false;
     }
 
-    $request = $this->receivedMentorshipRequests
+    $request = $this->receivedMentorshipRequests()
         ->firstWhere('program_id', $programId);
 
     $program = $request?->program;
@@ -201,7 +201,7 @@ class User extends Authenticatable
         return false;
     }
 
-    $activeCount = $this->receivedMentorshipRequests
+    $activeCount = $this->receivedMentorshipRequests()
         ->where('program_id', $programId)
         ->where('status', 'accepted')
         ->count();
