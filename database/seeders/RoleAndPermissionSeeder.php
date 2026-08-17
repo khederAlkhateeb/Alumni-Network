@@ -50,6 +50,11 @@ class RoleAndPermissionSeeder extends Seeder
         $createPermission(' edit-own-profile');
         $createPermission('manage-skills');
         $createPermission('toggle-mentor-status');
+        // Graduation Requests
+        $createPermission('submit-graduation-request');
+        $createPermission('view-graduation-requests');
+        $createPermission('approve-graduation-request');
+        $createPermission('reject-graduation-request');
 
         // Connections
         $createPermission('view-connections');
@@ -120,7 +125,8 @@ class RoleAndPermissionSeeder extends Seeder
             'create-university', 'edit-university', 'delete-university', 'view-university-stats',
             'view-faculties', 'manage-faculties', 'view-majors', 'manage-majors',
             'view-alumni-profiles', 'view-student-profiles',
-            'view-university-reports', 'view-notifications', 'mark-notification-as-read'
+            'view-university-reports', 'view-notifications', 'mark-notification-as-read',
+            'view-graduation-requests', 'approve-graduation-request', 'reject-graduation-request',
         ]);
 
         // University Admin
@@ -143,7 +149,8 @@ class RoleAndPermissionSeeder extends Seeder
             'send-connection-request',
             'accept-connection-request',
             'reject-connection-request',
-            'remove-connection'
+            'remove-connection',
+            'view-graduation-requests', 'approve-graduation-request', 'reject-graduation-request',
         ]);
 
         // Alumni
@@ -172,7 +179,7 @@ class RoleAndPermissionSeeder extends Seeder
             'view-events', 'register-for-event',
             'view-mentorship-programs', 'view-available-mentors', 'send-mentorship-request',
             'view-conversations', 'send-message', 'mark-message-as-read',
-            'view-notifications', 'mark-notification-as-read'
+            'view-notifications', 'mark-notification-as-read','submit-graduation-request'
         ]);
     }
 }

@@ -23,7 +23,7 @@ class StoreWorkExperienceAction
      *
      * @throws \Throwable If database transaction fails.
      */
-    public function execute(AlumniProfile $profile, array $data): WorkExperience
+    public function handle(AlumniProfile $profile, array $data): WorkExperience
     {
         return DB::transaction(function () use ($profile, $data) {
 

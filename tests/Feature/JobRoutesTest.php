@@ -61,6 +61,19 @@ class JobRoutesTest extends TestCase
 
         $this->superAdminUser = User::factory()->create(['is_active' => true]);
         $this->superAdminUser->assignRole('super_admin');
+
+
+        $universityId = $this->university->id;
+
+    app()->bind(\App\Contracts\UniversityContext::class, function () use ($universityId) {
+        return new class($universityId) implements \App\Contracts\UniversityContext {
+            private $id;
+            public function __construct($id) { $this->id = $id; }
+            public function isGuest(): bool { return false; }
+            public function isSuperAdmin(): bool { return false; }
+            public function getUniversityId(): ?int { return $this->id; }
+        };
+    });
     }
     private function createPermissions(): void
     {

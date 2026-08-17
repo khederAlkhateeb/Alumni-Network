@@ -13,6 +13,9 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 #[Fillable([
     'user_id',
@@ -85,4 +88,36 @@ class StudentProfile extends Model
     {
         return Attribute::get(fn () => $this->status === ProfileStatus::PENDING);
     }
+    /**
+     * Get all graduation requests submitted by the student.
+     *
+     * @return HasMany<\App\Models\GraduationRequest>
+     */
+    public function graduationRequests(): HasMany
+    {
+        return $this->hasMany(GraduationRequest::class);
+    }
+
+    /**
+     * Get the most recent graduation request submitted by the student.
+     *
+     * @return  HasOne<\App\Models\GraduationRequest>
+     */
+    public function latestGraduationRequest(): HasOne
+    {
+        return $this->hasOne(GraduationRequest::class)->latestOfMany();
+    }
+
+
+    public function university(): HasOneThrough
+{
+    return $this->hasOneThrough(
+        University::class,
+        Major::class,
+        'id',            
+        'id',
+        'major_id',
+        'university_id'
+    );
+}
 }

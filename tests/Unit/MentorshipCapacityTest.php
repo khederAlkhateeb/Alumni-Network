@@ -1,92 +1,107 @@
 <?php
 
-namespace Tests\Unit;
-
 use App\Models\MentorshipProgram;
 use App\Models\MentorshipRequest;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
+
+uses(RefreshDatabase::class);
 
 /**
- * Unit tests for the mentor capacity calculation.
+ * Create a mentorship request for a specific mentor, program, and status.
+ *
+ * A separate mentee is created for each request to satisfy the database
+ * relationship and unique constraint requirements.
+ *
+ * @param MentorshipProgram $program
+ * @param User $mentor
+ * @param string $status
+ * @return MentorshipRequest
+ */
+function createMentorshipRequest(MentorshipProgram $program, User $mentor, string $status): MentorshipRequest
+{
+    $mentee = User::factory()->create();
+
+    return MentorshipRequest::create([
+        'program_id' => $program->id,
+        'mentor_id' => $mentor->id,
+        'mentee_id' => $mentee->id,
+        'status' => $status,
+    ]);
+}
+
+/**
+ * Feature/Unit tests for the mentor capacity calculation.
  *
  * The capacity is based only on accepted mentorship requests and is scoped
  * to the selected mentor and mentorship program.
  */
-class MentorshipCapacityTest extends TestCase
-{
-    use RefreshDatabase;
+describe('Mentor Capacity Calculation', function () {
 
     /**
      * A mentor remains available when accepted requests are below capacity.
      */
-    public function test_mentor_has_not_reached_limit_when_accepted_count_is_below_capacity(): void
-    {
+    it('remains available when accepted requests are below capacity', function () {
         $mentor = User::factory()->create();
         $program = MentorshipProgram::factory()->create([
             'mentor_per_mentees_max' => 2,
         ]);
 
-        $this->createRequest($program, $mentor, 'accepted');
+        createMentorshipRequest($program, $mentor, 'accepted');
 
-        $this->assertFalse($mentor->hasReachedLimit($program->id));
-    }
+        expect($mentor->hasReachedLimit($program->id))->toBeFalse();
+    });
 
     /**
      * A mentor is full when accepted requests equal the configured capacity.
      */
-    public function test_mentor_has_reached_limit_at_exact_capacity(): void
-    {
+    it('has reached limit at exact capacity', function () {
         $mentor = User::factory()->create();
         $program = MentorshipProgram::factory()->create([
             'mentor_per_mentees_max' => 2,
         ]);
 
-        $this->createRequest($program, $mentor, 'accepted');
-        $this->createRequest($program, $mentor, 'accepted');
+        createMentorshipRequest($program, $mentor, 'accepted');
+        createMentorshipRequest($program, $mentor, 'accepted');
 
-        $this->assertTrue($mentor->hasReachedLimit($program->id));
-    }
+        expect($mentor->hasReachedLimit($program->id))->toBeTrue();
+    });
 
     /**
      * A mentor remains full when accepted requests exceed capacity.
      */
-    public function test_mentor_has_reached_limit_when_accepted_count_exceeds_capacity(): void
-    {
+    it('has reached limit when accepted count exceeds capacity', function () {
         $mentor = User::factory()->create();
         $program = MentorshipProgram::factory()->create([
             'mentor_per_mentees_max' => 1,
         ]);
 
-        $this->createRequest($program, $mentor, 'accepted');
-        $this->createRequest($program, $mentor, 'accepted');
+        createMentorshipRequest($program, $mentor, 'accepted');
+        createMentorshipRequest($program, $mentor, 'accepted');
 
-        $this->assertTrue($mentor->hasReachedLimit($program->id));
-    }
+        expect($mentor->hasReachedLimit($program->id))->toBeTrue();
+    });
 
     /**
      * Pending, rejected, and completed requests do not consume capacity.
      */
-    public function test_only_accepted_requests_count_towards_capacity(): void
-    {
+    it('only counts accepted requests towards capacity', function () {
         $mentor = User::factory()->create();
         $program = MentorshipProgram::factory()->create([
             'mentor_per_mentees_max' => 1,
         ]);
 
-        $this->createRequest($program, $mentor, 'pending');
-        $this->createRequest($program, $mentor, 'rejected');
-        $this->createRequest($program, $mentor, 'complete');
+        createMentorshipRequest($program, $mentor, 'pending');
+        createMentorshipRequest($program, $mentor, 'rejected');
+        createMentorshipRequest($program, $mentor, 'complete');
 
-        $this->assertFalse($mentor->hasReachedLimit($program->id));
-    }
+        expect($mentor->hasReachedLimit($program->id))->toBeFalse();
+    });
 
     /**
      * Requests belonging to another mentor or program do not affect capacity.
      */
-    public function test_capacity_is_scoped_to_the_same_mentor_and_program(): void
-    {
+    it('is scoped to the same mentor and program', function () {
         $mentor = User::factory()->create();
         $otherMentor = User::factory()->create();
         $program = MentorshipProgram::factory()->create([
@@ -96,37 +111,19 @@ class MentorshipCapacityTest extends TestCase
             'mentor_per_mentees_max' => 1,
         ]);
 
-        $this->createRequest($program, $otherMentor, 'accepted');
-        $this->createRequest($otherProgram, $mentor, 'accepted');
+        createMentorshipRequest($program, $otherMentor, 'accepted');
+        createMentorshipRequest($otherProgram, $mentor, 'accepted');
 
-        $this->assertFalse($mentor->hasReachedLimit($program->id));
-    }
+        expect($mentor->hasReachedLimit($program->id))->toBeFalse();
+    });
 
     /**
      * A missing program does not make the mentor appear to be at capacity.
      */
-    public function test_missing_program_does_not_mark_mentor_as_full(): void
-    {
+    it('does not mark mentor as full on missing program', function () {
         $mentor = User::factory()->create();
 
-        $this->assertFalse($mentor->hasReachedLimit(PHP_INT_MAX));
-    }
+        expect($mentor->hasReachedLimit(PHP_INT_MAX))->toBeFalse();
+    });
 
-    /**
-     * Create a mentorship request for a specific mentor, program, and status.
-     *
-     * A separate mentee is created for each request to satisfy the database
-     * relationship and unique constraint requirements.
-     */
-    private function createRequest(MentorshipProgram $program, User $mentor, string $status): MentorshipRequest
-    {
-        $mentee = User::factory()->create();
-
-        return MentorshipRequest::create([
-            'program_id' => $program->id,
-            'mentor_id' => $mentor->id,
-            'mentee_id' => $mentee->id,
-            'status' => $status,
-        ]);
-    }
-}
+});

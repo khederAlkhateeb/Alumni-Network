@@ -21,7 +21,7 @@ class StoreAlumniSkillsAction
      * @param array $data Validated input containing an array of skill objects.
      * @return AlumniProfile Updated profile with freshly loaded skills relation.
      */
-    public function execute(AlumniProfile $profile, array $data): AlumniProfile
+    public function handle(AlumniProfile $profile, array $data): AlumniProfile
     {
         //  Iterate through the skills array, ensuring existing skills are fetched
         //    or new ones are created, and collect their primary keys (IDs).

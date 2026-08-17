@@ -3,6 +3,7 @@
 namespace App\Policies;
 
 use App\Contracts\UniversityContext;
+use App\Enums\ProfileStatus;
 use App\Models\StudentProfile;
 use App\Models\User;
 
@@ -55,5 +56,17 @@ class StudentProfilePolicy
     public function update(User $user, StudentProfile $student): bool
     {
         return $user->id === $student->user_id;
+    }
+
+
+
+    public function submitGraduationRequest(User $user, StudentProfile $studentProfile): bool
+    {
+        // 1. يجب أن يكون السجل عائد للشيء نفسه
+        // 2. حالة الطالب الحالية ACTIVE
+        // 3. وصل لسنة التخرج المتوقعة أو تجاوزها
+        return $user->id === $studentProfile->user_id
+            && $studentProfile->status === ProfileStatus::ACTIVE
+            && (int) date('Y') >= $studentProfile->expected_graduation_year;
     }
 }

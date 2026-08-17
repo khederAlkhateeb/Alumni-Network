@@ -22,7 +22,7 @@ class UpdateAlumniProfileAction
      * @return AlumniProfile
      * @throws Throwable
      */
-    public function execute(AlumniProfile $profile, array $data): AlumniProfile
+    public function handle(AlumniProfile $profile, array $data): AlumniProfile
     {
         try {
             return DB::transaction(function () use ($profile, $data) {
@@ -86,7 +86,7 @@ class UpdateAlumniProfileAction
         $existingAttachment = $profile->photo;
 
         if ($existingAttachment && $existingAttachment->file_path) {
-       
+
             $this->uploadFileService->deleteFile(
                 $existingAttachment->file_path,
                 (string) $profile->user_id

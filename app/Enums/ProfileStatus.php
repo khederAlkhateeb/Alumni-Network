@@ -29,4 +29,6 @@ enum ProfileStatus: string
 
     /** Profile is suspended or blocked */
     case SUSPENDED = 'suspended';
+ /** Profile is pending to complete from the student how request to be alumni */
+    case INCOMPLETE = 'incomplete';
 }

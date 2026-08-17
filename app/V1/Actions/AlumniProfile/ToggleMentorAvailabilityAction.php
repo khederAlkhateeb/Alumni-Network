@@ -5,7 +5,7 @@ use App\Models\AlumniProfile;
 
 class ToggleMentorAvailabilityAction
 {
-    public function execute(AlumniProfile $profile): AlumniProfile
+    public function handle(AlumniProfile $profile): AlumniProfile
     {
         /**
      * Toggle the `is_open_to_mentor` flag and save the profile.

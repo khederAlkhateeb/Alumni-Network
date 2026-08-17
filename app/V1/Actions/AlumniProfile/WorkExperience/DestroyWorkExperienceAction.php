@@ -25,7 +25,7 @@ class DestroyWorkExperienceAction
      *
      * @throws ModelNotFoundException If the work experience record does not belong to the profile or does not exist.
      */
-    public function execute(AlumniProfile $profile, int $workExperienceId): void
+    public function handle(AlumniProfile $profile, int $workExperienceId): void
     {
         $workExperience = $profile->workExperiences()->find($workExperienceId);
 
